@@ -1,63 +1,71 @@
 module Main exposing (..)
-import Html exposing (..)
-import Html.Attributes exposing (..)
-import Html.Events exposing ( onClick )
 
--- component import example
-import Components.Hello exposing ( hello )
-
-
--- APP
-main : Program Never Int Msg
-main =
-  Html.beginnerProgram { model = model, view = view, update = update }
+import Html exposing (Html, h1, text)
 
 
 -- MODEL
-type alias Model = Int
-
-model : number
-model = 0
 
 
--- UPDATE
-type Msg = NoOp | Increment
+type alias Model =
+    {}
 
-update : Msg -> Model -> Model
-update msg model =
-  case msg of
-    NoOp -> model
-    Increment -> model + 1
+
+
+-- INIT
+
+
+init : ( Model, Cmd Msg )
+init =
+    ( Model, Cmd.none )
+
 
 
 -- VIEW
--- Html is defined as: elem [ attribs ][ children ]
--- CSS can be applied via class names or inline style attrib
+
+
 view : Model -> Html Msg
 view model =
-  div [ class "container", style [("margin-top", "30px"), ( "text-align", "center" )] ][    -- inline CSS (literal)
-    div [ class "row" ][
-      div [ class "col-xs-12" ][
-        div [ class "jumbotron" ][
-          img [ src "static/img/elm.jpg", style styles.img ] []                             -- inline CSS (via var)
-          , hello model                                                                     -- ext 'hello' component (takes 'model' as arg)
-          , p [] [ text ( "Elm Webpack Starter" ) ]
-          , button [ class "btn btn-primary btn-lg", onClick Increment ] [                  -- click handler
-            span[ class "glyphicon glyphicon-star" ][]                                      -- glyphicon
-            , span[][ text "FTW!" ]
-          ]
-        ]
-      ]
-    ]
-  ]
+    -- The inline style is being used for example purposes in order to keep this example simple and
+    -- avoid loading additional resources. Use a proper stylesheet when building your own app.
+    h1 []
+        [ text "Hello Elm!" ]
 
 
--- CSS STYLES
-styles : { img : List ( String, String ) }
-styles =
-  {
-    img =
-      [ ( "width", "33%" )
-      , ( "border", "4px solid #337AB7")
-      ]
-  }
+
+-- Msg
+
+
+type Msg
+    = None
+
+
+
+-- UPDATE
+
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update message model =
+    ( model, Cmd.none )
+
+
+
+-- SUBSCRIPTIONS
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.none
+
+
+
+-- MAIN
+
+
+main : Program Never Model Msg
+main =
+    Html.program
+        { init = init
+        , view = view
+        , update = update
+        , subscriptions = subscriptions
+        }
