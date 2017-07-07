@@ -1,16 +1,24 @@
 module Main exposing (..)
 
-import Html exposing (Html, h1, text)
+import Html exposing (Html, h1, text, div, input, label)
+import Html.Attributes exposing (id, class, for, type_, value)
 import Svg exposing (svg, rect)
 import Svg.Attributes exposing (width, height, viewBox, x, y, rx, ry, fill)
 import BoardPiece exposing (Piece, Color(..), Position)
+import Board exposing (Board, BoardHeight(..), BoardWidth(..))
+import Bootstrap exposing (formGroup)
 
 
 -- MODEL
 
 
 type alias Model =
-    {}
+    { board : Board }
+
+
+initModel : Model
+initModel =
+    { board = Board.default }
 
 
 
@@ -19,12 +27,12 @@ type alias Model =
 
 init : ( Model, Cmd Msg )
 init =
-    ( Model, Cmd.none )
+    ( initModel, Cmd.none )
 
 
 piecePos : Position
 piecePos =
-    { xPos = 10, yPos = 10 }
+    { xPos = 0, yPos = 0 }
 
 
 piece : Piece
@@ -40,11 +48,50 @@ piece =
 
 
 view : Model -> Html Msg
-view model =
-    svg
-        [ width "120", height "120", viewBox "0 0 120 120" ]
-        [ BoardPiece.draw piece
-        ]
+view { board } =
+    let
+        (BoardHeight bdHeight) =
+            board.height
+
+        (BoardWidth bdWidth) =
+            board.width
+    in
+        div []
+            [ div [ class "d-flex flex-row" ]
+                [ div [ class "p-2" ]
+                    [ formGroup
+                        [ label [ for "boardHeight" ] [ (text "Height") ]
+                        , input
+                            [ type_ "number"
+                            , value (toString bdHeight)
+                            , class "form-control"
+                            , id "boardHeight"
+                            ]
+                            []
+                        ]
+                    ]
+                , div [ class "p-2" ]
+                    [ formGroup
+                        [ label [ for "boardWidth" ] [ (text "Width") ]
+                        , input
+                            [ type_ "number"
+                            , value (toString bdWidth)
+                            , class "form-control"
+                            , id "boardWidth"
+                            ]
+                            []
+                        ]
+                    ]
+                ]
+            , div [ class "d-flex flex-row" ]
+                [ div [ class "p-12" ]
+                    [ svg
+                        [ width "120", height "120", viewBox "0 0 120 120" ]
+                        [ BoardPiece.draw piece
+                        ]
+                    ]
+                ]
+            ]
 
 
 
