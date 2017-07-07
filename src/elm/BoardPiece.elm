@@ -1,7 +1,7 @@
 module BoardPiece exposing (..)
 
 import Svg exposing (Svg, svg, rect)
-import Svg.Attributes exposing (width, height, viewBox, x, y, rx, ry)
+import Svg.Attributes exposing (width, height, viewBox, x, y, rx, ry, fill)
 
 
 type Color
@@ -26,11 +26,15 @@ draw { length, color, position } =
     let
         { xPos, yPos } =
             position
+
+        (Color col) =
+            color
     in
         rect
             [ x (toString xPos)
             , y (toString yPos)
             , width (toString length)
             , height (toString length)
+            , fill col
             ]
             []

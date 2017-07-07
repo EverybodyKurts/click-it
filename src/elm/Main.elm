@@ -2,7 +2,8 @@ module Main exposing (..)
 
 import Html exposing (Html, h1, text)
 import Svg exposing (svg, rect)
-import Svg.Attributes exposing (width, height, viewBox, x, y, rx, ry)
+import Svg.Attributes exposing (width, height, viewBox, x, y, rx, ry, fill)
+import BoardPiece exposing (Piece, Color(..), Position)
 
 
 -- MODEL
@@ -21,17 +22,29 @@ init =
     ( Model, Cmd.none )
 
 
+piecePos : Position
+piecePos =
+    { xPos = 10, yPos = 10 }
+
+
+piece : Piece
+piece =
+    { length = 25
+    , color = (Color "#f00")
+    , position = piecePos
+    }
+
+
 
 -- VIEW
 
 
 view : Model -> Html Msg
 view model =
-    -- The inline style is being used for example purposes in order to keep this example simple and
-    -- avoid loading additional resources. Use a proper stylesheet when building your own app.
     svg
         [ width "120", height "120", viewBox "0 0 120 120" ]
-        [ rect [ x "10", y "10", width "100", height "100", rx "15", ry "15" ] [] ]
+        [ BoardPiece.draw piece
+        ]
 
 
 
