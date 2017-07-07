@@ -1,7 +1,7 @@
 module BoardPiece exposing (..)
 
 import Svg exposing (Svg, svg, rect)
-import Svg.Attributes exposing (width, height, viewBox, x, y, rx, ry, fill)
+import Svg.Attributes exposing (width, height, viewBox, x, y, rx, ry, fill, stroke)
 
 
 type Color
@@ -36,5 +36,6 @@ draw { length, color, position } =
             , width (toString length)
             , height (toString length)
             , fill col
+            , stroke "#ddd"
             ]
             []
