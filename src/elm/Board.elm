@@ -53,24 +53,22 @@ pieceXPos (Board.Piece.Length l) (Columns c) (Index idx) =
         |> (*) l
 
 
-piecePos : Board.Piece.Length -> Columns -> Index -> Board.Piece.Position
-piecePos len cols idx =
-    Board.Piece.Position (pieceXPos len cols idx) (pieceYPos len cols idx)
+piecePos : Board -> Index -> Board.Piece.Position
+piecePos { pieceLength, columns } idx =
+    Board.Piece.Position (pieceXPos pieceLength columns idx) (pieceYPos pieceLength columns idx)
 
 
-initialize : Board -> Array Piece
-initialize { rows, columns, pieceLength } =
+indices : Board -> List Index
+indices { rows, columns } =
     let
         (Rows r) =
             rows
 
         (Columns c) =
             columns
-
-        indices =
-            List.range 0 ((r * c) - 1)
     in
-        Array.fromList []
+        List.range 0 ((r * c) - 1)
+            |> List.map Index
 
 
 width : Board -> Width

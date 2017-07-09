@@ -19,27 +19,5 @@ type alias Position =
 
 
 type alias Piece =
-    { length : Length
-    , color : Color
-    , position : Position
+    { color : Color
     }
-
-
-draw : Piece -> Svg msg
-draw { length, color, position } =
-    let
-        { xPos, yPos } =
-            position
-
-        (Color col) =
-            color
-    in
-        rect
-            [ x (toString xPos)
-            , y (toString yPos)
-            , width (toString length)
-            , height (toString length)
-            , fill col
-            , stroke "#ddd"
-            ]
-            []
