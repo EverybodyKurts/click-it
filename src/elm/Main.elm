@@ -2,12 +2,12 @@ module Main exposing (..)
 
 import Html exposing (Html, h1, text, div, input, label)
 import Html.Attributes exposing (id, class, for, type_, value)
+import Html.Events exposing (onInput)
 import Svg exposing (Svg, svg, rect)
 import Svg.Attributes exposing (width, height, viewBox, x, y, rx, ry, fill, stroke)
 import Board.Piece as Piece exposing (Piece, Color(..))
 import Board exposing (Board)
 import Bootstrap exposing (formGroup)
-import Array exposing (Array)
 
 
 -- MODEL
@@ -31,6 +31,39 @@ initModel =
 init : ( Model, Cmd Msg )
 init =
     ( initModel, Cmd.none )
+
+
+
+-- UPDATE
+
+
+type Msg
+    = UpdateRows String
+    | UpdateColumns String
+
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg ({ board } as model) =
+    case msg of
+        UpdateRows numRows ->
+            let
+                bd =
+                    String.toInt numRows
+                        |> Result.map (clamp 1 100)
+                        |> Result.map (\r -> { board | rows = (Board.Rows r) })
+                        |> Result.withDefault board
+            in
+                ( { model | board = bd }, Cmd.none )
+
+        UpdateColumns numCols ->
+            let
+                bd =
+                    String.toInt numCols
+                        |> Result.map (clamp 1 100)
+                        |> Result.map (\c -> { board | columns = (Board.Columns c) })
+                        |> Result.withDefault board
+            in
+                ( { model | board = bd }, Cmd.none )
 
 
 
@@ -89,6 +122,7 @@ view { board } =
                             , value (toString bdRows)
                             , class "form-control"
                             , id "boardRows"
+                            , onInput UpdateRows
                             ]
                             []
                         ]
@@ -101,6 +135,7 @@ view { board } =
                             , value (toString bdCols)
                             , class "form-control"
                             , id "boardColumns"
+                            , onInput UpdateColumns
                             ]
                             []
                         ]
@@ -114,19 +149,6 @@ view { board } =
                     ]
                 ]
             ]
-
-
-
--- UPDATE
-
-
-type Msg
-    = None
-
-
-update : Msg -> Model -> ( Model, Cmd Msg )
-update message model =
-    ( model, Cmd.none )
 
 
 
