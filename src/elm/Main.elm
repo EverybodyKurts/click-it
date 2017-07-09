@@ -3,9 +3,9 @@ module Main exposing (..)
 import Html exposing (Html, h1, text, div, input, label)
 import Html.Attributes exposing (id, class, for, type_, value)
 import Svg exposing (svg, rect)
-import Svg.Attributes exposing (width, height, viewBox, x, y, rx, ry, fill)
-import BoardPiece exposing (Piece, Color(..), Position)
-import Board exposing (Board, BoardHeight(..), BoardWidth(..))
+import Svg.Attributes exposing (width, height, viewBox, x, y, rx, ry, fill, stroke)
+import Board.Piece as Piece exposing (Piece, Color(..), Position)
+import Board exposing (Board, BoardHeight(..), BoardWidth(..), PixelHeight(..), PixelWidth(..))
 import Bootstrap exposing (formGroup)
 
 
@@ -55,6 +55,9 @@ view { board } =
 
         (BoardWidth bdWidth) =
             board.width
+
+        ( PixelHeight pHeight, PixelWidth pWidth ) =
+            Board.dimensions board
     in
         div []
             [ div [ class "d-flex flex-row" ]
@@ -86,8 +89,8 @@ view { board } =
             , div [ class "d-flex flex-row" ]
                 [ div [ class "p-12" ]
                     [ svg
-                        [ width "120", height "120", viewBox "0 0 120 120" ]
-                        [ BoardPiece.draw piece
+                        [ width (toString pWidth), height (toString pHeight) ]
+                        [ Piece.draw piece
                         ]
                     ]
                 ]
