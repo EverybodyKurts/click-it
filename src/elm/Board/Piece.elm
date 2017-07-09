@@ -1,11 +1,6 @@
 module Board.Piece exposing (..)
 
-import Svg exposing (Svg, svg, rect)
-import Svg.Attributes exposing (width, height, viewBox, x, y, rx, ry, fill, stroke)
-
-
-type Color
-    = Color String
+import Color exposing (Color)
 
 
 type Length
