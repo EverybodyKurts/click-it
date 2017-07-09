@@ -97,6 +97,6 @@ height { pieceLength, rows } =
         Height (l * r)
 
 
-dimensions : Board -> ( Height, Width )
+dimensions : Board -> ( Width, Height )
 dimensions board =
-    ( height board, width board )
+    ( width board, height board )

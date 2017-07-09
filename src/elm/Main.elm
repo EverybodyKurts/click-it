@@ -50,13 +50,7 @@ piece =
 view : Model -> Html Msg
 view { board } =
     let
-        (Board.Height bdHeight) =
-            Board.height board
-
-        (Board.Width bdWidth) =
-            Board.width board
-
-        ( Board.Height pHeight, Board.Width pWidth ) =
+        ( Board.Width bWidth, Board.Height bHeight ) =
             Board.dimensions board
     in
         div []
@@ -66,7 +60,7 @@ view { board } =
                         [ label [ for "boardHeight" ] [ (text "Height") ]
                         , input
                             [ type_ "number"
-                            , value (toString bdHeight)
+                            , value (toString bHeight)
                             , class "form-control"
                             , id "boardHeight"
                             ]
@@ -78,7 +72,7 @@ view { board } =
                         [ label [ for "boardWidth" ] [ (text "Width") ]
                         , input
                             [ type_ "number"
-                            , value (toString bdWidth)
+                            , value (toString bWidth)
                             , class "form-control"
                             , id "boardWidth"
                             ]
@@ -89,7 +83,7 @@ view { board } =
             , div [ class "d-flex flex-row" ]
                 [ div [ class "p-12" ]
                     [ svg
-                        [ width (toString pWidth), height (toString pHeight) ]
+                        [ width (toString bWidth), height (toString bHeight) ]
                         []
                     ]
                 ]
