@@ -1,4 +1,4 @@
-module BoardPiece exposing (..)
+module Board.Piece exposing (..)
 
 import Svg exposing (Svg, svg, rect)
 import Svg.Attributes exposing (width, height, viewBox, x, y, rx, ry, fill, stroke)
