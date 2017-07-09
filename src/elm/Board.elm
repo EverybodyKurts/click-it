@@ -1,6 +1,6 @@
 module Board exposing (..)
 
-import Board.Piece exposing (Piece, Position, Color(..), PieceLength(..))
+import Board.Piece exposing (Piece, Position, Color(..))
 import Svg exposing (Svg, svg)
 import Array exposing (Array)
 
@@ -19,7 +19,7 @@ type Columns
 type alias Board =
     { rows : Rows
     , columns : Columns
-    , pieceLength : PieceLength
+    , pieceLength : Board.Piece.Length
     }
 
 
@@ -37,15 +37,25 @@ type Index
 
 default : Board
 default =
-    Board (Rows 10) (Columns 5) (PieceLength 25)
+    Board (Rows 10) (Columns 5) (Board.Piece.Length 25)
 
 
+pieceYPos : Board.Piece.Length -> Columns -> Index -> Int
+pieceYPos (Board.Piece.Length l) (Columns c) (Index i) =
+    ((toFloat i) / (toFloat c))
+        |> floor
+        |> (*) l
 
--- yPos : BoardWidth -> PieceLength -> BoardIndex -> Int
--- yPos (BoardWidth w) (PieceLength l) (BoardIndex i) =
---     ((toFloat i) / (toFloat w))
---         |> floor
---         |> (*) l
+
+pieceXPos : Board.Piece.Length -> Columns -> Index -> Int
+pieceXPos (Board.Piece.Length l) (Columns c) (Index idx) =
+    (idx % c)
+        |> (*) l
+
+
+piecePos : Board.Piece.Length -> Columns -> Index -> Board.Piece.Position
+piecePos len cols idx =
+    Board.Piece.Position (pieceXPos len cols idx) (pieceYPos len cols idx)
 
 
 initialize : Board -> Array Piece
@@ -66,7 +76,7 @@ initialize { rows, columns, pieceLength } =
 width : Board -> Width
 width { pieceLength, columns } =
     let
-        (PieceLength l) =
+        (Board.Piece.Length l) =
             pieceLength
 
         (Columns c) =
@@ -78,7 +88,7 @@ width { pieceLength, columns } =
 height : Board -> Height
 height { pieceLength, rows } =
     let
-        (PieceLength l) =
+        (Board.Piece.Length l) =
             pieceLength
 
         (Rows r) =
