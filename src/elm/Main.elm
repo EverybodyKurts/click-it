@@ -4,8 +4,8 @@ import Html exposing (Html, h1, text, div, input, label)
 import Html.Attributes exposing (id, class, for, type_, value)
 import Svg exposing (svg, rect)
 import Svg.Attributes exposing (width, height, viewBox, x, y, rx, ry, fill, stroke)
-import Board.Piece as Piece exposing (Piece, Color(..), Position)
-import Board exposing (Board, BoardHeight(..), BoardWidth(..), PixelHeight(..), PixelWidth(..))
+import Board.Piece as Piece exposing (Piece, Color(..), Position, PieceLength(..))
+import Board exposing (Board)
 import Bootstrap exposing (formGroup)
 
 
@@ -37,7 +37,7 @@ piecePos =
 
 piece : Piece
 piece =
-    { length = 25
+    { length = (PieceLength 25)
     , color = (Color "#f00")
     , position = piecePos
     }
@@ -50,13 +50,13 @@ piece =
 view : Model -> Html Msg
 view { board } =
     let
-        (BoardHeight bdHeight) =
-            board.height
+        (Board.Height bdHeight) =
+            Board.height board
 
-        (BoardWidth bdWidth) =
-            board.width
+        (Board.Width bdWidth) =
+            Board.width board
 
-        ( PixelHeight pHeight, PixelWidth pWidth ) =
+        ( Board.Height pHeight, Board.Width pWidth ) =
             Board.dimensions board
     in
         div []
@@ -90,8 +90,7 @@ view { board } =
                 [ div [ class "p-12" ]
                     [ svg
                         [ width (toString pWidth), height (toString pHeight) ]
-                        [ Piece.draw piece
-                        ]
+                        []
                     ]
                 ]
             ]

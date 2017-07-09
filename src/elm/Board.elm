@@ -1,62 +1,92 @@
 module Board exposing (..)
 
-
-type BoardHeight
-    = BoardHeight Int
-
-
-type BoardWidth
-    = BoardWidth Int
+import Board.Piece exposing (Piece, Position, Color(..), PieceLength(..))
+import Svg exposing (Svg, svg)
+import Array exposing (Array)
 
 
-type PieceLength
-    = PieceLength Int
+-- MODEL --
+
+
+type Rows
+    = Rows Int
+
+
+type Columns
+    = Columns Int
 
 
 type alias Board =
-    { height : BoardHeight
-    , width : BoardWidth
+    { rows : Rows
+    , columns : Columns
     , pieceLength : PieceLength
     }
 
 
-type PixelHeight
-    = PixelHeight Int
+type Height
+    = Height Int
 
 
-type PixelWidth
-    = PixelWidth Int
+type Width
+    = Width Int
+
+
+type Index
+    = Index Int
 
 
 default : Board
 default =
-    Board (BoardHeight 10) (BoardWidth 5) (PieceLength 25)
+    Board (Rows 10) (Columns 5) (PieceLength 25)
 
 
-pixelWidth : Board -> PixelWidth
-pixelWidth { pieceLength, width } =
+
+-- yPos : BoardWidth -> PieceLength -> BoardIndex -> Int
+-- yPos (BoardWidth w) (PieceLength l) (BoardIndex i) =
+--     ((toFloat i) / (toFloat w))
+--         |> floor
+--         |> (*) l
+
+
+initialize : Board -> Array Piece
+initialize { rows, columns, pieceLength } =
     let
-        (PieceLength pLength) =
+        (Rows r) =
+            rows
+
+        (Columns c) =
+            columns
+
+        indices =
+            List.range 0 ((r * c) - 1)
+    in
+        Array.fromList []
+
+
+width : Board -> Width
+width { pieceLength, columns } =
+    let
+        (PieceLength l) =
             pieceLength
 
-        (BoardWidth bdWidth) =
-            width
+        (Columns c) =
+            columns
     in
-        PixelWidth (pLength * bdWidth)
+        Width (l * c)
 
 
-pixelHeight : Board -> PixelHeight
-pixelHeight { pieceLength, height } =
+height : Board -> Height
+height { pieceLength, rows } =
     let
-        (PieceLength pLength) =
+        (PieceLength l) =
             pieceLength
 
-        (BoardHeight bdHeight) =
-            height
+        (Rows r) =
+            rows
     in
-        PixelHeight (pLength * bdHeight)
+        Height (l * r)
 
 
-dimensions : Board -> ( PixelHeight, PixelWidth )
+dimensions : Board -> ( Height, Width )
 dimensions board =
-    ( pixelHeight board, pixelWidth board )
+    ( height board, width board )
