@@ -5,9 +5,11 @@ import Html.Attributes exposing (id, class, for, type_, value)
 import Html.Events exposing (onInput)
 import Svg exposing (Svg, svg, rect)
 import Svg.Attributes exposing (width, height, viewBox, x, y, rx, ry, fill, stroke)
-import Board.Piece as Piece exposing (Piece, Color(..))
+import Board.Piece as Piece exposing (Piece)
 import Board exposing (Board)
 import Bootstrap exposing (formGroup)
+import Color exposing (Color)
+import Color.Convert exposing (colorToHex)
 
 
 -- MODEL
@@ -76,8 +78,8 @@ drawPiece ({ pieceLength } as board) color index =
         { xPos, yPos } =
             Board.piecePos board index
 
-        (Color col) =
-            color
+        hexColor =
+            colorToHex color
 
         (Piece.Length len) =
             pieceLength
@@ -87,7 +89,7 @@ drawPiece ({ pieceLength } as board) color index =
             , y (toString yPos)
             , width (toString len)
             , height (toString len)
-            , fill col
+            , fill hexColor
             , stroke "#ddd"
             ]
             []
@@ -110,7 +112,7 @@ view { board } =
 
         drawnPieces =
             Board.indices board
-                |> List.map (drawPiece board (Color "#f00"))
+                |> List.map (drawPiece board (Color.rgb 255 0 0))
     in
         div []
             [ div [ class "d-flex flex-row" ]
