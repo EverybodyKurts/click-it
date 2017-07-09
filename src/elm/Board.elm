@@ -1,8 +1,6 @@
 module Board exposing (..)
 
-import Board.Piece exposing (Piece, Position, Color(..))
-import Svg exposing (Svg, svg)
-import Array exposing (Array)
+import Board.Piece exposing (Piece, Position)
 
 
 -- MODEL --
@@ -42,8 +40,7 @@ default =
 
 pieceYPos : Board.Piece.Length -> Columns -> Index -> Int
 pieceYPos (Board.Piece.Length l) (Columns c) (Index i) =
-    ((toFloat i) / (toFloat c))
-        |> floor
+    (i // c)
         |> (*) l
 
 
