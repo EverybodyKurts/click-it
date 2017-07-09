@@ -10,6 +10,7 @@ import Board exposing (Board)
 import Bootstrap exposing (formGroup)
 import Color exposing (Color)
 import Color.Convert exposing (colorToHex)
+import Random exposing (Generator)
 
 
 -- MODEL
@@ -32,16 +33,23 @@ initModel =
 
 init : ( Model, Cmd Msg )
 init =
-    ( initModel, Cmd.none )
+    update GenerateRandomColor initModel
 
 
 
 -- UPDATE
 
 
+randomRgb : Generator Color
+randomRgb =
+    Random.map3 Color.rgb (Random.int 0 255) (Random.int 0 255) (Random.int 0 255)
+
+
 type Msg
     = UpdateRows String
     | UpdateColumns String
+    | GenerateRandomColor
+    | GeneratedRandomColor Color
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -64,6 +72,16 @@ update msg ({ board } as model) =
                         |> Result.map (clamp 1 100)
                         |> Result.map (\c -> { board | columns = (Board.Columns c) })
                         |> Result.withDefault board
+            in
+                ( { model | board = bd }, Cmd.none )
+
+        GenerateRandomColor ->
+            ( model, Random.generate GeneratedRandomColor randomRgb )
+
+        GeneratedRandomColor randColor ->
+            let
+                bd =
+                    { board | color = randColor }
             in
                 ( { model | board = bd }, Cmd.none )
 
@@ -98,7 +116,7 @@ drawPiece ({ pieceLength } as board) color index =
 view : Model -> Html Msg
 view { board } =
     let
-        { rows, columns } =
+        { rows, columns, color } =
             board
 
         (Board.Rows bdRows) =
@@ -112,7 +130,7 @@ view { board } =
 
         drawnPieces =
             Board.indices board
-                |> List.map (drawPiece board (Color.rgb 255 0 0))
+                |> List.map (drawPiece board color)
     in
         div []
             [ div [ class "d-flex flex-row" ]
