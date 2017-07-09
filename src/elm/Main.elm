@@ -4,7 +4,7 @@ import Html exposing (Html, h1, text, div, input, label)
 import Html.Attributes exposing (id, class, for, type_, value)
 import Svg exposing (svg, rect)
 import Svg.Attributes exposing (width, height, viewBox, x, y, rx, ry, fill, stroke)
-import Board.Piece as Piece exposing (Piece, Color(..), Position, PieceLength(..))
+import Board.Piece as Piece exposing (Piece, Color(..), Position)
 import Board exposing (Board)
 import Bootstrap exposing (formGroup)
 
@@ -37,7 +37,7 @@ piecePos =
 
 piece : Piece
 piece =
-    { length = (PieceLength 25)
+    { length = (Piece.Length 25)
     , color = (Color "#f00")
     , position = piecePos
     }
