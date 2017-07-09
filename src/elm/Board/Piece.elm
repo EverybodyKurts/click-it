@@ -8,6 +8,10 @@ type Color
     = Color String
 
 
+type Length
+    = Length Int
+
+
 type alias Position =
     { xPos : Int
     , yPos : Int
@@ -15,7 +19,7 @@ type alias Position =
 
 
 type alias Piece =
-    { length : Int
+    { length : Length
     , color : Color
     , position : Position
     }
