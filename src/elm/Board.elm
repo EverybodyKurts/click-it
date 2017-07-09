@@ -19,7 +19,7 @@ type alias Board =
     { rows : Rows
     , columns : Columns
     , pieceLength : Board.Piece.Length
-    , color : Color
+    , colors : List Color
     }
 
 
@@ -37,7 +37,7 @@ type Index
 
 default : Board
 default =
-    Board (Rows 10) (Columns 5) (Board.Piece.Length 25) (Color.rgb 255 0 0)
+    Board (Rows 10) (Columns 5) (Board.Piece.Length 25) [ (Color.rgb 255 0 0) ]
 
 
 pieceYPos : Board.Piece.Length -> Columns -> Index -> Int

@@ -33,7 +33,7 @@ initModel =
 
 init : ( Model, Cmd Msg )
 init =
-    update GenerateRandomColor initModel
+    update (GenerateRandomColors 3) initModel
 
 
 
@@ -45,11 +45,16 @@ randomRgb =
     Random.map3 Color.rgb (Random.int 0 255) (Random.int 0 255) (Random.int 0 255)
 
 
+randomRgbs : Int -> Generator (List Color)
+randomRgbs numColors =
+    Random.list numColors randomRgb
+
+
 type Msg
     = UpdateRows String
     | UpdateColumns String
-    | GenerateRandomColor
-    | GeneratedRandomColor Color
+    | GenerateRandomColors Int
+    | GeneratedRandomColors (List Color)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -75,13 +80,13 @@ update msg ({ board } as model) =
             in
                 ( { model | board = bd }, Cmd.none )
 
-        GenerateRandomColor ->
-            ( model, Random.generate GeneratedRandomColor randomRgb )
+        GenerateRandomColors numColors ->
+            ( model, Random.generate GeneratedRandomColors (randomRgbs numColors) )
 
-        GeneratedRandomColor randColor ->
+        GeneratedRandomColors randColors ->
             let
                 bd =
-                    { board | color = randColor }
+                    { board | colors = randColors }
             in
                 ( { model | board = bd }, Cmd.none )
 
@@ -116,8 +121,12 @@ drawPiece ({ pieceLength } as board) color index =
 view : Model -> Html Msg
 view { board } =
     let
-        { rows, columns, color } =
+        { rows, columns, colors } =
             board
+
+        col =
+            List.head colors
+                |> Maybe.withDefault Color.red
 
         (Board.Rows bdRows) =
             rows
@@ -130,7 +139,7 @@ view { board } =
 
         drawnPieces =
             Board.indices board
-                |> List.map (drawPiece board color)
+                |> List.map (drawPiece board col)
     in
         div []
             [ div [ class "d-flex flex-row" ]
