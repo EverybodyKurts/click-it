@@ -50,6 +50,12 @@ piece =
 view : Model -> Html Msg
 view { board } =
     let
+        (Board.Rows bRows) =
+            board.rows
+
+        (Board.Columns bColumns) =
+            board.columns
+
         ( Board.Width bWidth, Board.Height bHeight ) =
             Board.dimensions board
     in
@@ -57,24 +63,24 @@ view { board } =
             [ div [ class "d-flex flex-row" ]
                 [ div [ class "p-2" ]
                     [ formGroup
-                        [ label [ for "boardHeight" ] [ (text "Height") ]
+                        [ label [ for "boardRows" ] [ (text "Rows") ]
                         , input
                             [ type_ "number"
-                            , value (toString bHeight)
+                            , value (toString bRows)
                             , class "form-control"
-                            , id "boardHeight"
+                            , id "boardRows"
                             ]
                             []
                         ]
                     ]
                 , div [ class "p-2" ]
                     [ formGroup
-                        [ label [ for "boardWidth" ] [ (text "Width") ]
+                        [ label [ for "boardColumns" ] [ (text "Columns") ]
                         , input
                             [ type_ "number"
-                            , value (toString bWidth)
+                            , value (toString bColumns)
                             , class "form-control"
-                            , id "boardWidth"
+                            , id "boardColumns"
                             ]
                             []
                         ]
