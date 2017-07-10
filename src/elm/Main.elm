@@ -97,8 +97,9 @@ update msg ({ board } as model) =
                         |> Result.map (\r -> { board | rows = (Board.Rows r) })
                         |> Result.withDefault board
             in
-                ( { model | board = bd }, Cmd.none )
+                update (GeneratePieceColors 3) { model | board = bd }
 
+        -- ( { model | board = bd }, Cmd.none )
         UpdateColumns numCols ->
             let
                 bd =
@@ -107,7 +108,7 @@ update msg ({ board } as model) =
                         |> Result.map (\c -> { board | columns = (Board.Columns c) })
                         |> Result.withDefault board
             in
-                ( { model | board = bd }, Cmd.none )
+                update (GeneratePieceColors 3) { model | board = bd }
 
         GeneratePieceColors numColors ->
             let
