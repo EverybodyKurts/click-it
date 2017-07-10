@@ -1,16 +1,19 @@
 module Main exposing (..)
 
+import Array exposing (Array)
+import Maybe exposing (Maybe)
 import Html exposing (Html, h1, text, div, input, label)
 import Html.Attributes exposing (id, class, for, type_, value)
 import Html.Events exposing (onInput)
 import Svg exposing (Svg, svg, rect)
 import Svg.Attributes exposing (width, height, viewBox, x, y, rx, ry, fill, stroke)
-import Board.Piece as Piece exposing (Piece)
+import Board.Piece exposing (Piece)
 import Board exposing (Board)
 import Bootstrap exposing (formGroup)
 import Color exposing (Color)
 import Color.Convert exposing (colorToHex)
 import Random exposing (Generator)
+import Random.Array
 
 
 -- MODEL
@@ -18,12 +21,14 @@ import Random exposing (Generator)
 
 type alias Model =
     { board : Board
+    , pieces : Array ( Board.Index, Maybe Piece )
     }
 
 
 initModel : Model
 initModel =
     { board = Board.default
+    , pieces = Array.fromList []
     }
 
 
@@ -33,7 +38,7 @@ initModel =
 
 init : ( Model, Cmd Msg )
 init =
-    update (GenerateRandomColors 3) initModel
+    update (GeneratePieceColors 3) initModel
 
 
 
@@ -45,16 +50,40 @@ randomRgb =
     Random.map3 Color.rgb (Random.int 0 255) (Random.int 0 255) (Random.int 0 255)
 
 
-randomRgbs : Int -> Generator (List Color)
+randomRgbs : Int -> Generator (Array Color)
 randomRgbs numColors =
-    Random.list numColors randomRgb
+    Random.Array.array numColors randomRgb
+
+
+generateColor : Array Color -> Generator (Maybe Color)
+generateColor =
+    Random.Array.sample
+
+
+generatePieceColors : Int -> Int -> Generator (Array (Maybe Color))
+generatePieceColors numColors numPieces =
+    let
+        randColors =
+            randomRgbs numColors
+    in
+        Random.Array.array numPieces (randColors |> Random.andThen Random.Array.sample)
 
 
 type Msg
     = UpdateRows String
     | UpdateColumns String
-    | GenerateRandomColors Int
-    | GeneratedRandomColors (List Color)
+    | GeneratePieceColors Int
+    | GeneratedPieceColors (Array (Maybe Color))
+
+
+maybeColorToPiece : Maybe Color -> Piece
+maybeColorToPiece maybeColor =
+    case maybeColor of
+        Just color ->
+            Piece color
+
+        Nothing ->
+            Piece (Color.rgb 255 0 0)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -80,31 +109,39 @@ update msg ({ board } as model) =
             in
                 ( { model | board = bd }, Cmd.none )
 
-        GenerateRandomColors numColors ->
-            ( model, Random.generate GeneratedRandomColors (randomRgbs numColors) )
-
-        GeneratedRandomColors randColors ->
+        GeneratePieceColors numColors ->
             let
-                bd =
-                    { board | colors = randColors }
+                numPieces =
+                    Board.numPieces board
             in
-                ( { model | board = bd }, Cmd.none )
+                ( model, Random.generate GeneratedPieceColors (generatePieceColors 3 numPieces) )
+
+        GeneratedPieceColors colors ->
+            let
+                pieces =
+                    colors
+                        |> Array.map maybeColorToPiece
+                        |> Array.map Just
+                        |> Array.indexedMap (,)
+                        |> Array.map (\( i, p ) -> ( Board.Index i, p ))
+            in
+                ( { model | pieces = pieces }, Cmd.none )
 
 
 
 -- VIEW
 
 
-drawPiece : Board -> Color -> Board.Index -> Svg Msg
-drawPiece ({ pieceLength } as board) color index =
+drawPiece : Board -> ( Board.Index, Piece ) -> Svg Msg
+drawPiece ({ pieceLength } as board) ( index, piece ) =
     let
         { xPos, yPos } =
             Board.piecePos board index
 
         hexColor =
-            colorToHex color
+            colorToHex piece.color
 
-        (Piece.Length len) =
+        (Board.Piece.Length len) =
             pieceLength
     in
         rect
@@ -118,14 +155,30 @@ drawPiece ({ pieceLength } as board) color index =
             []
 
 
+drawPieces : Board -> Array ( Board.Index, Maybe Piece ) -> List (Svg Msg)
+drawPieces board piecesWithIndex =
+    piecesWithIndex
+        |> Array.toList
+        |> List.filterMap
+            (\( i, mp ) ->
+                case mp of
+                    Just p ->
+                        Just ( i, p )
+
+                    Nothing ->
+                        Nothing
+            )
+        |> List.map (drawPiece board)
+
+
 view : Model -> Html Msg
-view { board } =
+view { board, pieces } =
     let
         { rows, columns, colors } =
             board
 
         col =
-            List.head colors
+            Array.get 0 colors
                 |> Maybe.withDefault Color.red
 
         (Board.Rows bdRows) =
@@ -138,8 +191,7 @@ view { board } =
             Board.dimensions board
 
         drawnPieces =
-            Board.indices board
-                |> List.map (drawPiece board col)
+            drawPieces board pieces
     in
         div []
             [ div [ class "d-flex flex-row" ]

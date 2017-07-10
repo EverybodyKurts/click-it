@@ -2,6 +2,7 @@ module Board exposing (..)
 
 import Board.Piece exposing (Piece, Position)
 import Color exposing (Color)
+import Array exposing (Array)
 
 
 -- MODEL --
@@ -19,7 +20,7 @@ type alias Board =
     { rows : Rows
     , columns : Columns
     , pieceLength : Board.Piece.Length
-    , colors : List Color
+    , colors : Array Color
     }
 
 
@@ -37,7 +38,7 @@ type Index
 
 default : Board
 default =
-    Board (Rows 10) (Columns 5) (Board.Piece.Length 25) [ (Color.rgb 255 0 0) ]
+    Board (Rows 10) (Columns 5) (Board.Piece.Length 25) (Array.fromList [ (Color.rgb 255 0 0) ])
 
 
 pieceYPos : Board.Piece.Length -> Columns -> Index -> Int
@@ -55,6 +56,15 @@ pieceXPos (Board.Piece.Length l) (Columns c) (Index idx) =
 piecePos : Board -> Index -> Board.Piece.Position
 piecePos { pieceLength, columns } idx =
     Board.Piece.Position (pieceXPos pieceLength columns idx) (pieceYPos pieceLength columns idx)
+
+
+numPieces : Board -> Int
+numPieces { rows, columns } =
+    let
+        ( Rows r, Columns c ) =
+            ( rows, columns )
+    in
+        r * c
 
 
 indices : Board -> List Index
