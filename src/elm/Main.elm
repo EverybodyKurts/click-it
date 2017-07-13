@@ -55,18 +55,19 @@ randomRgbs numColors =
     Random.Array.array numColors randomRgb
 
 
-generateColor : Array Color -> Generator (Maybe Color)
-generateColor =
-    Random.Array.sample
-
-
 generatePieceColors : Int -> Int -> Generator (Array (Maybe Color))
 generatePieceColors numColors numPieces =
     let
         randColors =
             randomRgbs numColors
+
+        seed0 =
+            Random.initialSeed 0
+
+        ( colors, _ ) =
+            Random.step randColors seed0
     in
-        Random.Array.array numPieces (randColors |> Random.andThen Random.Array.sample)
+        Random.Array.array numPieces (Random.Array.sample colors)
 
 
 type Msg
@@ -94,7 +95,8 @@ update msg ({ board } as model) =
                 bd =
                     String.toInt numRows
                         |> Result.map (clamp 1 100)
-                        |> Result.map (\r -> { board | rows = (Board.Rows r) })
+                        |> Result.map Board.Rows
+                        |> Result.map (Board.updateRows board)
                         |> Result.withDefault board
             in
                 update (GeneratePieceColors 3) { model | board = bd }
@@ -105,7 +107,8 @@ update msg ({ board } as model) =
                 bd =
                     String.toInt numCols
                         |> Result.map (clamp 1 100)
-                        |> Result.map (\c -> { board | columns = (Board.Columns c) })
+                        |> Result.map Board.Columns
+                        |> Result.map (Board.updateColumns board)
                         |> Result.withDefault board
             in
                 update (GeneratePieceColors 3) { model | board = bd }
