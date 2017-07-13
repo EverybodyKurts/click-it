@@ -101,7 +101,6 @@ update msg ({ board } as model) =
             in
                 update (GeneratePieceColors 3) { model | board = bd }
 
-        -- ( { model | board = bd }, Cmd.none )
         UpdateColumns numCols ->
             let
                 bd =
