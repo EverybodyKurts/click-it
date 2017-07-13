@@ -107,3 +107,13 @@ height { pieceLength, rows } =
 dimensions : Board -> ( Width, Height )
 dimensions board =
     ( width board, height board )
+
+
+updateColumns : Board -> Columns -> Board
+updateColumns board columns =
+    { board | columns = columns }
+
+
+updateRows : Board -> Rows -> Board
+updateRows board rows =
+    { board | rows = rows }
