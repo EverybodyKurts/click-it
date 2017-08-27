@@ -32,13 +32,22 @@ initModel =
     }
 
 
+defaultColor : Color
+defaultColor =
+    Color.red
+
+
 
 -- INIT
 
 
 init : ( Model, Cmd Msg )
 init =
-    update (GeneratePieceColors 3) initModel
+    let
+        numPieces =
+            Board.numPieces Board.default
+    in
+        initModel ! [ Random.generate GeneratedPieceColors (generatePieceColors 3 numPieces) ]
 
 
 
@@ -64,10 +73,41 @@ generatePieceColors numColors numPieces =
         seed0 =
             Random.initialSeed 0
 
-        ( colors, _ ) =
+        ( colors, seed1 ) =
             Random.step randColors seed0
+
+        genRandomPieceColors =
+            Random.Array.array numPieces (Random.Array.sample colors)
+
+        ( pieceColors, _ ) =
+            Random.step genRandomPieceColors seed1
     in
         Random.Array.array numPieces (Random.Array.sample colors)
+
+
+generatePieces : Int -> Int -> Array ( Board.Index, Maybe Piece )
+generatePieces numColors numPieces =
+    let
+        randColors =
+            randomRgbs numColors
+
+        seed0 =
+            Random.initialSeed 0
+
+        ( colors, seed1 ) =
+            Random.step randColors seed0
+
+        genRandomPieceColors =
+            Random.Array.array numPieces (Random.Array.sample colors)
+
+        ( pieceColors, _ ) =
+            Random.step genRandomPieceColors seed1
+    in
+        pieceColors
+            |> Array.map maybeColorToPiece
+            |> Array.map Just
+            |> Array.indexedMap (,)
+            |> Array.map (\( i, p ) -> ( Board.Index i, p ))
 
 
 type Msg
@@ -75,6 +115,7 @@ type Msg
     | UpdateColumns String
     | GeneratePieceColors Int
     | GeneratedPieceColors (Array (Maybe Color))
+    | GeneratedPieces (Array (Maybe Color))
 
 
 maybeColorToPiece : Maybe Color -> Piece
@@ -129,6 +170,9 @@ update msg ({ board } as model) =
                         |> Array.map (\( i, p ) -> ( Board.Index i, p ))
             in
                 ( { model | pieces = pieces }, Cmd.none )
+
+        GeneratedPieces colors ->
+            ( model, Cmd.none )
 
 
 
