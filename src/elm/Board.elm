@@ -88,6 +88,11 @@ numPieces { properties } =
     Board.Properties.numPieces properties
 
 
+numColorsValue : Board -> Int
+numColorsValue { properties } =
+    Board.Properties.numColorsValue properties
+
+
 updateProperties : Board -> Properties -> Board
 updateProperties board properties =
     { board | properties = properties }
@@ -113,3 +118,10 @@ updatePieces board pieces =
 toIndexedPiece : Int -> Maybe Piece -> ( Index, Maybe Piece )
 toIndexedPiece index piece =
     ( Index index, piece )
+
+
+maybeColorsToPieces : Board -> Array (Maybe Color) -> Board
+maybeColorsToPieces board =
+    Array.map (Maybe.map Piece)
+        >> Array.indexedMap toIndexedPiece
+        >> (updatePieces board)

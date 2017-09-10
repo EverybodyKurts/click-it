@@ -108,13 +108,13 @@ update msg ({ board } as model) =
             Board.updateNumRowsFromString board numRows
                 |> Result.withDefault board
                 |> updateBoard model
-                |> update (GeneratePieceColors 3)
+                |> update (GeneratePieceColors (Board.numColorsValue board))
 
         UpdateColumns numCols ->
             Board.updateNumColumnsFromString board numCols
                 |> Result.withDefault board
                 |> updateBoard model
-                |> update (GeneratePieceColors 3)
+                |> update (GeneratePieceColors (Board.numColorsValue board))
 
         GeneratePieceColors numColors ->
             let
@@ -129,13 +129,12 @@ update msg ({ board } as model) =
 
         GeneratedPieceColors colors ->
             let
-                updatedBoard =
+                updatedModel =
                     colors
-                        |> Array.map (Maybe.map Piece)
-                        |> Array.indexedMap Board.toIndexedPiece
-                        |> (Board.updatePieces board)
+                        |> Board.maybeColorsToPieces board
+                        |> updateBoard model
             in
-                ( { model | board = updatedBoard }, Cmd.none )
+                ( updatedModel, Cmd.none )
 
         GeneratedPieces colors ->
             ( model, Cmd.none )
