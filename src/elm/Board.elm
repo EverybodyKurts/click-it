@@ -151,3 +151,8 @@ columnValue { columns } =
             columns
     in
         colsInt
+
+
+numColors : Board -> Int
+numColors { colorPalette } =
+    Array.length colorPalette
