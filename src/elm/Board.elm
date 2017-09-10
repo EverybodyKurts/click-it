@@ -242,6 +242,20 @@ updateNumColumnsFromString board rawNumColumns =
         |> Result.map (updateNumColumns board)
 
 
+updateNumColors : Board -> NumColors -> Board
+updateNumColors ({ properties } as board) numColors =
+    { properties | numColors = numColors }
+        |> updateProperties board
+
+
+updateNumColorsFromString : Board -> String -> Result String Board
+updateNumColorsFromString board rawNumColors =
+    String.toInt rawNumColors
+        |> Result.map (clamp 1 100)
+        |> Result.map NumColors
+        |> Result.map (updateNumColors board)
+
+
 updatePieces : Board -> Array ( Index, Maybe Piece ) -> Board
 updatePieces board pieces =
     { board | pieces = pieces }

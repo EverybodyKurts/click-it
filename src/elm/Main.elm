@@ -95,6 +95,7 @@ updateBoard model board =
 type Msg
     = UpdateRows String
     | UpdateColumns String
+    | UpdateNumColors String
     | GeneratePieceColors Int
     | GeneratedPieceColors (Array (Maybe Color))
     | GeneratedPieces (Array (Maybe Color))
@@ -138,6 +139,24 @@ update msg ({ board } as model) =
         GeneratedPieces colors ->
             ( model, Cmd.none )
 
+        UpdateNumColors rawNumColors ->
+            let
+                updatedBoard =
+                    Board.updateNumColorsFromString board rawNumColors
+                        |> Result.withDefault board
+
+                numColors =
+                    Board.numColorsValue updatedBoard
+
+                cmd =
+                    updatedBoard
+                        |> Board.numPieces
+                        |> NumPieces
+                        |> (genColorsThenPieces (NumColors numColors))
+                        |> Random.generate GeneratedPieceColors
+            in
+                { model | board = updatedBoard } ! [ cmd ]
+
 
 
 -- VIEW
@@ -163,9 +182,9 @@ drawPiece board ( index, piece ) =
             []
 
 
-drawPieces : Board -> Array ( Board.Index, Maybe Piece ) -> List (Svg Msg)
-drawPieces board piecesWithIndex =
-    piecesWithIndex
+drawPieces : Board -> List (Svg Msg)
+drawPieces board =
+    board.pieces
         |> Array.toList
         |> List.filterMap
             (\( i, mp ) ->
@@ -194,7 +213,7 @@ view { board } =
             Board.dimensionsValue board
 
         drawnPieces =
-            drawPieces board board.pieces
+            drawPieces board
 
         numColors =
             Board.numColorsValue board
@@ -236,6 +255,7 @@ view { board } =
                             , value numColors
                             , class "form-control"
                             , id "numColors"
+                            , onInput UpdateNumColors
                             ]
                             []
                         ]
