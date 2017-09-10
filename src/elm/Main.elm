@@ -76,14 +76,6 @@ genColorsThenPieces numPieces numColors =
         |> Random.andThen (genPieceColors numPieces)
 
 
-type Msg
-    = UpdateRows String
-    | UpdateColumns String
-    | GeneratePieceColors Int
-    | GeneratedPieceColors (Array (Maybe Color))
-    | GeneratedPieces (Array (Maybe Color))
-
-
 maybeColorToPiece : Maybe Color -> Piece
 maybeColorToPiece maybeColor =
     case maybeColor of
@@ -97,6 +89,14 @@ maybeColorToPiece maybeColor =
 updateBoard : Model -> Board -> Model
 updateBoard model board =
     { model | board = board }
+
+
+type Msg
+    = UpdateRows String
+    | UpdateColumns String
+    | GeneratePieceColors Int
+    | GeneratedPieceColors (Array (Maybe Color))
+    | GeneratedPieces (Array (Maybe Color))
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -148,9 +148,6 @@ drawPiece ({ pieceLength } as board) ( index, piece ) =
         { xPos, yPos } =
             Board.piecePos board index
 
-        hexColor =
-            colorToHex piece.color
-
         (Board.Piece.Length len) =
             pieceLength
     in
@@ -159,7 +156,7 @@ drawPiece ({ pieceLength } as board) ( index, piece ) =
             , y (toString yPos)
             , width (toString len)
             , height (toString len)
-            , fill hexColor
+            , fill (colorToHex piece.color)
             , stroke "#ddd"
             ]
             []
