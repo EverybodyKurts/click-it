@@ -108,3 +108,8 @@ updateNumColumnsFromString ({ properties } as board) =
 updatePieces : Board -> Array ( Index, Maybe Piece ) -> Board
 updatePieces board pieces =
     { board | pieces = pieces }
+
+
+toIndexedPiece : Int -> Maybe Piece -> ( Index, Maybe Piece )
+toIndexedPiece index piece =
+    ( Index index, piece )

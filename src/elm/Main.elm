@@ -82,10 +82,6 @@ updateBoard model board =
     { model | board = board }
 
 
-toIndexedPiece index piece =
-    ( Board.Index index, piece )
-
-
 type Msg
     = UpdateRows String
     | UpdateColumns String
@@ -121,7 +117,7 @@ update msg ({ board } as model) =
                 updatedBoard =
                     colors
                         |> Array.map (Maybe.map Piece)
-                        |> Array.indexedMap toIndexedPiece
+                        |> Array.indexedMap Board.toIndexedPiece
                         |> (Board.updatePieces board)
             in
                 ( { model | board = updatedBoard }, Cmd.none )
