@@ -109,15 +109,10 @@ update msg ({ board } as model) =
                 |> update (GeneratePieceColors 3)
 
         UpdateColumns numCols ->
-            let
-                bd =
-                    String.toInt numCols
-                        |> Result.map (clamp 1 100)
-                        |> Result.map Board.Columns
-                        |> Result.map (Board.updateColumns board)
-                        |> Result.withDefault board
-            in
-                update (GeneratePieceColors 3) { model | board = bd }
+            Board.updateColumnsFromString numCols board
+                |> Result.withDefault board
+                |> updateBoard model
+                |> update (GeneratePieceColors 3)
 
         GeneratePieceColors numColors ->
             let
