@@ -1,6 +1,7 @@
 module Board exposing (..)
 
-import Board.Piece as Piece exposing (Position)
+import Board.Piece exposing (Position, Piece)
+import Board.Properties exposing (NumRows, NumColumns, NumColors, PieceLength, Properties)
 import Color exposing (Color)
 import Array exposing (Array)
 
@@ -16,11 +17,14 @@ type Columns
     = Columns Int
 
 
+type Index
+    = Index Int
+
+
 type alias Board =
-    { rows : Rows
-    , columns : Columns
-    , pieceLength : Piece.Length
+    { properties : Properties
     , colorPalette : Array Color
+    , pieces : Array ( Index, Maybe Piece )
     }
 
 
@@ -32,127 +36,92 @@ type Width
     = Width Int
 
 
-type Index
-    = Index Int
-
-
 default : Board
 default =
-    Board (Rows 10) (Columns 5) (Piece.Length 25) (Array.fromList [])
+    Board Board.Properties.default (Array.fromList []) (Array.fromList [])
 
 
-pieceYPos : Piece.Length -> Columns -> Index -> Int
-pieceYPos (Piece.Length l) (Columns c) (Index i) =
-    (i // c)
-        |> (*) l
+pieceYPos : Board -> Index -> Int
+pieceYPos { properties } (Index idx) =
+    let
+        c =
+            Board.Properties.numColumnsValue properties
+
+        l =
+            Board.Properties.pieceLengthValue properties
+    in
+        (idx // c)
+            |> (*) l
 
 
-pieceXPos : Piece.Length -> Columns -> Index -> Int
-pieceXPos (Piece.Length l) (Columns c) (Index idx) =
-    (idx % c)
-        |> (*) l
+pieceXPos : Board -> Index -> Int
+pieceXPos { properties } (Index idx) =
+    let
+        c =
+            Board.Properties.numColumnsValue properties
+
+        l =
+            Board.Properties.pieceLengthValue properties
+    in
+        (idx % c)
+            |> (*) l
 
 
-piecePos : Board -> Index -> Piece.Position
-piecePos { pieceLength, columns } idx =
-    Piece.Position (pieceXPos pieceLength columns idx) (pieceYPos pieceLength columns idx)
+piecePos : Board -> Index -> Board.Piece.Position
+piecePos board idx =
+    Board.Piece.Position (pieceXPos board idx) (pieceYPos board idx)
+
+
+indices : Properties -> List Index
+indices =
+    Board.Properties.rawIndices
+        >> List.map Index
+
+
+createIndexedPiece : Int -> Maybe Piece -> ( Index, Maybe Piece )
+createIndexedPiece index maybePiece =
+    ( Index index, maybePiece )
 
 
 numPieces : Board -> Int
-numPieces { rows, columns } =
-    let
-        ( Rows r, Columns c ) =
-            ( rows, columns )
-    in
-        r * c
+numPieces { properties } =
+    Board.Properties.numPieces properties
 
 
-indices : Board -> List Index
-indices { rows, columns } =
-    let
-        (Rows r) =
-            rows
-
-        (Columns c) =
-            columns
-    in
-        List.range 0 ((r * c) - 1)
-            |> List.map Index
+numColorsValue : Board -> Int
+numColorsValue { properties } =
+    Board.Properties.numColorsValue properties
 
 
-width : Board -> Width
-width { pieceLength, columns } =
-    let
-        (Piece.Length l) =
-            pieceLength
-
-        (Columns c) =
-            columns
-    in
-        Width (l * c)
+updateProperties : Board -> Properties -> Board
+updateProperties board properties =
+    { board | properties = properties }
 
 
-height : Board -> Height
-height { pieceLength, rows } =
-    let
-        (Piece.Length l) =
-            pieceLength
-
-        (Rows r) =
-            rows
-    in
-        Height (l * r)
+updateNumRowsFromString : Board -> String -> Result String Board
+updateNumRowsFromString ({ properties } as board) =
+    Board.Properties.updateNumRowsFromString properties
+        >> Result.map (updateProperties board)
 
 
-dimensions : Board -> ( Width, Height )
-dimensions board =
-    ( width board, height board )
+updateNumColumnsFromString : Board -> String -> Result String Board
+updateNumColumnsFromString ({ properties } as board) =
+    Board.Properties.updateNumColumnsFromString properties
+        >> Result.map (updateProperties board)
 
 
-updateColumns : Board -> Columns -> Board
-updateColumns board columns =
-    { board | columns = columns }
+updatePieces : Board -> Array ( Index, Maybe Piece ) -> Board
+updatePieces board pieces =
+    { board | pieces = pieces }
 
 
-updateRows : Board -> Rows -> Board
-updateRows board rows =
-    { board | rows = rows }
+toIndexedPiece : Int -> Maybe Piece -> ( Index, Maybe Piece )
+toIndexedPiece index piece =
+    ( Index index, piece )
 
 
-updateRowsFromString : String -> Board -> Result String Board
-updateRowsFromString rawNumRows board =
-    String.toInt rawNumRows
-        |> Result.map (clamp 1 100)
-        |> Result.map Rows
-        |> Result.map (updateRows board)
-
-
-updateColumnsFromString : String -> Board -> Result String Board
-updateColumnsFromString rawNumCols board =
-    String.toInt rawNumCols
-        |> Result.map (clamp 1 100)
-        |> Result.map Columns
-        |> Result.map (updateColumns board)
-
-
-rowValue : Board -> Int
-rowValue { rows } =
-    let
-        (Rows rowsInt) =
-            rows
-    in
-        rowsInt
-
-
-columnValue : Board -> Int
-columnValue { columns } =
-    let
-        (Columns colsInt) =
-            columns
-    in
-        colsInt
-
-
-numColors : Board -> Int
-numColors { colorPalette } =
-    Array.length colorPalette
+maybeColorsToPieces : Board -> Array (Maybe Color) -> Board
+maybeColorsToPieces board =
+    Array.map (Maybe.map Piece)
+        >> Array.indexedMap toIndexedPiece
+        >> (updatePieces board)

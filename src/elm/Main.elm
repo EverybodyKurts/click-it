@@ -9,6 +9,7 @@ import Svg exposing (Svg, svg, rect)
 import Svg.Attributes exposing (width, height, viewBox, x, y, rx, ry, fill, stroke)
 import Board.Piece exposing (Piece)
 import Board exposing (Board)
+import Board.Properties exposing (Properties)
 import Bootstrap exposing (formGroup)
 import Color exposing (Color)
 import Color.Convert exposing (colorToHex)
@@ -21,15 +22,21 @@ import Random.Array
 
 type alias Model =
     { board : Board
-    , pieces : Array ( Board.Index, Maybe Piece )
     }
 
 
 initModel : Model
 initModel =
     { board = Board.default
-    , pieces = Array.fromList []
     }
+
+
+type NumColors
+    = NumColors Int
+
+
+type NumPieces
+    = NumPieces Int
 
 
 
@@ -40,9 +47,12 @@ init : ( Model, Cmd Msg )
 init =
     let
         numPieces =
-            Board.numPieces initModel.board
+            Board.Properties.numPieces initModel.board.properties
+
+        numColors =
+            Board.Properties.numColorsValue initModel.board.properties
     in
-        initModel ! [ Random.generate GeneratedPieceColors (genColorsThenPieces numPieces 3) ]
+        initModel ! [ Random.generate GeneratedPieceColors (genColorsThenPieces (NumColors numColors) (NumPieces numPieces)) ]
 
 
 
@@ -72,8 +82,8 @@ genPieceColors numPieces colors =
 
 {-| Generate an array of colors and then array of pieces that sample from those random colors.
 -}
-genColorsThenPieces : Int -> Int -> Generator (Array (Maybe Color))
-genColorsThenPieces numPieces numColors =
+genColorsThenPieces : NumColors -> NumPieces -> Generator (Array (Maybe Color))
+genColorsThenPieces (NumColors numColors) (NumPieces numPieces) =
     genRandomColors numColors
         |> Random.andThen (genPieceColors numPieces)
 
@@ -95,35 +105,36 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg ({ board } as model) =
     case msg of
         UpdateRows numRows ->
-            board
-                |> Board.updateRowsFromString numRows
+            Board.updateNumRowsFromString board numRows
                 |> Result.withDefault board
                 |> updateBoard model
-                |> update (GeneratePieceColors 3)
+                |> update (GeneratePieceColors (Board.numColorsValue board))
 
         UpdateColumns numCols ->
-            board
-                |> Board.updateColumnsFromString numCols
+            Board.updateNumColumnsFromString board numCols
                 |> Result.withDefault board
                 |> updateBoard model
-                |> update (GeneratePieceColors 3)
+                |> update (GeneratePieceColors (Board.numColorsValue board))
 
         GeneratePieceColors numColors ->
             let
-                numPieces =
-                    Board.numPieces board
+                cmd =
+                    board.properties
+                        |> Board.Properties.numPieces
+                        |> NumPieces
+                        |> (genColorsThenPieces (NumColors numColors))
+                        |> Random.generate GeneratedPieceColors
             in
-                ( model, Random.generate GeneratedPieceColors (genColorsThenPieces numPieces 3) )
+                ( model, cmd )
 
         GeneratedPieceColors colors ->
             let
-                pieces =
+                updatedModel =
                     colors
-                        |> Array.map (Maybe.map Piece)
-                        |> Array.indexedMap (,)
-                        |> Array.map (\( i, p ) -> ( Board.Index i, p ))
+                        |> Board.maybeColorsToPieces board
+                        |> updateBoard model
             in
-                ( { model | pieces = pieces }, Cmd.none )
+                ( updatedModel, Cmd.none )
 
         GeneratedPieces colors ->
             ( model, Cmd.none )
@@ -134,13 +145,13 @@ update msg ({ board } as model) =
 
 
 drawPiece : Board -> ( Board.Index, Piece ) -> Svg Msg
-drawPiece ({ pieceLength } as board) ( index, piece ) =
+drawPiece board ( index, piece ) =
     let
         { xPos, yPos } =
             Board.piecePos board index
 
-        (Board.Piece.Length len) =
-            pieceLength
+        len =
+            Board.Properties.pieceLengthValue board.properties
     in
         rect
             [ x (toString xPos)
@@ -170,24 +181,24 @@ drawPieces board piecesWithIndex =
 
 
 view : Model -> Html Msg
-view { board, pieces } =
+view { board } =
     let
         bdRows =
-            Board.rowValue board
+            Board.Properties.numRowsValue board.properties
                 |> toString
 
         bdCols =
-            Board.columnValue board
+            Board.Properties.numColumnsValue board.properties
                 |> toString
 
-        ( Board.Width bWidth, Board.Height bHeight ) =
-            Board.dimensions board
+        ( bWidth, bHeight ) =
+            Board.Properties.dimensionsValue board.properties
 
         drawnPieces =
-            drawPieces board pieces
+            drawPieces board board.pieces
 
         numColors =
-            Board.numColors board
+            Board.Properties.numColorsValue board.properties
                 |> toString
     in
         div []
