@@ -39,9 +39,9 @@ init : ( Model, Cmd Msg )
 init =
     let
         numPieces =
-            Board.numPieces initModel.board
+            Board.Properties.numPieces initModel.board.properties
     in
-        initModel ! [ Random.generate GeneratedPieceColors (genColorsThenPieces numPieces 3) ]
+        initModel ! [ Random.generate GeneratedPieceColors (genColorsThenPieces 3 numPieces) ]
 
 
 
@@ -72,7 +72,7 @@ genPieceColors numPieces colors =
 {-| Generate an array of colors and then array of pieces that sample from those random colors.
 -}
 genColorsThenPieces : Int -> Int -> Generator (Array (Maybe Color))
-genColorsThenPieces numPieces numColors =
+genColorsThenPieces numColors numPieces =
     genRandomColors numColors
         |> Random.andThen (genPieceColors numPieces)
 
@@ -107,10 +107,13 @@ update msg ({ board } as model) =
 
         GeneratePieceColors numColors ->
             let
-                numPieces =
-                    Board.numPieces board
+                cmd =
+                    board.properties
+                        |> Board.Properties.numPieces
+                        |> (genColorsThenPieces numColors)
+                        |> Random.generate GeneratedPieceColors
             in
-                ( model, Random.generate GeneratedPieceColors (genColorsThenPieces numPieces 3) )
+                ( model, cmd )
 
         GeneratedPieceColors colors ->
             let
