@@ -9,7 +9,6 @@ import Svg exposing (Svg, svg, rect)
 import Svg.Attributes exposing (width, height, viewBox, x, y, rx, ry, fill, stroke)
 import Board.Piece exposing (Piece)
 import Board exposing (Board)
-import Board.Properties exposing (Properties)
 import Bootstrap exposing (formGroup)
 import Color exposing (Color)
 import Color.Convert exposing (colorToHex)
@@ -47,10 +46,10 @@ init : ( Model, Cmd Msg )
 init =
     let
         numPieces =
-            Board.Properties.numPieces initModel.board.properties
+            Board.numPieces initModel.board
 
         numColors =
-            Board.Properties.numColorsValue initModel.board.properties
+            Board.numColorsValue initModel.board
     in
         initModel ! [ Random.generate GeneratedPieceColors (genColorsThenPieces (NumColors numColors) (NumPieces numPieces)) ]
 
@@ -119,8 +118,8 @@ update msg ({ board } as model) =
         GeneratePieceColors numColors ->
             let
                 cmd =
-                    board.properties
-                        |> Board.Properties.numPieces
+                    board
+                        |> Board.numPieces
                         |> NumPieces
                         |> (genColorsThenPieces (NumColors numColors))
                         |> Random.generate GeneratedPieceColors
@@ -151,7 +150,7 @@ drawPiece board ( index, piece ) =
             Board.piecePos board index
 
         len =
-            Board.Properties.pieceLengthValue board.properties
+            Board.pieceLengthValue board
     in
         rect
             [ x (toString xPos)
@@ -184,21 +183,21 @@ view : Model -> Html Msg
 view { board } =
     let
         bdRows =
-            Board.Properties.numRowsValue board.properties
+            Board.numRowsValue board
                 |> toString
 
         bdCols =
-            Board.Properties.numColumnsValue board.properties
+            Board.numColumnsValue board
                 |> toString
 
         ( bWidth, bHeight ) =
-            Board.Properties.dimensionsValue board.properties
+            Board.dimensionsValue board
 
         drawnPieces =
             drawPieces board board.pieces
 
         numColors =
-            Board.Properties.numColorsValue board.properties
+            Board.numColorsValue board
                 |> toString
     in
         div []
