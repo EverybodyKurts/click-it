@@ -183,12 +183,8 @@ drawPieces board piecesWithIndex =
 view : Model -> Html Msg
 view { board, pieces } =
     let
-        { rows, columns, colors } =
+        { rows, columns, colorPalette } =
             board
-
-        col =
-            Array.get 0 colors
-                |> Maybe.withDefault Color.red
 
         (Board.Rows bdRows) =
             rows

@@ -20,7 +20,7 @@ type alias Board =
     { rows : Rows
     , columns : Columns
     , pieceLength : Piece.Length
-    , colors : Array Color
+    , colorPalette : Array Color
     }
 
 
