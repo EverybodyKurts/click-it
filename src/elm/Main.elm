@@ -78,16 +78,6 @@ genColorsThenPieces numPieces numColors =
         |> Random.andThen (genPieceColors numPieces)
 
 
-maybeColorToPiece : Maybe Color -> Piece
-maybeColorToPiece maybeColor =
-    case maybeColor of
-        Just color ->
-            Piece color
-
-        Nothing ->
-            Piece (Color.rgb 255 0 0)
-
-
 updateBoard : Model -> Board -> Model
 updateBoard model board =
     { model | board = board }
@@ -129,8 +119,7 @@ update msg ({ board } as model) =
             let
                 pieces =
                     colors
-                        |> Array.map maybeColorToPiece
-                        |> Array.map Just
+                        |> Array.map (Maybe.map Piece)
                         |> Array.indexedMap (,)
                         |> Array.map (\( i, p ) -> ( Board.Index i, p ))
             in
@@ -196,6 +185,10 @@ view { board, pieces } =
 
         drawnPieces =
             drawPieces board pieces
+
+        numColors =
+            Board.numColors board
+                |> toString
     in
         div []
             [ div [ class "d-flex flex-row" ]
@@ -221,6 +214,18 @@ view { board, pieces } =
                             , class "form-control"
                             , id "boardColumns"
                             , onInput UpdateColumns
+                            ]
+                            []
+                        ]
+                    ]
+                , div [ class "p-2" ]
+                    [ formGroup
+                        [ label [ for "numColors" ] [ (text "# of Colors") ]
+                        , input
+                            [ type_ "number"
+                            , value numColors
+                            , class "form-control"
+                            , id "numColors"
                             ]
                             []
                         ]
