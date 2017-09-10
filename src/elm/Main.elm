@@ -183,14 +183,13 @@ drawPieces board piecesWithIndex =
 view : Model -> Html Msg
 view { board, pieces } =
     let
-        { rows, columns, colorPalette } =
-            board
+        bdRows =
+            Board.rowValue board
+                |> toString
 
-        (Board.Rows bdRows) =
-            rows
-
-        (Board.Columns bdCols) =
-            columns
+        bdCols =
+            Board.columnValue board
+                |> toString
 
         ( Board.Width bWidth, Board.Height bHeight ) =
             Board.dimensions board
@@ -205,7 +204,7 @@ view { board, pieces } =
                         [ label [ for "boardRows" ] [ (text "Rows") ]
                         , input
                             [ type_ "number"
-                            , value (toString bdRows)
+                            , value bdRows
                             , class "form-control"
                             , id "boardRows"
                             , onInput UpdateRows
@@ -218,7 +217,7 @@ view { board, pieces } =
                         [ label [ for "boardColumns" ] [ (text "Columns") ]
                         , input
                             [ type_ "number"
-                            , value (toString bdCols)
+                            , value bdCols
                             , class "form-control"
                             , id "boardColumns"
                             , onInput UpdateColumns

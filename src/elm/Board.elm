@@ -133,3 +133,21 @@ updateColumnsFromString rawNumCols board =
         |> Result.map (clamp 1 100)
         |> Result.map Columns
         |> Result.map (updateColumns board)
+
+
+rowValue : Board -> Int
+rowValue { rows } =
+    let
+        (Rows rowsInt) =
+            rows
+    in
+        rowsInt
+
+
+columnValue : Board -> Int
+columnValue { columns } =
+    let
+        (Columns colsInt) =
+            columns
+    in
+        colsInt
