@@ -70,6 +70,8 @@ genPieceColors numPieces colors =
     Random.Array.array numPieces (Random.Array.sample colors)
 
 
+{-| Generate an array of colors and then array of pieces that sample from those random colors.
+-}
 genColorsThenPieces : Int -> Int -> Generator (Array (Maybe Color))
 genColorsThenPieces numPieces numColors =
     genRandomColors numColors
