@@ -117,3 +117,11 @@ updateColumns board columns =
 updateRows : Board -> Rows -> Board
 updateRows board rows =
     { board | rows = rows }
+
+
+updateRowsFromString : String -> Board -> Result String Board
+updateRowsFromString rawNumRows board =
+    String.toInt rawNumRows
+        |> Result.map (clamp 1 100)
+        |> Result.map Rows
+        |> Result.map (updateRows board)

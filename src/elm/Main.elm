@@ -49,16 +49,22 @@ init =
 -- UPDATE
 
 
+{-| Generate a random color
+-}
 genRandomColor : Generator Color
 genRandomColor =
     Random.map3 Color.rgb (Random.int 0 255) (Random.int 0 255) (Random.int 0 255)
 
 
+{-| Generate a specified # of random colors
+-}
 genRandomColors : Int -> Generator (Array Color)
 genRandomColors numColors =
     Random.Array.array numColors genRandomColor
 
 
+{-| Generate an array of pieces that have a random color from the specified list of colors
+-}
 genPieceColors : Int -> Array Color -> Generator (Array (Maybe Color))
 genPieceColors numPieces colors =
     Random.Array.array numPieces (Random.Array.sample colors)
@@ -88,19 +94,19 @@ maybeColorToPiece maybeColor =
             Piece (Color.rgb 255 0 0)
 
 
+updateBoard : Model -> Board -> Model
+updateBoard model board =
+    { model | board = board }
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg ({ board } as model) =
     case msg of
         UpdateRows numRows ->
-            let
-                bd =
-                    String.toInt numRows
-                        |> Result.map (clamp 1 100)
-                        |> Result.map Board.Rows
-                        |> Result.map (Board.updateRows board)
-                        |> Result.withDefault board
-            in
-                update (GeneratePieceColors 3) { model | board = bd }
+            Board.updateRowsFromString numRows board
+                |> Result.withDefault board
+                |> updateBoard model
+                |> update (GeneratePieceColors 3)
 
         UpdateColumns numCols ->
             let
