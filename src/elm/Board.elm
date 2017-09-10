@@ -1,6 +1,6 @@
 module Board exposing (..)
 
-import Board.Piece exposing (Piece, Position)
+import Board.Piece as Piece exposing (Position)
 import Color exposing (Color)
 import Array exposing (Array)
 
@@ -19,7 +19,7 @@ type Columns
 type alias Board =
     { rows : Rows
     , columns : Columns
-    , pieceLength : Board.Piece.Length
+    , pieceLength : Piece.Length
     , colors : Array Color
     }
 
@@ -38,24 +38,24 @@ type Index
 
 default : Board
 default =
-    Board (Rows 10) (Columns 5) (Board.Piece.Length 25) (Array.fromList [ (Color.rgb 255 0 0) ])
+    Board (Rows 10) (Columns 5) (Piece.Length 25) (Array.fromList [])
 
 
-pieceYPos : Board.Piece.Length -> Columns -> Index -> Int
-pieceYPos (Board.Piece.Length l) (Columns c) (Index i) =
+pieceYPos : Piece.Length -> Columns -> Index -> Int
+pieceYPos (Piece.Length l) (Columns c) (Index i) =
     (i // c)
         |> (*) l
 
 
-pieceXPos : Board.Piece.Length -> Columns -> Index -> Int
-pieceXPos (Board.Piece.Length l) (Columns c) (Index idx) =
+pieceXPos : Piece.Length -> Columns -> Index -> Int
+pieceXPos (Piece.Length l) (Columns c) (Index idx) =
     (idx % c)
         |> (*) l
 
 
-piecePos : Board -> Index -> Board.Piece.Position
+piecePos : Board -> Index -> Piece.Position
 piecePos { pieceLength, columns } idx =
-    Board.Piece.Position (pieceXPos pieceLength columns idx) (pieceYPos pieceLength columns idx)
+    Piece.Position (pieceXPos pieceLength columns idx) (pieceYPos pieceLength columns idx)
 
 
 numPieces : Board -> Int
@@ -83,7 +83,7 @@ indices { rows, columns } =
 width : Board -> Width
 width { pieceLength, columns } =
     let
-        (Board.Piece.Length l) =
+        (Piece.Length l) =
             pieceLength
 
         (Columns c) =
@@ -95,7 +95,7 @@ width { pieceLength, columns } =
 height : Board -> Height
 height { pieceLength, rows } =
     let
-        (Board.Piece.Length l) =
+        (Piece.Length l) =
             pieceLength
 
         (Rows r) =
