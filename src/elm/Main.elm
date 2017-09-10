@@ -103,13 +103,15 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg ({ board } as model) =
     case msg of
         UpdateRows numRows ->
-            Board.updateRowsFromString numRows board
+            board
+                |> Board.updateRowsFromString numRows
                 |> Result.withDefault board
                 |> updateBoard model
                 |> update (GeneratePieceColors 3)
 
         UpdateColumns numCols ->
-            Board.updateColumnsFromString numCols board
+            board
+                |> Board.updateColumnsFromString numCols
                 |> Result.withDefault board
                 |> updateBoard model
                 |> update (GeneratePieceColors 3)
