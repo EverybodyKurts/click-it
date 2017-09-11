@@ -71,8 +71,6 @@ defaultProperties =
     Properties (NumRows 10) (NumColumns 5) (NumColors 3) (PieceLength 25)
 
 
-{-| Get raw value of a board's # of columns
--}
 numColumnsValue : Board -> Int
 numColumnsValue { properties } =
     let
@@ -100,8 +98,6 @@ numColorsValue { properties } =
         c
 
 
-{-| Get raw value of a board's piece length
--}
 pieceLengthValue : Board -> Int
 pieceLengthValue { properties } =
     let
@@ -195,6 +191,28 @@ pieceXPos board (Index idx) =
 piecePos : Board -> Index -> Position
 piecePos board idx =
     Position (pieceXPos board idx) (pieceYPos board idx)
+
+
+neighborPositions : Position -> List Position
+neighborPositions { xPos, yPos } =
+    [ (Position xPos (yPos - 1)) -- north
+    , (Position xPos (yPos + 1)) -- south
+    , (Position (xPos - 1) yPos) -- east
+    , (Position (xPos + 1) yPos) -- west
+    ]
+
+
+
+-- getIndexedPiece : Board -> Position -> ( Index, Maybe Piece )
+-- getIndexedPiece board { xPos, yPos } =
+--     let
+--         ( BoardWidth width, BoardHeight height ) =
+--             dimensions board
+--     in
+--         ( Index 0, Nothing )
+-- neighborPieces : Board -> Position -> List (Maybe Piece)
+-- neighborPieces board ({ xPos, yPos } as position) =
+--     []
 
 
 rawIndices : Board -> List Int
