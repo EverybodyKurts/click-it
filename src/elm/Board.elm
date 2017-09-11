@@ -1,6 +1,5 @@
 module Board exposing (..)
 
-import Board.Piece exposing (Position, Piece)
 import Color exposing (Color)
 import Array exposing (Array)
 
@@ -54,6 +53,17 @@ type Height
 
 type Width
     = Width Int
+
+
+type alias Position =
+    { xPos : Int
+    , yPos : Int
+    }
+
+
+type alias Piece =
+    { color : Color
+    }
 
 
 defaultProperties : Properties
@@ -182,9 +192,9 @@ pieceXPos board (Index idx) =
             |> (*) l
 
 
-piecePos : Board -> Index -> Board.Piece.Position
+piecePos : Board -> Index -> Position
 piecePos board idx =
-    Board.Piece.Position (pieceXPos board idx) (pieceYPos board idx)
+    Position (pieceXPos board idx) (pieceYPos board idx)
 
 
 rawIndices : Board -> List Int
