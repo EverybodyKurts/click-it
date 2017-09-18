@@ -165,7 +165,7 @@ drawPiece : Board -> ( Board.Index, Piece ) -> Svg Msg
 drawPiece board ( index, piece ) =
     let
         { xPos, yPos } =
-            Board.pieceSvgPos board index
+            Board.piecePos board index
 
         len =
             Board.pieceLengthValue board

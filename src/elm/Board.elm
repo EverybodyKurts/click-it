@@ -162,35 +162,57 @@ default =
     Board defaultProperties (Array.fromList []) (Array.fromList [])
 
 
-pieceSvgYPos : Board -> Index -> Int
-pieceSvgYPos board (Index idx) =
+{-| The row the piece is located
+-}
+pieceRow : Board -> Index -> Int
+pieceRow board (Index idx) =
     let
         c =
             numColumnsValue board
-
-        l =
-            pieceLengthValue board
     in
         (idx // c)
-            |> (*) l
 
 
-pieceSvgXPos : Board -> Index -> Int
-pieceSvgXPos board (Index idx) =
+{-| The piece's y-coord
+-}
+pieceYPos : Board -> Index -> Int
+pieceYPos board index =
     let
-        c =
-            numColumnsValue board
-
         l =
             pieceLengthValue board
     in
-        (idx % c)
+        pieceRow board index
             |> (*) l
 
 
-pieceSvgPos : Board -> Index -> Position
-pieceSvgPos board idx =
-    Position (pieceSvgXPos board idx) (pieceSvgYPos board idx)
+{-| The column the piece is located in
+-}
+pieceColumn : Board -> Index -> Int
+pieceColumn board (Index idx) =
+    let
+        c =
+            numColumnsValue board
+    in
+        (idx % c)
+
+
+{-| The piece's x-coord
+-}
+pieceXPos : Board -> Index -> Int
+pieceXPos board index =
+    let
+        l =
+            pieceLengthValue board
+    in
+        pieceColumn board index
+            |> (*) l
+
+
+{-| The piece's coordinates
+-}
+piecePos : Board -> Index -> Position
+piecePos board idx =
+    Position (pieceXPos board idx) (pieceYPos board idx)
 
 
 
