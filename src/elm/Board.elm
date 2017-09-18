@@ -55,9 +55,9 @@ type Width
     = Width Int
 
 
-type alias Position =
-    { xPos : Int
-    , yPos : Int
+type alias Coordinates =
+    { xCoord : Int
+    , yCoord : Int
     }
 
 
@@ -210,23 +210,23 @@ pieceXPos board index =
 
 {-| The piece's coordinates
 -}
-piecePos : Board -> Index -> Position
-piecePos board idx =
-    Position (pieceXPos board idx) (pieceYPos board idx)
+pieceCoordinates : Board -> Index -> Coordinates
+pieceCoordinates board idx =
+    Coordinates (pieceXPos board idx) (pieceYPos board idx)
 
 
 
--- neighborPositions : Position -> List Position
--- neighborPositions { xPos, yPos } =
---     [ (Position xPos (yPos - 1)) -- north
---     , (Position xPos (yPos + 1)) -- south
---     , (Position (xPos - 1) yPos) -- east
---     , (Position (xPos + 1) yPos) -- west
+-- neighborPositions : Coordinates -> List Coordinates
+-- neighborPositions { xCoord, yCoord } =
+--     [ (Coordinates xCoord (yCoord - 1)) -- north
+--     , (Coordinates xCoord (yCoord + 1)) -- south
+--     , (Coordinates (xCoord - 1) yCoord) -- east
+--     , (Coordinates (xCoord + 1) yCoord) -- west
 --     ]
 
 
-positionInBounds : Board -> Position -> Bool
-positionInBounds board { xPos, yPos } =
+positionInBounds : Board -> Coordinates -> Bool
+positionInBounds board { xCoord, yCoord } =
     let
         numColumns =
             numColumnsValue board
@@ -234,7 +234,7 @@ positionInBounds board { xPos, yPos } =
         numRows =
             numRowsValue board
     in
-        case ( xPos < 0, xPos >= numColumns, yPos < 0, yPos >= numRows ) of
+        case ( xCoord < 0, xCoord >= numColumns, yCoord < 0, yCoord >= numRows ) of
             ( True, True, True, True ) ->
                 True
 

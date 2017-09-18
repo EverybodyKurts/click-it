@@ -164,15 +164,15 @@ update msg ({ board } as model) =
 drawPiece : Board -> ( Board.Index, Piece ) -> Svg Msg
 drawPiece board ( index, piece ) =
     let
-        { xPos, yPos } =
-            Board.piecePos board index
+        { xCoord, yCoord } =
+            Board.pieceCoordinates board index
 
         len =
             Board.pieceLengthValue board
     in
         rect
-            [ x (toString xPos)
-            , y (toString yPos)
+            [ x (toString xCoord)
+            , y (toString yCoord)
             , width (toString len)
             , height (toString len)
             , fill (colorToHex piece.color)
