@@ -162,8 +162,8 @@ default =
     Board defaultProperties (Array.fromList []) (Array.fromList [])
 
 
-pieceYPos : Board -> Index -> Int
-pieceYPos board (Index idx) =
+pieceSvgYPos : Board -> Index -> Int
+pieceSvgYPos board (Index idx) =
     let
         c =
             numColumnsValue board
@@ -175,8 +175,8 @@ pieceYPos board (Index idx) =
             |> (*) l
 
 
-pieceXPos : Board -> Index -> Int
-pieceXPos board (Index idx) =
+pieceSvgXPos : Board -> Index -> Int
+pieceSvgXPos board (Index idx) =
     let
         c =
             numColumnsValue board
@@ -188,31 +188,36 @@ pieceXPos board (Index idx) =
             |> (*) l
 
 
-piecePos : Board -> Index -> Position
-piecePos board idx =
-    Position (pieceXPos board idx) (pieceYPos board idx)
-
-
-neighborPositions : Position -> List Position
-neighborPositions { xPos, yPos } =
-    [ (Position xPos (yPos - 1)) -- north
-    , (Position xPos (yPos + 1)) -- south
-    , (Position (xPos - 1) yPos) -- east
-    , (Position (xPos + 1) yPos) -- west
-    ]
+pieceSvgPos : Board -> Index -> Position
+pieceSvgPos board idx =
+    Position (pieceSvgXPos board idx) (pieceSvgYPos board idx)
 
 
 
--- getIndexedPiece : Board -> Position -> ( Index, Maybe Piece )
--- getIndexedPiece board { xPos, yPos } =
---     let
---         ( BoardWidth width, BoardHeight height ) =
---             dimensions board
---     in
---         ( Index 0, Nothing )
--- neighborPieces : Board -> Position -> List (Maybe Piece)
--- neighborPieces board ({ xPos, yPos } as position) =
---     []
+-- neighborPositions : Position -> List Position
+-- neighborPositions { xPos, yPos } =
+--     [ (Position xPos (yPos - 1)) -- north
+--     , (Position xPos (yPos + 1)) -- south
+--     , (Position (xPos - 1) yPos) -- east
+--     , (Position (xPos + 1) yPos) -- west
+--     ]
+
+
+positionInBounds : Board -> Position -> Bool
+positionInBounds board { xPos, yPos } =
+    let
+        numColumns =
+            numColumnsValue board
+
+        numRows =
+            numRowsValue board
+    in
+        case ( xPos < 0, xPos >= numColumns, yPos < 0, yPos >= numRows ) of
+            ( True, True, True, True ) ->
+                True
+
+            _ ->
+                True
 
 
 rawIndices : Board -> List Int
@@ -249,6 +254,7 @@ updateNumRows ({ properties } as board) numRows =
         |> updateProperties board
 
 
+updateNumRowsFromString : Board -> String -> Result String Board
 updateNumRowsFromString board rawNumRows =
     String.toInt rawNumRows
         |> Result.map (clamp 1 100)
