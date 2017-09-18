@@ -61,6 +61,12 @@ type alias Coordinates =
     }
 
 
+type alias Position =
+    { row : Int
+    , column : Int
+    }
+
+
 type alias Piece =
     { color : Color
     }
@@ -215,18 +221,17 @@ pieceCoordinates board idx =
     Coordinates (pieceXPos board idx) (pieceYPos board idx)
 
 
+neighborPositions : Position -> List Position
+neighborPositions { row, column } =
+    [ (Position row (column - 1)) -- north
+    , (Position row (column + 1)) -- south
+    , (Position (row - 1) column) -- east
+    , (Position (row + 1) column) -- west
+    ]
 
--- neighborPositions : Coordinates -> List Coordinates
--- neighborPositions { xCoord, yCoord } =
---     [ (Coordinates xCoord (yCoord - 1)) -- north
---     , (Coordinates xCoord (yCoord + 1)) -- south
---     , (Coordinates (xCoord - 1) yCoord) -- east
---     , (Coordinates (xCoord + 1) yCoord) -- west
---     ]
 
-
-positionInBounds : Board -> Coordinates -> Bool
-positionInBounds board { xCoord, yCoord } =
+positionInBounds : Board -> Position -> Bool
+positionInBounds board { row, column } =
     let
         numColumns =
             numColumnsValue board
@@ -234,7 +239,7 @@ positionInBounds board { xCoord, yCoord } =
         numRows =
             numRowsValue board
     in
-        case ( xCoord < 0, xCoord >= numColumns, yCoord < 0, yCoord >= numRows ) of
+        case ( column < 0, column >= numColumns, row < 0, row >= numRows ) of
             ( True, True, True, True ) ->
                 True
 
