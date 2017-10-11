@@ -7,6 +7,7 @@ import Html.Attributes exposing (id, class, for, type_, value)
 import Html.Events exposing (onInput)
 import Svg exposing (Svg, svg, rect)
 import Svg.Attributes exposing (width, height, viewBox, x, y, rx, ry, fill, stroke)
+import Svg.Events exposing (onClick)
 import Board exposing (Board, Piece)
 import Bootstrap exposing (formGroup)
 import Color exposing (Color)
@@ -98,6 +99,7 @@ type Msg
     | GeneratePieceColors Int
     | GeneratedPieceColors (Array (Maybe Color))
     | GeneratedPieces (Array (Maybe Color))
+    | ClickPiece Board.Index
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -156,6 +158,18 @@ update msg ({ board } as model) =
             in
                 { model | board = updatedBoard } ! [ cmd ]
 
+        ClickPiece idx ->
+            let
+                neighborPositions =
+                    (Board.piecePosition model.board idx)
+                        |> (Board.neighborPositionsInbound model.board)
+
+                _ =
+                    Debug.log "Neighbor Positions" neighborPositions
+            in
+                -- Board.removePieceAtIndex board index
+                ( model, Cmd.none )
+
 
 
 -- VIEW
@@ -177,6 +191,7 @@ drawPiece board ( index, piece ) =
             , height (toString len)
             , fill (colorToHex piece.color)
             , stroke "#ddd"
+            , onClick (ClickPiece index)
             ]
             []
 
