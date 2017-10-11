@@ -191,7 +191,7 @@ pieceYPos board index =
             |> (*) l
 
 
-{-| The column the piece is located in
+{-| The column the piece is located
 -}
 pieceColumn : Board -> Index -> Int
 pieceColumn board (Index idx) =
@@ -214,11 +214,33 @@ pieceXPos board index =
             |> (*) l
 
 
+piecePosition : Board -> Index -> Position
+piecePosition board idx =
+    Position (pieceRow board idx) (pieceColumn board idx)
+
+
 {-| The piece's coordinates
 -}
 pieceCoordinates : Board -> Index -> Coordinates
 pieceCoordinates board idx =
     Coordinates (pieceXPos board idx) (pieceYPos board idx)
+
+
+positionInbound : Board -> Position -> Bool
+positionInbound board { row, column } =
+    let
+        numColumns =
+            numColumnsValue board
+
+        numRows =
+            numRowsValue board
+    in
+        case ( column >= 0, column < numColumns, row >= 0, row < numRows ) of
+            ( True, True, True, True ) ->
+                True
+
+            _ ->
+                False
 
 
 neighborPositions : Position -> List Position
@@ -230,21 +252,10 @@ neighborPositions { row, column } =
     ]
 
 
-positionInBounds : Board -> Position -> Bool
-positionInBounds board { row, column } =
-    let
-        numColumns =
-            numColumnsValue board
-
-        numRows =
-            numRowsValue board
-    in
-        case ( column < 0, column >= numColumns, row < 0, row >= numRows ) of
-            ( True, True, True, True ) ->
-                True
-
-            _ ->
-                True
+neighborPositionsInbound : Board -> Position -> List Position
+neighborPositionsInbound board position =
+    neighborPositions position
+        |> List.filter (positionInbound board)
 
 
 rawIndices : Board -> List Int
