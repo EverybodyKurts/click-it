@@ -287,9 +287,17 @@ findIndexedColor idx =
         >> Maybe.andThen indexedPieceToColor
 
 
-fcb : Color -> Board -> List Index -> List Index -> List Index
-fcb color board colorBlock toVisit =
-    case Lextra.uncons toVisit of
+type ColorBlockIndices
+    = ColorBlockIndices (List Index)
+
+
+type DestinationIndices
+    = DestinationIndices (List Index)
+
+
+fcb : Color -> Board -> ColorBlockIndices -> DestinationIndices -> List Index
+fcb color board (ColorBlockIndices colorBlock) (DestinationIndices destinations) =
+    case Lextra.uncons destinations of
         Just ( blockIndex, rest ) ->
             let
                 updatedColorBlock =
@@ -299,7 +307,8 @@ fcb color board colorBlock toVisit =
                     |> (colorNeighborIndices board color)
                     |> Lextra.filterNot (\idx -> List.member idx updatedColorBlock)
                     |> List.append rest
-                    |> (fcb color board updatedColorBlock)
+                    |> DestinationIndices
+                    |> (fcb color board (ColorBlockIndices updatedColorBlock))
 
         Nothing ->
             colorBlock
@@ -320,11 +329,26 @@ findColorBlock board idx =
                     colorBlock =
                         [ idx ]
                 in
-                    fcb col board colorBlock toVisit
+                    fcb col board (ColorBlockIndices colorBlock) (DestinationIndices toVisit)
 
             Nothing ->
                 []
 
+
+--removeBlockAt : Board -> Index -> Board
+--removeBlockAt board index =
+--    let
+--        colorBlockIndices =
+--            findColorBlock board index
+--    in
+--        if (List.length colorBlockIndices) >= 3 then
+--            board.pieces
+--                |> Lextra.filterNot (\( i, mp ) -> List.member i colorBlockIndices)
+--                |> Array.fromList
+--                |> (updatePieces board)
+--        else
+--            board
+--
 
 {-| The piece's coordinates
 -}
