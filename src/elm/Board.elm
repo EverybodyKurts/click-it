@@ -335,20 +335,21 @@ findColorBlock board idx =
                 []
 
 
---removeBlockAt : Board -> Index -> Board
---removeBlockAt board index =
---    let
---        colorBlockIndices =
---            findColorBlock board index
---    in
---        if (List.length colorBlockIndices) >= 3 then
---            board.pieces
---                |> Lextra.filterNot (\( i, mp ) -> List.member i colorBlockIndices)
---                |> Array.fromList
---                |> (updatePieces board)
---        else
---            board
---
+removeBlockAt : Board -> Index -> Board
+removeBlockAt board index =
+    let
+        colorBlockIndices =
+            findColorBlock board index
+    in
+        if (List.length colorBlockIndices) >= 3 then
+            board.pieces
+                |> Array.toList
+                |> Lextra.filterNot (\( i, mp ) -> List.member i colorBlockIndices)
+                |> Array.fromList
+                |> (updatePieces board)
+        else
+            board
+
 
 {-| The piece's coordinates
 -}
