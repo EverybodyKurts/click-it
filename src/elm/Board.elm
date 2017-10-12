@@ -317,9 +317,6 @@ findColorBlock board idx =
                     toVisit =
                         colorNeighborIndices board col idx
 
-                    visited =
-                        [ idx ]
-
                     colorBlock =
                         [ idx ]
                 in
