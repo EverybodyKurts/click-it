@@ -241,6 +241,7 @@ pieceIsColor color piece =
     color == piece.color
 
 
+colorNeighborToIndex : Color -> List Index -> ( Index, Maybe Piece ) -> Maybe Index
 colorNeighborToIndex color neighborIndices ( idx, maybePiece ) =
     let
         isColor =
