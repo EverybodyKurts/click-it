@@ -160,12 +160,11 @@ update msg ({ board } as model) =
 
         ClickPiece idx ->
             let
-                neighborPositions =
-                    (Board.piecePosition model.board idx)
-                        |> (Board.neighborPositionsInbound model.board)
+                blockIndices =
+                    Board.findColorBlock model.board idx
 
                 _ =
-                    Debug.log "Neighbor Positions" neighborPositions
+                    Debug.log "blockIndices" blockIndices
             in
                 -- Board.removePieceAtIndex board index
                 ( model, Cmd.none )
