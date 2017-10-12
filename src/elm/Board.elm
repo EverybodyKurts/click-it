@@ -2,6 +2,7 @@ module Board exposing (..)
 
 import Color exposing (Color)
 import Array exposing (Array)
+import List.Extra as Lextra
 
 
 type NumRows
@@ -40,6 +41,11 @@ type Index
     = Index Int
 
 
+type alias Piece =
+    { color : Color
+    }
+
+
 type alias Board =
     { properties : Properties
     , colorPalette : Array Color
@@ -64,11 +70,6 @@ type alias Coordinates =
 type alias Position =
     { row : Int
     , column : Int
-    }
-
-
-type alias Piece =
-    { color : Color
     }
 
 
@@ -217,6 +218,114 @@ pieceXPos board index =
 piecePosition : Board -> Index -> Position
 piecePosition board idx =
     Position (pieceRow board idx) (pieceColumn board idx)
+
+
+positionToIndex : Board -> Position -> Index
+positionToIndex board { row, column } =
+    let
+        numCols =
+            numColumnsValue board
+    in
+        Index (numCols * row + column)
+
+
+neighborIndices : Board -> Index -> List Index
+neighborIndices board =
+    (piecePosition board)
+        >> (neighborPositionsInbound board)
+        >> List.map (positionToIndex board)
+
+
+pieceIsColor : Color -> Piece -> Bool
+pieceIsColor color piece =
+    color == piece.color
+
+
+colorNeighborToIndex color neighborIndices ( idx, maybePiece ) =
+    let
+        isColor =
+            maybePiece
+                |> Maybe.map (pieceIsColor color)
+                |> Maybe.withDefault False
+
+        isNeighbor =
+            List.member idx neighborIndices
+    in
+        if isColor && isNeighbor then
+            Just idx
+        else
+            Nothing
+
+
+colorNeighborIndices : Board -> Color -> Index -> List Index
+colorNeighborIndices board color index =
+    let
+        nIndices =
+            neighborIndices board index
+    in
+        board.pieces
+            |> Array.toList
+            |> List.filterMap (colorNeighborToIndex color nIndices)
+
+
+findIndexedPiece : Index -> Array ( Index, Maybe Piece ) -> Maybe ( Index, Maybe Piece )
+findIndexedPiece idx =
+    Array.toList
+        >> Lextra.find (\( i, maybePiece ) -> i == idx)
+
+
+indexedPieceToColor : ( Index, Maybe Piece ) -> Maybe Color
+indexedPieceToColor ( idx, maybePiece ) =
+    maybePiece
+        |> Maybe.map .color
+
+
+findIndexedColor : Index -> Array ( Index, Maybe Piece ) -> Maybe Color
+findIndexedColor idx =
+    findIndexedPiece idx
+        >> Maybe.andThen indexedPieceToColor
+
+
+fcb : Color -> Board -> List Index -> List Index -> List Index
+fcb color board colorBlock toVisit =
+    case Lextra.uncons toVisit of
+        Just ( blockIndex, rest ) ->
+            let
+                updatedColorBlock =
+                    blockIndex :: colorBlock
+            in
+                blockIndex
+                    |> (colorNeighborIndices board color)
+                    |> Lextra.filterNot (\idx -> List.member idx updatedColorBlock)
+                    |> List.append rest
+                    |> (fcb color board updatedColorBlock)
+
+        Nothing ->
+            colorBlock
+
+
+findColorBlock : Board -> Index -> List Index
+findColorBlock board idx =
+    let
+        color =
+            findIndexedColor idx board.pieces
+    in
+        case color of
+            Just col ->
+                let
+                    toVisit =
+                        colorNeighborIndices board col idx
+
+                    visited =
+                        [ idx ]
+
+                    colorBlock =
+                        [ idx ]
+                in
+                    fcb col board colorBlock toVisit
+
+            Nothing ->
+                []
 
 
 {-| The piece's coordinates
