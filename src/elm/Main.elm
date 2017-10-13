@@ -156,7 +156,7 @@ update msg ({ board } as model) =
                         |> (genColorsThenPieces (NumColors numColors))
                         |> Random.generate GeneratedPieceColors
             in
-                { model | board = updatedBoard } ! [ cmd ]
+                (updateBoard model updatedBoard) ! [ cmd ]
 
         ClickPiece idx ->
             let
@@ -164,7 +164,6 @@ update msg ({ board } as model) =
                     Board.removeBlockAt model.board idx
                         |> updateBoard model
             in
-                -- Board.removePieceAtIndex board index
                 ( updatedModel, Cmd.none )
 
 
