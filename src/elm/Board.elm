@@ -1,4 +1,22 @@
-module Board exposing (..)
+module Board
+    exposing
+        ( Board
+        , Piece
+        , Index
+        , default
+        , numPieces
+        , numColorsValue
+        , updateNumRowsFromString
+        , updateNumColorsFromString
+        , updateNumColumnsFromString
+        , maybeColorsToPieces
+        , pieceCoordinates
+        , pieceLengthValue
+        , numColumnsValue
+        , numRowsValue
+        , dimensionsValue
+        , removeBlockAt
+        )
 
 import Color exposing (Color)
 import Array exposing (Array)
@@ -73,57 +91,17 @@ type alias Position =
     }
 
 
+type ColorBlockIndices
+    = ColorBlockIndices (List Index)
+
+
+type DestinationIndices
+    = DestinationIndices (List Index)
+
+
 defaultProperties : Properties
 defaultProperties =
     Properties (NumRows 10) (NumColumns 5) (NumColors 3) (PieceLength 25)
-
-
-numColumnsValue : Board -> Int
-numColumnsValue { properties } =
-    let
-        (NumColumns c) =
-            properties.numColumns
-    in
-        c
-
-
-numRowsValue : Board -> Int
-numRowsValue { properties } =
-    let
-        (NumRows r) =
-            properties.numRows
-    in
-        r
-
-
-numColorsValue : Board -> Int
-numColorsValue { properties } =
-    let
-        (NumColors c) =
-            properties.numColors
-    in
-        c
-
-
-pieceLengthValue : Board -> Int
-pieceLengthValue { properties } =
-    let
-        (PieceLength pl) =
-            properties.pieceLength
-    in
-        pl
-
-
-numPieces : Board -> Int
-numPieces board =
-    let
-        r =
-            numRowsValue board
-
-        c =
-            numColumnsValue board
-    in
-        r * c
 
 
 boardWidth : Board -> BoardWidth
@@ -153,20 +131,6 @@ boardHeight { properties } =
 dimensions : Board -> ( BoardWidth, BoardHeight )
 dimensions board =
     ( boardWidth board, boardHeight board )
-
-
-dimensionsValue : Board -> ( Int, Int )
-dimensionsValue board =
-    let
-        ( BoardWidth bw, BoardHeight bh ) =
-            dimensions board
-    in
-        ( bw, bh )
-
-
-default : Board
-default =
-    Board defaultProperties (Array.fromList []) (Array.fromList [])
 
 
 {-| The row the piece is located
@@ -287,14 +251,6 @@ findIndexedColor idx =
         >> Maybe.andThen indexedPieceToColor
 
 
-type ColorBlockIndices
-    = ColorBlockIndices (List Index)
-
-
-type DestinationIndices
-    = DestinationIndices (List Index)
-
-
 fcb : Color -> Board -> ColorBlockIndices -> DestinationIndices -> List Index
 fcb color board (ColorBlockIndices colorBlock) (DestinationIndices destinations) =
     case Lextra.uncons destinations of
@@ -333,29 +289,6 @@ findColorBlock board idx =
 
             Nothing ->
                 []
-
-
-removeBlockAt : Board -> Index -> Board
-removeBlockAt board index =
-    let
-        colorBlockIndices =
-            findColorBlock board index
-    in
-        if (List.length colorBlockIndices) >= 3 then
-            board.pieces
-                |> Array.toList
-                |> Lextra.filterNot (\( i, mp ) -> List.member i colorBlockIndices)
-                |> Array.fromList
-                |> (updatePieces board)
-        else
-            board
-
-
-{-| The piece's coordinates
--}
-pieceCoordinates : Board -> Index -> Coordinates
-pieceCoordinates board idx =
-    Coordinates (pieceXPos board idx) (pieceYPos board idx)
 
 
 positionInbound : Board -> Position -> Bool
@@ -424,26 +357,10 @@ updateNumRows ({ properties } as board) numRows =
         |> updateProperties board
 
 
-updateNumRowsFromString : Board -> String -> Result String Board
-updateNumRowsFromString board rawNumRows =
-    String.toInt rawNumRows
-        |> Result.map (clamp 1 100)
-        |> Result.map NumRows
-        |> Result.map (updateNumRows board)
-
-
 updateNumColumns : Board -> NumColumns -> Board
 updateNumColumns ({ properties } as board) numColumns =
     { properties | numColumns = numColumns }
         |> updateProperties board
-
-
-updateNumColumnsFromString : Board -> String -> Result String Board
-updateNumColumnsFromString board rawNumColumns =
-    String.toInt rawNumColumns
-        |> Result.map (clamp 1 100)
-        |> Result.map NumColumns
-        |> Result.map (updateNumColumns board)
 
 
 updateNumColors : Board -> NumColors -> Board
@@ -470,8 +387,135 @@ toIndexedPiece index piece =
     ( Index index, piece )
 
 
+
+-- Public API
+
+
+{-| Remove a block of pieces at the specified index
+-}
+removeBlockAt : Board -> Index -> Board
+removeBlockAt board index =
+    let
+        colorBlockIndices =
+            findColorBlock board index
+    in
+        if (List.length colorBlockIndices) >= 3 then
+            board.pieces
+                |> Array.toList
+                |> Lextra.filterNot (\( i, mp ) -> List.member i colorBlockIndices)
+                |> Array.fromList
+                |> (updatePieces board)
+        else
+            board
+
+
+{-| Create a default board
+-}
+default : Board
+default =
+    Board defaultProperties (Array.fromList []) (Array.fromList [])
+
+
+{-| Get the total # of possible pieces on the board.
+-}
+numPieces : Board -> Int
+numPieces board =
+    let
+        r =
+            numRowsValue board
+
+        c =
+            numColumnsValue board
+    in
+        r * c
+
+
+{-| The board's # of colors.
+-}
+numColorsValue : Board -> Int
+numColorsValue { properties } =
+    let
+        (NumColors c) =
+            properties.numColors
+    in
+        c
+
+
+{-| Update the # of board rows from a user inputted string.
+-}
+updateNumRowsFromString : Board -> String -> Result String Board
+updateNumRowsFromString board rawNumRows =
+    String.toInt rawNumRows
+        |> Result.map (clamp 1 100)
+        |> Result.map NumRows
+        |> Result.map (updateNumRows board)
+
+
+{-| Update the # of board columns from a user inputted string.
+-}
+updateNumColumnsFromString : Board -> String -> Result String Board
+updateNumColumnsFromString board rawNumColumns =
+    String.toInt rawNumColumns
+        |> Result.map (clamp 1 100)
+        |> Result.map NumColumns
+        |> Result.map (updateNumColumns board)
+
+
+{-| Convert colors to pieces
+-}
 maybeColorsToPieces : Board -> Array (Maybe Color) -> Board
 maybeColorsToPieces board =
     Array.map (Maybe.map Piece)
         >> Array.indexedMap toIndexedPiece
         >> (updatePieces board)
+
+
+{-| The piece's coordinates
+-}
+pieceCoordinates : Board -> Index -> Coordinates
+pieceCoordinates board idx =
+    Coordinates (pieceXPos board idx) (pieceYPos board idx)
+
+
+{-| Return the length of a board piece
+-}
+pieceLengthValue : Board -> Int
+pieceLengthValue { properties } =
+    let
+        (PieceLength pl) =
+            properties.pieceLength
+    in
+        pl
+
+
+{-| Return the # of board columns
+-}
+numColumnsValue : Board -> Int
+numColumnsValue { properties } =
+    let
+        (NumColumns c) =
+            properties.numColumns
+    in
+        c
+
+
+{-| Return the # of board rows
+-}
+numRowsValue : Board -> Int
+numRowsValue { properties } =
+    let
+        (NumRows r) =
+            properties.numRows
+    in
+        r
+
+
+{-| Return the width & height of the board.
+-}
+dimensionsValue : Board -> ( Int, Int )
+dimensionsValue board =
+    let
+        ( BoardWidth bw, BoardHeight bh ) =
+            dimensions board
+    in
+        ( bw, bh )
