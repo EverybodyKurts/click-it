@@ -56,6 +56,18 @@ raw { numRows, numColumns, numColors, pieceLength } =
         ( rows, columns, colors, pl )
 
 
+numPieces : Properties -> Int
+numPieces { numRows, numColumns } =
+    let
+        (NumRows r) =
+            numRows
+
+        (NumColumns c) =
+            numColumns
+    in
+        r * c
+
+
 
 -- UPDATING PROPERTIES
 
@@ -70,11 +82,17 @@ updateNumRows properties numRows =
 {-| Update the number of rows from a string, most likely user input.
 -}
 updateNumRowsFromString : Properties -> String -> Result String Properties
-updateNumRowsFromString properties rawNumRows =
-    String.toInt rawNumRows
-        |> Result.map (clamp 1 100)
-        |> Result.map NumRows
-        |> Result.map (updateNumRows properties)
+updateNumRowsFromString properties =
+    String.toInt
+        >> Result.map (clamp 1 100)
+        >> Result.map NumRows
+        >> Result.map (updateNumRows properties)
+
+
+updateNumRowsOrDefault : Properties -> String -> Properties
+updateNumRowsOrDefault properties =
+    (updateNumRowsFromString properties)
+        >> Result.withDefault default
 
 
 updateNumColumns : Properties -> NumColumns -> Properties
@@ -83,11 +101,17 @@ updateNumColumns properties numColumns =
 
 
 updateNumColumnsFromString : Properties -> String -> Result String Properties
-updateNumColumnsFromString properties rawNumColumns =
-    String.toInt rawNumColumns
-        |> Result.map (clamp 1 100)
-        |> Result.map NumColumns
-        |> Result.map (updateNumColumns properties)
+updateNumColumnsFromString properties =
+    String.toInt
+        >> Result.map (clamp 1 100)
+        >> Result.map NumColumns
+        >> Result.map (updateNumColumns properties)
+
+
+updateNumColumnsOrDefault : Properties -> String -> Properties
+updateNumColumnsOrDefault properties =
+    (updateNumColumnsFromString properties)
+        >> Result.withDefault default
 
 
 updateNumColors : Properties -> NumColors -> Properties
@@ -96,11 +120,17 @@ updateNumColors properties numColors =
 
 
 updateNumColorsFromString : Properties -> String -> Result String Properties
-updateNumColorsFromString properties rawNumColors =
-    String.toInt rawNumColors
-        |> Result.map (clamp 1 100)
-        |> Result.map NumColors
-        |> Result.map (updateNumColors properties)
+updateNumColorsFromString properties =
+    String.toInt
+        >> Result.map (clamp 1 100)
+        >> Result.map NumColors
+        >> Result.map (updateNumColors properties)
+
+
+updateNumColorsOrDefault : Properties -> String -> Properties
+updateNumColorsOrDefault properties =
+    (updateNumColorsFromString properties)
+        >> Result.withDefault default
 
 
 
