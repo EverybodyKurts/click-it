@@ -63,10 +63,19 @@ genPaletteThenBoard numRows numColumns numColors =
         |> Random.andThen (genBoard numRows numColumns)
 
 
-default : Generator Board
-default =
+{-| Initialize a board based on specified properties
+-}
+init : Properties -> Generator Board
+init properties =
     let
         ( rows, columns, colors, pieceLength ) =
-            (Board.Properties.raw Board.Properties.default)
+            (Board.Properties.raw properties)
     in
         genPaletteThenBoard rows columns colors
+
+
+{-| Generate the default board
+-}
+default : Generator Board
+default =
+    init Board.Properties.default
