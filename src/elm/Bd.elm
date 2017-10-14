@@ -5,6 +5,7 @@ import Random exposing (Generator)
 import Random.Array
 import Color exposing (Color)
 import List.Extra as Lextra
+import Board.Properties exposing (Properties)
 
 
 type Row
@@ -37,32 +38,35 @@ genColorPalette numColors =
     Random.Array.array numColors genRandomColor
 
 
-colorsToRows : Int -> List (Maybe Color) -> Rows
-colorsToRows numColumns boardColors =
+colorsToBoard : Int -> List (Maybe Color) -> Board
+colorsToBoard numColumns boardColors =
     boardColors
         |> Lextra.groupsOf numColumns
         |> List.map Row
         |> Rows
+        |> Board
 
 
-{-| Generate the board colors
+{-| Generate the board & its colors
 -}
-genBoardColors : Int -> Int -> Array Color -> Generator Rows
-genBoardColors numRows numColumns colorPalette =
+genBoard : Int -> Int -> Array Color -> Generator Board
+genBoard numRows numColumns colorPalette =
     Random.list (numRows * numColumns) (Random.Array.sample colorPalette)
-        |> Random.map (colorsToRows numColumns)
+        |> Random.map (colorsToBoard numColumns)
 
 
-{-| Generate color palette then board colors
+{-| Generate color palette & then the board and its colors
 -}
-genPaletteThenBoard : Int -> Int -> Int -> Generator Rows
+genPaletteThenBoard : Int -> Int -> Int -> Generator Board
 genPaletteThenBoard numRows numColumns numColors =
     genColorPalette numColors
-        |> Random.andThen (genBoardColors numRows numColumns)
+        |> Random.andThen (genBoard numRows numColumns)
 
 
-
--- splitBoardColors numRows numColumns boardColors =
--- genPaletteThenBoardColors numRows numColumns numColors =
---     genColorPalette numColors
---         |> Random.andThen (genBoardColors numRows numColumns)
+default : Generator Board
+default =
+    let
+        ( rows, columns, colors, pieceLength ) =
+            (Board.Properties.raw Board.Properties.default)
+    in
+        genPaletteThenBoard rows columns colors
