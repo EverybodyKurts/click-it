@@ -150,14 +150,14 @@ keepExistingIndexedColors ( index, maybeColor ) =
             Nothing
 
 
-drawPiece : PieceLength -> RowIndex -> ( Int, Color ) -> Svg msg
+drawPiece : PieceLength -> RowIndex -> ( ColumnIndex, Color ) -> Svg msg
 drawPiece pieceLength rowIndex ( columnIndex, color ) =
     let
         (PieceLength length) =
             pieceLength
 
         (XCoord xCoord) =
-            Board.Properties.xCoord pieceLength (ColumnIndex columnIndex)
+            Board.Properties.xCoord pieceLength columnIndex
 
         (YCoord yCoord) =
             Board.Properties.yCoord pieceLength rowIndex
@@ -175,14 +175,18 @@ drawPiece pieceLength rowIndex ( columnIndex, color ) =
             []
 
 
-drawRow : PieceLength -> ( Int, Row ) -> List (Svg msg)
+drawRow : PieceLength -> ( RowIndex, Row ) -> List (Svg msg)
 drawRow pieceLength ( rowIndex, Row row ) =
     let
+        columnIndexTuple : Int -> a -> ( ColumnIndex, a )
+        columnIndexTuple rawIndex a =
+            ( ColumnIndex rawIndex, a )
+
         indexedPieces =
             row
-                |> List.indexedMap (,)
+                |> List.indexedMap columnIndexTuple
                 |> List.filterMap keepExistingIndexedColors
-                |> List.map (drawPiece pieceLength (RowIndex rowIndex))
+                |> List.map (drawPiece pieceLength rowIndex)
     in
         indexedPieces
 
@@ -192,11 +196,15 @@ drawRows pieceLength maybeBoard =
     case maybeBoard of
         Just board ->
             let
+                rowIndexTuple : Int -> a -> ( RowIndex, a )
+                rowIndexTuple rawIndex a =
+                    ( RowIndex rawIndex, a )
+
                 (Board (Rows rows)) =
                     board
             in
                 rows
-                    |> List.indexedMap (,)
+                    |> List.indexedMap rowIndexTuple
                     |> List.concatMap (drawRow pieceLength)
 
         Nothing ->
