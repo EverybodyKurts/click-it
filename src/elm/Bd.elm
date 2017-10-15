@@ -149,7 +149,7 @@ fcb color board (ColorBlock colorBlock) (Destinations destinations) =
             in
                 blockPosition
                     |> (equivNeighborPositions board color)
-                    |> Lextra.filterNot (\i -> List.member i updatedColorBlock)
+                    |> Lextra.filterNot (flip List.member updatedColorBlock)
                     |> List.append restDestinations
                     |> Destinations
                     |> (fcb color board (ColorBlock updatedColorBlock))
