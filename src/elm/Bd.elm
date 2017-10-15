@@ -113,18 +113,63 @@ neighborPositions (Position ( RowIndex rowIndex, ColumnIndex columnIndex )) =
     ]
 
 
-neighborPieces : Board -> Position -> List (Maybe Color)
-neighborPieces board position =
-    position
-        |> neighborPositions
-        |> List.map (getPiece board)
+equivNeighborPositions : Board -> Color -> Position -> List Position
+equivNeighborPositions board color position =
+    let
+        keepPositionIfSameColor : Board -> Color -> Position -> Maybe Position
+        keepPositionIfSameColor board color position =
+            getPiece board position
+                |> Maybe.andThen
+                    (\pieceColor ->
+                        if pieceColor == color then
+                            Just position
+                        else
+                            Nothing
+                    )
+    in
+        neighborPositions position
+            |> List.filterMap (keepPositionIfSameColor board color)
 
 
-findColorBlock : Board -> Position -> List ( RowIndex, ColumnIndex )
+type ColorBlock
+    = ColorBlock (List Position)
+
+
+type Destinations
+    = Destinations (List Position)
+
+
+fcb : Color -> Board -> ColorBlock -> Destinations -> List Position
+fcb color board (ColorBlock colorBlock) (Destinations destinations) =
+    case Lextra.uncons destinations of
+        Just ( blockPosition, restDestinations ) ->
+            let
+                updatedColorBlock =
+                    blockPosition :: colorBlock
+            in
+                blockPosition
+                    |> (equivNeighborPositions board color)
+                    |> Lextra.filterNot (\i -> List.member i updatedColorBlock)
+                    |> List.append restDestinations
+                    |> Destinations
+                    |> (fcb color board (ColorBlock updatedColorBlock))
+
+        Nothing ->
+            colorBlock
+
+
+findColorBlock : Board -> Position -> List Position
 findColorBlock board position =
     case getPiece board position of
         Just color ->
-            []
+            let
+                destinations =
+                    Destinations (equivNeighborPositions board color position)
+
+                colorBlock =
+                    ColorBlock [ position ]
+            in
+                fcb color board colorBlock destinations
 
         Nothing ->
             []

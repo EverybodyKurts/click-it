@@ -13,7 +13,7 @@ import Svg.Events exposing (onClick)
 -- import Board exposing (Board, Piece)
 
 import Bd exposing (Board(..), Rows(..), Row(..))
-import Board.Properties exposing (Properties, PieceLength(..), XCoord(..), YCoord(..), RowIndex(..), ColumnIndex(..))
+import Board.Properties exposing (Properties, PieceLength(..), XCoord(..), YCoord(..), RowIndex(..), ColumnIndex(..), Position(..))
 import Bootstrap exposing (formGroup)
 import Color exposing (Color)
 import Color.Convert exposing (colorToHex)
@@ -82,7 +82,7 @@ type Msg
     | UpdateNumRows String
     | UpdateNumColumns String
     | UpdateNumColors String
-    | ClickPiece ( RowIndex, ColumnIndex )
+    | ClickPiece Position
 
 
 
@@ -129,22 +129,21 @@ update msg ({ properties, board } as model) =
             in
                 updatePropertiesAndBoard model updatedProperties updatedBoard
 
-        ClickPiece ( rowIndex, columnIndex ) ->
-            ( model, Cmd.none )
+        ClickPiece position ->
+            let
+                _ =
+                    case board of
+                        Just b ->
+                            Debug.log "colorblock" (Bd.findColorBlock b position)
+
+                        _ ->
+                            []
+            in
+                ( model, Cmd.none )
 
 
 
 -- VIEW
-
-
-keepExistingIndexedColors : ( a, Maybe b ) -> Maybe ( a, b )
-keepExistingIndexedColors ( index, maybeColor ) =
-    case maybeColor of
-        Just color ->
-            Just ( index, color )
-
-        _ ->
-            Nothing
 
 
 drawPiece : PieceLength -> RowIndex -> ( ColumnIndex, Color ) -> Svg Msg
@@ -166,7 +165,7 @@ drawPiece pieceLength rowIndex ( columnIndex, color ) =
             , height (toString length)
             , fill (colorToHex color)
             , stroke "#ddd"
-            , onClick (ClickPiece ( rowIndex, columnIndex ))
+            , onClick (ClickPiece (Position ( rowIndex, columnIndex )))
             ]
             []
 
@@ -174,6 +173,15 @@ drawPiece pieceLength rowIndex ( columnIndex, color ) =
 drawRow : PieceLength -> ( RowIndex, Row ) -> List (Svg Msg)
 drawRow pieceLength ( rowIndex, Row row ) =
     let
+        keepExistingIndexedColors : ( a, Maybe b ) -> Maybe ( a, b )
+        keepExistingIndexedColors ( index, maybeColor ) =
+            case maybeColor of
+                Just color ->
+                    Just ( index, color )
+
+                _ ->
+                    Nothing
+
         columnIndexTuple : Int -> a -> ( ColumnIndex, a )
         columnIndexTuple rawIndex a =
             ( ColumnIndex rawIndex, a )
