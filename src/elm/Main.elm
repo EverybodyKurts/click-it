@@ -82,6 +82,7 @@ type Msg
     | UpdateNumRows String
     | UpdateNumColumns String
     | UpdateNumColors String
+    | ClickPiece ( RowIndex, ColumnIndex )
 
 
 
@@ -128,15 +129,11 @@ update msg ({ properties, board } as model) =
             in
                 updatePropertiesAndBoard model updatedProperties updatedBoard
 
+        ClickPiece ( rowIndex, columnIndex ) ->
+            ( model, Cmd.none )
 
 
--- ClickPiece idx ->
---     let
---         updatedModel =
---             Board.removeBlockAt model.board idx
---                 |> updateBoard model
---     in
---         ( updatedModel, Cmd.none )
+
 -- VIEW
 
 
@@ -150,7 +147,7 @@ keepExistingIndexedColors ( index, maybeColor ) =
             Nothing
 
 
-drawPiece : PieceLength -> RowIndex -> ( ColumnIndex, Color ) -> Svg msg
+drawPiece : PieceLength -> RowIndex -> ( ColumnIndex, Color ) -> Svg Msg
 drawPiece pieceLength rowIndex ( columnIndex, color ) =
     let
         (PieceLength length) =
@@ -169,13 +166,12 @@ drawPiece pieceLength rowIndex ( columnIndex, color ) =
             , height (toString length)
             , fill (colorToHex color)
             , stroke "#ddd"
-
-            -- , onClick (ClickPiece index)
+            , onClick (ClickPiece ( rowIndex, columnIndex ))
             ]
             []
 
 
-drawRow : PieceLength -> ( RowIndex, Row ) -> List (Svg msg)
+drawRow : PieceLength -> ( RowIndex, Row ) -> List (Svg Msg)
 drawRow pieceLength ( rowIndex, Row row ) =
     let
         columnIndexTuple : Int -> a -> ( ColumnIndex, a )
@@ -191,7 +187,7 @@ drawRow pieceLength ( rowIndex, Row row ) =
         indexedPieces
 
 
-drawRows : PieceLength -> Maybe Board -> List (Svg msg)
+drawRows : PieceLength -> Maybe Board -> List (Svg Msg)
 drawRows pieceLength maybeBoard =
     case maybeBoard of
         Just board ->
