@@ -5,7 +5,8 @@ import Random exposing (Generator)
 import Random.Array
 import Color exposing (Color)
 import List.Extra as Lextra
-import Board.Properties exposing (Properties)
+import Board.Properties exposing (Properties, RowIndex(..), ColumnIndex(..))
+import Maybe.Extra
 
 
 type Row
@@ -79,3 +80,34 @@ init properties =
 default : Generator Board
 default =
     init Board.Properties.default
+
+
+
+-- ACCESSING THE BOARD
+
+
+unwrapRow : Row -> List (Maybe Color)
+unwrapRow (Row row) =
+    row
+
+
+getPiece : Board -> RowIndex -> ColumnIndex -> Maybe Color
+getPiece (Board boardRows) (RowIndex rowIndex) (ColumnIndex columnIndex) =
+    let
+        (Rows rows) =
+            boardRows
+    in
+        rows
+            |> Lextra.getAt rowIndex
+            |> Maybe.map unwrapRow
+            |> Maybe.andThen (Lextra.getAt columnIndex)
+            |> Maybe.Extra.join
+
+
+
+-- BOARD UPDATES
+
+
+findColorBlock : Board -> RowIndex -> ColumnIndex -> List ( RowIndex, ColumnIndex )
+findColorBlock board rowIndex columnIndex =
+    []
