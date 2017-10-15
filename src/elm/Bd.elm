@@ -113,8 +113,11 @@ neighborPositions (Position ( RowIndex rowIndex, ColumnIndex columnIndex )) =
     ]
 
 
-
--- neighborPieces
+neighborPieces : Board -> Position -> List (Maybe Color)
+neighborPieces board position =
+    position
+        |> neighborPositions
+        |> List.map (getPiece board)
 
 
 findColorBlock : Board -> Position -> List ( RowIndex, ColumnIndex )
