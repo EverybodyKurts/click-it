@@ -1,6 +1,5 @@
 module Main exposing (..)
 
-import Array exposing (Array)
 import Maybe exposing (Maybe)
 import Html exposing (Html, h1, text, div, input, label)
 import Html.Attributes exposing (id, class, for, type_, value)
@@ -18,8 +17,6 @@ import Bootstrap exposing (formGroup)
 import Color exposing (Color)
 import Color.Convert exposing (colorToHex)
 import Random exposing (Generator)
-import Random.Array
-import List.Extra as Lextra
 
 
 -- MODEL

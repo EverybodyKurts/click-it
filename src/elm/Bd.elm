@@ -177,3 +177,41 @@ findColorBlock board position =
 
 
 -- UPDATING THE BOARD
+
+
+removePiece : Board -> Position -> Board
+removePiece (Board boardRows) (Position ( RowIndex rowIndex, ColumnIndex columnIndex )) =
+    let
+        (Rows rows) =
+            boardRows
+
+        setRow : Int -> List Row -> Row -> Maybe (List Row)
+        setRow rowIndex rows row =
+            Lextra.setAt rowIndex row rows
+    in
+        rows
+            |> Lextra.getAt rowIndex
+            |> Maybe.map unwrapRow
+            |> Maybe.andThen (Lextra.setAt columnIndex Nothing)
+            |> Maybe.map Row
+            |> Maybe.andThen (setRow rowIndex rows)
+            |> Maybe.map Rows
+            |> Maybe.map Board
+            |> Maybe.withDefault (Board boardRows)
+
+
+
+-- removeBlock (Board boardRows) colorBlock =
+--     colorBlock
+--         |> List.map
+--             (\(Position ( RowIndex rowIndex, ColumnIndex columnIndex )) ->
+--             )
+-- removeBlockAt board position =
+--     let
+--         colorBlock =
+--             findColorBlock board position
+--     in
+--         if List.length colorBlock >= 3 then
+--             colorBlock
+--         else
+--             []
