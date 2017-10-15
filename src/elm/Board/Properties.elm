@@ -159,3 +159,29 @@ height { numRows, pieceLength } =
             numRows
     in
         (l * r)
+
+
+type RowIndex
+    = RowIndex Int
+
+
+type ColumnIndex
+    = ColumnIndex Int
+
+
+type XCoord
+    = XCoord Int
+
+
+type YCoord
+    = YCoord Int
+
+
+xCoord : PieceLength -> ColumnIndex -> XCoord
+xCoord (PieceLength pieceLength) (ColumnIndex columnIndex) =
+    XCoord (pieceLength * columnIndex)
+
+
+yCoord : PieceLength -> RowIndex -> YCoord
+yCoord (PieceLength pieceLength) (RowIndex rowIndex) =
+    YCoord (pieceLength * rowIndex)

@@ -12,13 +12,14 @@ import Svg.Events exposing (onClick)
 
 -- import Board exposing (Board, Piece)
 
-import Bd exposing (Board(..), Rows(..))
-import Board.Properties exposing (Properties)
+import Bd exposing (Board(..), Rows(..), Row(..))
+import Board.Properties exposing (Properties, PieceLength(..), XCoord(..), YCoord(..), RowIndex(..), ColumnIndex(..))
 import Bootstrap exposing (formGroup)
 import Color exposing (Color)
 import Color.Convert exposing (colorToHex)
 import Random exposing (Generator)
 import Random.Array
+import List.Extra as Lextra
 
 
 -- MODEL
@@ -32,8 +33,7 @@ type alias Model =
 
 initModel : Model
 initModel =
-    { board = Bd.default
-    }
+    Model Board.Properties.default Nothing
 
 
 type NumColors
@@ -57,11 +57,12 @@ init =
 -- UPDATE
 
 
+generateBoard : Generator Board -> Cmd Msg
 generateBoard board =
     Random.generate GeneratedBoard board
 
 
-updateBoard : Model -> Board -> Model
+updateBoard : Model -> Maybe Board -> Model
 updateBoard model board =
     { model | board = board }
 
@@ -71,6 +72,7 @@ updateProperties model properties =
     { model | properties = properties }
 
 
+updatePropertiesAndBoard : Model -> Properties -> Generator Board -> ( Model, Cmd Msg )
 updatePropertiesAndBoard model properties board =
     (updateProperties model properties) ! [ generateBoard board ]
 
@@ -80,8 +82,6 @@ type Msg
     | UpdateNumRows String
     | UpdateNumColumns String
     | UpdateNumColors String
-    | GeneratePieceColors Int
-    | GeneratedPieces (Array (Maybe Color))
 
 
 
@@ -121,7 +121,7 @@ update msg ({ properties, board } as model) =
         UpdateNumColors rawNumColors ->
             let
                 updatedProperties =
-                    Board.Properties.updateNumColorsOrDefault board rawNumColors
+                    Board.Properties.updateNumColorsOrDefault properties rawNumColors
 
                 updatedBoard =
                     Bd.init updatedProperties
@@ -138,23 +138,73 @@ update msg ({ properties, board } as model) =
 --     in
 --         ( updatedModel, Cmd.none )
 -- VIEW
+-- drawPieces : Board -> List (Svg Msg)
+-- drawPieces (Board (Rows rows)) =
+--     board.pieces
+--         |> Array.toList
+--         |> List.filterMap
+--             (\( i, mp ) ->
+--                 case mp of
+--                     Just p ->
+--                         Just ( i, p )
+--                     Nothing ->
+--                         Nothing
+--             )
+--         |> List.map (drawPiece board)
 
 
-drawPiece : Board -> ( Board.Index, Piece ) -> Svg Msg
-drawPiece board ( index, piece ) =
+keepExistingIndexedColors : ( a, Maybe b ) -> Maybe ( a, b )
+keepExistingIndexedColors ( index, maybeColor ) =
+    case maybeColor of
+        Just color ->
+            Just ( index, color )
+
+        _ ->
+            Nothing
+
+
+
+-- drawPiece : Board -> ( Board.Index, Piece ) -> Svg Msg
+-- drawPiece board ( index, piece ) =
+--     let
+--         { xCoord, yCoord } =
+--             Board.pieceCoordinates board index
+--         len =
+--             Board.pieceLengthValue board
+--     in
+--         rect
+--             [ x (toString xCoord)
+--             , y (toString yCoord)
+--             , width (toString len)
+--             , height (toString len)
+--             , fill (colorToHex piece.color)
+--             , stroke "#ddd"
+--             -- , onClick (ClickPiece index)
+--             ]
+--             []
+
+
+drawPiece : PieceLength -> RowIndex -> ( Int, Color ) -> Svg msg
+drawPiece pieceLength rowIndex ( columnIndex, color ) =
     let
-        { xCoord, yCoord } =
-            Board.pieceCoordinates board index
+        (PieceLength length) =
+            pieceLength
 
-        len =
-            Board.pieceLengthValue board
+        (XCoord xCoord) =
+            Board.Properties.xCoord pieceLength (ColumnIndex columnIndex)
+
+        (YCoord yCoord) =
+            Board.Properties.yCoord pieceLength rowIndex
+
+        _ =
+            Debug.log "x,y" ( xCoord, yCoord )
     in
         rect
             [ x (toString xCoord)
             , y (toString yCoord)
-            , width (toString len)
-            , height (toString len)
-            , fill (colorToHex piece.color)
+            , width (toString length)
+            , height (toString length)
+            , fill (colorToHex color)
             , stroke "#ddd"
 
             -- , onClick (ClickPiece index)
@@ -162,24 +212,32 @@ drawPiece board ( index, piece ) =
             []
 
 
-drawPieces : Board -> List (Svg Msg)
-drawPieces (Board (Rows rows)) =
-    rows
-        |> List.indexedMap (,)
+drawRow : PieceLength -> ( Int, Row ) -> List (Svg msg)
+drawRow pieceLength ( rowIndex, Row row ) =
+    let
+        indexedPieces =
+            row
+                |> List.indexedMap (,)
+                |> List.filterMap keepExistingIndexedColors
+                |> List.map (drawPiece pieceLength (RowIndex rowIndex))
+    in
+        indexedPieces
 
 
+drawRows : PieceLength -> Maybe Board -> List (Svg msg)
+drawRows pieceLength maybeBoard =
+    case maybeBoard of
+        Just board ->
+            let
+                (Board (Rows rows)) =
+                    board
+            in
+                rows
+                    |> List.indexedMap (,)
+                    |> List.concatMap (drawRow pieceLength)
 
--- board.pieces
---     |> Array.toList
---     |> List.filterMap
---         (\( i, mp ) ->
---             case mp of
---                 Just p ->
---                     Just ( i, p )
---                 Nothing ->
---                     Nothing
---         )
---     |> List.map (drawPiece board)
+        Nothing ->
+            []
 
 
 view : Model -> Html Msg
@@ -194,8 +252,8 @@ view { board, properties } =
         boardHeight =
             Board.Properties.height properties
 
-        drawnPieces =
-            drawPieces board
+        drawnRows =
+            drawRows properties.pieceLength board
     in
         div []
             [ div [ class "d-flex flex-row" ]
@@ -230,7 +288,7 @@ view { board, properties } =
                         [ label [ for "numColors" ] [ (text "# of Colors") ]
                         , input
                             [ type_ "number"
-                            , value numColors
+                            , value (toString numColors)
                             , class "form-control"
                             , id "numColors"
                             , onInput UpdateNumColors
@@ -243,7 +301,7 @@ view { board, properties } =
                 [ div [ class "p-12" ]
                     [ svg
                         [ width (toString boardWidth), height (toString boardHeight) ]
-                        drawnPieces
+                        drawnRows
                     ]
                 ]
             ]
