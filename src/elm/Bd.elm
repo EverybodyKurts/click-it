@@ -5,7 +5,7 @@ import Random exposing (Generator)
 import Random.Array
 import Color exposing (Color)
 import List.Extra as Lextra
-import Board.Properties exposing (Properties, RowIndex(..), ColumnIndex(..))
+import Board.Properties exposing (Properties, RowIndex(..), ColumnIndex(..), Position(..))
 import Maybe.Extra
 
 
@@ -91,8 +91,8 @@ unwrapRow (Row row) =
     row
 
 
-getPiece : Board -> RowIndex -> ColumnIndex -> Maybe Color
-getPiece (Board boardRows) (RowIndex rowIndex) (ColumnIndex columnIndex) =
+getPiece : Board -> Position -> Maybe Color
+getPiece (Board boardRows) (Position ( RowIndex rowIndex, ColumnIndex columnIndex )) =
     let
         (Rows rows) =
             boardRows
@@ -104,10 +104,28 @@ getPiece (Board boardRows) (RowIndex rowIndex) (ColumnIndex columnIndex) =
             |> Maybe.Extra.join
 
 
+neighborPositions : Position -> List Position
+neighborPositions (Position ( RowIndex rowIndex, ColumnIndex columnIndex )) =
+    [ Position ( RowIndex rowIndex, ColumnIndex (columnIndex - 1) ) -- north
+    , Position ( RowIndex rowIndex, ColumnIndex (columnIndex + 1) ) -- south
+    , Position ( RowIndex (rowIndex - 1), ColumnIndex columnIndex ) -- east
+    , Position ( RowIndex (rowIndex + 1), ColumnIndex columnIndex ) -- west
+    ]
 
--- BOARD UPDATES
 
 
-findColorBlock : Board -> RowIndex -> ColumnIndex -> List ( RowIndex, ColumnIndex )
-findColorBlock board rowIndex columnIndex =
-    []
+-- neighborPieces
+
+
+findColorBlock : Board -> Position -> List ( RowIndex, ColumnIndex )
+findColorBlock board position =
+    case getPiece board position of
+        Just color ->
+            []
+
+        Nothing ->
+            []
+
+
+
+-- UPDATING THE BOARD

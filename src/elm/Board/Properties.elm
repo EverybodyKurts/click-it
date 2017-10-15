@@ -33,6 +33,10 @@ type ColumnIndex
     = ColumnIndex Int
 
 
+type Position
+    = Position ( RowIndex, ColumnIndex )
+
+
 type XCoord
     = XCoord Int
 
