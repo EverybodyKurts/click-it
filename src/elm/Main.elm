@@ -138,19 +138,6 @@ update msg ({ properties, board } as model) =
 --     in
 --         ( updatedModel, Cmd.none )
 -- VIEW
--- drawPieces : Board -> List (Svg Msg)
--- drawPieces (Board (Rows rows)) =
---     board.pieces
---         |> Array.toList
---         |> List.filterMap
---             (\( i, mp ) ->
---                 case mp of
---                     Just p ->
---                         Just ( i, p )
---                     Nothing ->
---                         Nothing
---             )
---         |> List.map (drawPiece board)
 
 
 keepExistingIndexedColors : ( a, Maybe b ) -> Maybe ( a, b )
@@ -161,27 +148,6 @@ keepExistingIndexedColors ( index, maybeColor ) =
 
         _ ->
             Nothing
-
-
-
--- drawPiece : Board -> ( Board.Index, Piece ) -> Svg Msg
--- drawPiece board ( index, piece ) =
---     let
---         { xCoord, yCoord } =
---             Board.pieceCoordinates board index
---         len =
---             Board.pieceLengthValue board
---     in
---         rect
---             [ x (toString xCoord)
---             , y (toString yCoord)
---             , width (toString len)
---             , height (toString len)
---             , fill (colorToHex piece.color)
---             , stroke "#ddd"
---             -- , onClick (ClickPiece index)
---             ]
---             []
 
 
 drawPiece : PieceLength -> RowIndex -> ( Int, Color ) -> Svg msg
@@ -195,9 +161,6 @@ drawPiece pieceLength rowIndex ( columnIndex, color ) =
 
         (YCoord yCoord) =
             Board.Properties.yCoord pieceLength rowIndex
-
-        _ =
-            Debug.log "x,y" ( xCoord, yCoord )
     in
         rect
             [ x (toString xCoord)
