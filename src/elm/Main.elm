@@ -7,13 +7,17 @@ import Html.Events exposing (onInput)
 import Svg exposing (Svg, svg, rect)
 import Svg.Attributes exposing (width, height, viewBox, x, y, rx, ry, fill, stroke)
 import Svg.Events exposing (onClick)
-import Board exposing (Board(..), Rows(..), Row(..), XCoord(..), YCoord(..))
-import Board.Properties exposing (Properties, PieceLength(..))
-import Board.Position exposing (RowIndex(..), ColumnIndex(..), Position(..))
-import Bootstrap exposing (formGroup)
 import Color exposing (Color)
 import Color.Convert exposing (colorToHex)
 import Random exposing (Generator)
+
+
+-- User modules
+
+import Bootstrap exposing (formGroup)
+import Board exposing (Board(..), Rows(..), Row(..), XCoord(..), YCoord(..))
+import Board.Properties exposing (Properties, PieceLength(..), NumRows(..), NumColumns(..), NumColors(..))
+import Board.Position exposing (RowIndex(..), ColumnIndex(..), Position(..))
 
 
 -- MODEL
@@ -27,14 +31,6 @@ type Model
 initModel : Model
 initModel =
     Prestart Board.Properties.default
-
-
-type NumColors
-    = NumColors Int
-
-
-type NumPieces
-    = NumPieces Int
 
 
 
@@ -243,17 +239,81 @@ drawRows pieceLength board =
             |> List.concatMap (drawRow pieceLength)
 
 
+boardRowsFormGroup : NumRows -> List (Html Msg)
+boardRowsFormGroup (NumRows numRows) =
+    [ formGroup
+        [ label [ for "boardRows" ] [ (text "Rows") ]
+        , input
+            [ type_ "number"
+            , value (toString numRows)
+            , class "form-control"
+            , id "boardRows"
+            , onInput UpdateNumRows
+            ]
+            []
+        ]
+    ]
+
+
+boardColumnsFormGroup : NumColumns -> List (Html Msg)
+boardColumnsFormGroup (NumColumns numColumns) =
+    [ formGroup
+        [ label [ for "boardColumns" ] [ (text "Columns") ]
+        , input
+            [ type_ "number"
+            , value (toString numColumns)
+            , class "form-control"
+            , id "boardColumns"
+            , onInput UpdateNumColumns
+            ]
+            []
+        ]
+    ]
+
+
+boardColorsFormGroup : NumColors -> List (Html Msg)
+boardColorsFormGroup (NumColors numColors) =
+    [ formGroup
+        [ label [ for "numColors" ] [ (text "# of Colors") ]
+        , input
+            [ type_ "number"
+            , value (toString numColors)
+            , class "form-control"
+            , id "numColors"
+            , onInput UpdateNumColors
+            ]
+            []
+        ]
+    ]
+
+
+boardPropertiesView : NumRows -> NumColumns -> NumColors -> Html Msg
+boardPropertiesView numRows numColumns numColors =
+    div [ class "d-flex flex-row" ]
+        [ div [ class "p-2" ]
+            (boardRowsFormGroup numRows)
+        , div [ class "p-2" ]
+            (boardColumnsFormGroup numColumns)
+        , div [ class "p-2" ]
+            (boardColorsFormGroup numColors)
+        ]
+
+
 view : Model -> Html Msg
 view model =
     case model of
-        Prestart _ ->
-            div [] []
+        Prestart ({ numRows, numColumns, numColors } as properties) ->
+            div []
+                [ div [ class "d-flex flex-row" ]
+                    [ (boardPropertiesView numRows numColumns numColors) ]
+                , div [ class "d-flex flex-row" ]
+                    [ div [ class "p-12" ]
+                        []
+                    ]
+                ]
 
-        Started properties board ->
+        Started ({ numRows, numColumns, numColors } as properties) board ->
             let
-                ( numRows, numColumns, numColors, _ ) =
-                    Board.Properties.raw properties
-
                 boardWidth =
                     Board.Properties.width properties
 
@@ -265,46 +325,7 @@ view model =
             in
                 div []
                     [ div [ class "d-flex flex-row" ]
-                        [ div [ class "p-2" ]
-                            [ formGroup
-                                [ label [ for "boardRows" ] [ (text "Rows") ]
-                                , input
-                                    [ type_ "number"
-                                    , value (toString numRows)
-                                    , class "form-control"
-                                    , id "boardRows"
-                                    , onInput UpdateNumRows
-                                    ]
-                                    []
-                                ]
-                            ]
-                        , div [ class "p-2" ]
-                            [ formGroup
-                                [ label [ for "boardColumns" ] [ (text "Columns") ]
-                                , input
-                                    [ type_ "number"
-                                    , value (toString numColumns)
-                                    , class "form-control"
-                                    , id "boardColumns"
-                                    , onInput UpdateNumColumns
-                                    ]
-                                    []
-                                ]
-                            ]
-                        , div [ class "p-2" ]
-                            [ formGroup
-                                [ label [ for "numColors" ] [ (text "# of Colors") ]
-                                , input
-                                    [ type_ "number"
-                                    , value (toString numColors)
-                                    , class "form-control"
-                                    , id "numColors"
-                                    , onInput UpdateNumColors
-                                    ]
-                                    []
-                                ]
-                            ]
-                        ]
+                        [ (boardPropertiesView numRows numColumns numColors) ]
                     , div [ class "d-flex flex-row" ]
                         [ div [ class "p-12" ]
                             [ svg
