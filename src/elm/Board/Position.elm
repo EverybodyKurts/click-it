@@ -64,5 +64,10 @@ neighbors position =
 
 
 toDict : List Position -> Dict Int (List Position)
-toDict positions =
-    Dixtra.groupBy unwrapRow positions
+toDict =
+    Dixtra.groupBy unwrapRow
+
+
+groupByRow : List Position -> List ( Int, List Position )
+groupByRow =
+    toDict >> Dict.toList
