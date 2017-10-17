@@ -124,16 +124,18 @@ update msg ({ properties, board } as model) =
                 updatePropertiesAndBoard model updatedProperties updatedBoard
 
         ClickPiece position ->
-            let
-                _ =
-                    case board of
-                        Just b ->
-                            Debug.log "colorblock" (Board.findBlockAt b position)
+            case board of
+                Just b ->
+                    let
+                        updatedModel =
+                            Board.removeBlockAt b position
+                                |> Just
+                                |> updateBoard model
+                    in
+                        ( updatedModel, Cmd.none )
 
-                        _ ->
-                            []
-            in
-                ( model, Cmd.none )
+                _ ->
+                    ( model, Cmd.none )
 
 
 

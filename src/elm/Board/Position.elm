@@ -68,6 +68,26 @@ toDict =
     Dixtra.groupBy unwrapRow
 
 
+{-| Group positions by row
+-}
 groupByRow : List Position -> List ( Int, List Position )
 groupByRow =
     toDict >> Dict.toList
+
+
+columnIndex : Position -> ColumnIndex
+columnIndex (Position ( _, columnIndex )) =
+    columnIndex
+
+
+groupColumnIndicesByRow : List Position -> List ( Int, List ColumnIndex )
+groupColumnIndicesByRow positions =
+    let
+        positionsToColumnIndices : ( Int, List Position ) -> ( Int, List ColumnIndex )
+        positionsToColumnIndices ( rowIndex, rowPositions ) =
+            ( rowIndex
+            , rowPositions |> List.map columnIndex
+            )
+    in
+        groupByRow positions
+            |> List.map positionsToColumnIndices

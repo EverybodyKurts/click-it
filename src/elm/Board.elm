@@ -8,6 +8,7 @@ import List.Extra as Lextra
 import Board.Properties exposing (Properties, PieceLength(..))
 import Board.Position as Position exposing (RowIndex(..), ColumnIndex(..), Position(..))
 import Maybe.Extra
+import Dict exposing (Dict)
 
 
 type Row
@@ -223,8 +224,8 @@ rpr row remainingColumnIndices =
             row
 
 
-removePiecesInRow : Row -> List ColumnIndex -> Row
-removePiecesInRow (Row colors) columnIndices =
+removePiecesInRow : List ColumnIndex -> Row -> Row
+removePiecesInRow columnIndices (Row colors) =
     let
         remainingColumnIndices =
             columnIndices
@@ -240,28 +241,44 @@ toRowsList =
         >> unwrapRows
 
 
-rb rowsList indexedColorBlockRows =
-    case Lextra.uncons indexedColorBlockRows of
-        Just ( ( rowIndex, columnIndices ), restRows ) ->
+rb rowsList rowGroupedColumnIndices =
+    case Lextra.uncons rowGroupedColumnIndices of
+        Just ( ( rowIndex, columnIndices ), restRowGroups ) ->
             let
-                row =
+                updatedRowsList =
                     Lextra.getAt rowIndex rowsList
+                        |> Maybe.map (removePiecesInRow columnIndices)
+                        |> Maybe.andThen (\row -> Lextra.setAt rowIndex row rowsList)
+                        |> Maybe.withDefault rowsList
             in
-                rowsList
+                rb updatedRowsList restRowGroups
 
         Nothing ->
             rowsList
 
 
-removeBlock board sortedColorBlock =
-    let
-        indexedColorBlockRows =
-            sortedColorBlock
-                |> Position.sort
-                |> Lextra.groupWhile Position.haveSameRow
-                |> List.indexedMap (,)
-    in
-        indexedColorBlockRows
+fromRowsList : List Row -> Board
+fromRowsList =
+    Rows >> Board
+
+
+removeBlock : Board -> List Position -> Board
+removeBlock board colorBlock =
+    if List.length colorBlock >= 3 then
+        let
+            blockGroupedByRow =
+                Position.groupColumnIndicesByRow colorBlock
+        in
+            rb (toRowsList board) blockGroupedByRow
+                |> fromRowsList
+    else
+        board
+
+
+removeBlockAt : Board -> Position -> Board
+removeBlockAt board =
+    findBlockAt board
+        >> removeBlock board
 
 
 xCoord : PieceLength -> ColumnIndex -> XCoord
