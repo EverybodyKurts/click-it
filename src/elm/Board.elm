@@ -246,8 +246,6 @@ rb rowsList indexedColorBlockRows =
             let
                 row =
                     Lextra.getAt rowIndex rowsList
-
-                -- |> Maybe.map (\colors -> )
             in
                 rowsList
 
