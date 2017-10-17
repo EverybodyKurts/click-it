@@ -19,15 +19,14 @@ import Random exposing (Generator)
 -- MODEL
 
 
-type alias Model =
-    { properties : Properties
-    , board : Maybe Board
-    }
+type Model
+    = Prestart Properties
+    | Started Properties Board
 
 
 initModel : Model
 initModel =
-    Model Board.Properties.default Nothing
+    Prestart Board.Properties.default
 
 
 type NumColors
@@ -56,14 +55,24 @@ generateBoard board =
     Random.generate GeneratedBoard board
 
 
-updateBoard : Model -> Maybe Board -> Model
+updateBoard : Model -> Board -> Model
 updateBoard model board =
-    { model | board = board }
+    case model of
+        Prestart properties ->
+            Started properties board
+
+        Started properties _ ->
+            Started properties board
 
 
 updateProperties : Model -> Properties -> Model
-updateProperties model properties =
-    { model | properties = properties }
+updateProperties model updatedProperties =
+    case model of
+        Prestart _ ->
+            Prestart updatedProperties
+
+        Started _ _ ->
+            Prestart updatedProperties
 
 
 updatePropertiesAndBoard : Model -> Properties -> Generator Board -> ( Model, Cmd Msg )
@@ -79,63 +88,91 @@ type Msg
     | ClickPiece Position
 
 
+updateNumRows : Model -> Properties -> String -> ( Model, Cmd Msg )
+updateNumRows model properties numRows =
+    let
+        updatedProperties =
+            Board.Properties.updateNumRowsOrDefault properties numRows
 
--- | ClickPiece Board.Index
+        updatedBoard =
+            Board.init updatedProperties
+    in
+        updatePropertiesAndBoard model updatedProperties updatedBoard
+
+
+updateNumColumns : Model -> Properties -> String -> ( Model, Cmd Msg )
+updateNumColumns model properties numColumns =
+    let
+        updatedProperties =
+            Board.Properties.updateNumColumnsOrDefault properties numColumns
+
+        updatedBoard =
+            Board.init updatedProperties
+    in
+        updatePropertiesAndBoard model updatedProperties updatedBoard
+
+
+updateNumColors : Model -> Properties -> String -> ( Model, Cmd Msg )
+updateNumColors model properties numColors =
+    let
+        updatedProperties =
+            Board.Properties.updateNumColorsOrDefault properties numColors
+
+        updatedBoard =
+            Board.init updatedProperties
+    in
+        updatePropertiesAndBoard model updatedProperties updatedBoard
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg ({ properties, board } as model) =
-    case msg of
-        GeneratedBoard board ->
-            let
-                updatedModel =
-                    updateBoard model (Just board)
-            in
-                ( updatedModel, Cmd.none )
-
-        UpdateNumRows numRows ->
-            let
-                updatedProperties =
-                    Board.Properties.updateNumRowsOrDefault properties numRows
-
-                updatedBoard =
-                    Board.init updatedProperties
-            in
-                updatePropertiesAndBoard model updatedProperties updatedBoard
-
-        UpdateNumColumns numCols ->
-            let
-                updatedProperties =
-                    Board.Properties.updateNumColumnsOrDefault properties numCols
-
-                updatedBoard =
-                    Board.init updatedProperties
-            in
-                updatePropertiesAndBoard model updatedProperties updatedBoard
-
-        UpdateNumColors rawNumColors ->
-            let
-                updatedProperties =
-                    Board.Properties.updateNumColorsOrDefault properties rawNumColors
-
-                updatedBoard =
-                    Board.init updatedProperties
-            in
-                updatePropertiesAndBoard model updatedProperties updatedBoard
-
-        ClickPiece position ->
-            case board of
-                Just b ->
+update msg model =
+    case model of
+        Prestart properties ->
+            case msg of
+                GeneratedBoard board ->
                     let
                         updatedModel =
-                            Board.removeBlockAt b position
-                                |> Just
-                                |> updateBoard model
+                            updateBoard model board
                     in
                         ( updatedModel, Cmd.none )
 
-                _ ->
+                UpdateNumRows numRows ->
+                    updateNumRows model properties numRows
+
+                UpdateNumColumns numColumns ->
+                    updateNumColumns model properties numColumns
+
+                UpdateNumColors numColors ->
+                    updateNumColors model properties numColors
+
+                ClickPiece _ ->
                     ( model, Cmd.none )
+
+        Started properties board ->
+            case msg of
+                GeneratedBoard board ->
+                    let
+                        updatedModel =
+                            updateBoard model board
+                    in
+                        ( updatedModel, Cmd.none )
+
+                UpdateNumRows numRows ->
+                    updateNumRows model properties numRows
+
+                UpdateNumColumns numColumns ->
+                    updateNumColumns model properties numColumns
+
+                UpdateNumColors numColors ->
+                    updateNumColors model properties numColors
+
+                ClickPiece position ->
+                    let
+                        updatedModel =
+                            Board.removeBlockAt board position
+                                |> updateBoard model
+                    in
+                        ( updatedModel, Cmd.none )
 
 
 
@@ -191,91 +228,91 @@ drawRow pieceLength ( rowIndex, Row row ) =
         indexedPieces
 
 
-drawRows : PieceLength -> Maybe Board -> List (Svg Msg)
-drawRows pieceLength maybeBoard =
-    case maybeBoard of
-        Just board ->
-            let
-                rowIndexTuple : Int -> a -> ( RowIndex, a )
-                rowIndexTuple rawIndex a =
-                    ( RowIndex rawIndex, a )
+drawRows : PieceLength -> Board -> List (Svg Msg)
+drawRows pieceLength board =
+    let
+        rowIndexTuple : Int -> a -> ( RowIndex, a )
+        rowIndexTuple rawIndex a =
+            ( RowIndex rawIndex, a )
 
-                (Board (Rows rows)) =
-                    board
-            in
-                rows
-                    |> List.indexedMap rowIndexTuple
-                    |> List.concatMap (drawRow pieceLength)
-
-        Nothing ->
-            []
+        (Board (Rows rows)) =
+            board
+    in
+        rows
+            |> List.indexedMap rowIndexTuple
+            |> List.concatMap (drawRow pieceLength)
 
 
 view : Model -> Html Msg
-view { board, properties } =
-    let
-        ( numRows, numColumns, numColors, _ ) =
-            Board.Properties.raw properties
+view model =
+    case model of
+        Prestart _ ->
+            div [] []
 
-        boardWidth =
-            Board.Properties.width properties
+        Started properties board ->
+            let
+                ( numRows, numColumns, numColors, _ ) =
+                    Board.Properties.raw properties
 
-        boardHeight =
-            Board.Properties.height properties
+                boardWidth =
+                    Board.Properties.width properties
 
-        drawnRows =
-            drawRows properties.pieceLength board
-    in
-        div []
-            [ div [ class "d-flex flex-row" ]
-                [ div [ class "p-2" ]
-                    [ formGroup
-                        [ label [ for "boardRows" ] [ (text "Rows") ]
-                        , input
-                            [ type_ "number"
-                            , value (toString numRows)
-                            , class "form-control"
-                            , id "boardRows"
-                            , onInput UpdateNumRows
+                boardHeight =
+                    Board.Properties.height properties
+
+                drawnRows =
+                    drawRows properties.pieceLength board
+            in
+                div []
+                    [ div [ class "d-flex flex-row" ]
+                        [ div [ class "p-2" ]
+                            [ formGroup
+                                [ label [ for "boardRows" ] [ (text "Rows") ]
+                                , input
+                                    [ type_ "number"
+                                    , value (toString numRows)
+                                    , class "form-control"
+                                    , id "boardRows"
+                                    , onInput UpdateNumRows
+                                    ]
+                                    []
+                                ]
                             ]
-                            []
+                        , div [ class "p-2" ]
+                            [ formGroup
+                                [ label [ for "boardColumns" ] [ (text "Columns") ]
+                                , input
+                                    [ type_ "number"
+                                    , value (toString numColumns)
+                                    , class "form-control"
+                                    , id "boardColumns"
+                                    , onInput UpdateNumColumns
+                                    ]
+                                    []
+                                ]
+                            ]
+                        , div [ class "p-2" ]
+                            [ formGroup
+                                [ label [ for "numColors" ] [ (text "# of Colors") ]
+                                , input
+                                    [ type_ "number"
+                                    , value (toString numColors)
+                                    , class "form-control"
+                                    , id "numColors"
+                                    , onInput UpdateNumColors
+                                    ]
+                                    []
+                                ]
+                            ]
+                        ]
+                    , div [ class "d-flex flex-row" ]
+                        [ div [ class "p-12" ]
+                            [ svg
+                                [ width (toString boardWidth), height (toString boardHeight) ]
+                                drawnRows
+                            ]
                         ]
                     ]
-                , div [ class "p-2" ]
-                    [ formGroup
-                        [ label [ for "boardColumns" ] [ (text "Columns") ]
-                        , input
-                            [ type_ "number"
-                            , value (toString numColumns)
-                            , class "form-control"
-                            , id "boardColumns"
-                            , onInput UpdateNumColumns
-                            ]
-                            []
-                        ]
-                    ]
-                , div [ class "p-2" ]
-                    [ formGroup
-                        [ label [ for "numColors" ] [ (text "# of Colors") ]
-                        , input
-                            [ type_ "number"
-                            , value (toString numColors)
-                            , class "form-control"
-                            , id "numColors"
-                            , onInput UpdateNumColors
-                            ]
-                            []
-                        ]
-                    ]
-                ]
-            , div [ class "d-flex flex-row" ]
-                [ div [ class "p-12" ]
-                    [ svg
-                        [ width (toString boardWidth), height (toString boardHeight) ]
-                        drawnRows
-                    ]
-                ]
-            ]
 
 
 
