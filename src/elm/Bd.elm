@@ -119,13 +119,12 @@ from2dList =
         >> Board
 
 
-getPiece : Board -> Position -> Maybe Color
-getPiece board (Position ( RowIndex rowIndex, ColumnIndex columnIndex )) =
-    board
-        |> to2dList
-        |> Lextra.getAt rowIndex
-        |> Maybe.andThen (Lextra.getAt columnIndex)
-        |> Maybe.Extra.join
+getPiece : Position -> Board -> Maybe Color
+getPiece (Position ( RowIndex rowIndex, ColumnIndex columnIndex )) =
+    to2dList
+        >> Lextra.getAt rowIndex
+        >> Maybe.andThen (Lextra.getAt columnIndex)
+        >> Maybe.Extra.join
 
 
 neighborPositions : Position -> List Position
@@ -142,7 +141,7 @@ equivNeighborPositions board color position =
     let
         keepPositionIfSameColor : Board -> Color -> Position -> Maybe Position
         keepPositionIfSameColor board color position =
-            getPiece board position
+            getPiece position board
                 |> Maybe.andThen
                     (\pieceColor ->
                         if pieceColor == color then
@@ -189,7 +188,7 @@ positionRowIndex (Position ( RowIndex r, _ )) =
 
 findBlockAt : Board -> Position -> List Position
 findBlockAt board position =
-    case getPiece board position of
+    case getPiece position board of
         Just color ->
             let
                 destinations =
@@ -207,27 +206,20 @@ findBlockAt board position =
 
 
 -- UPDATING THE BOARD
-
-
-removePiece : Board -> Position -> Board
-removePiece (Board boardRows) (Position ( RowIndex rowIndex, ColumnIndex columnIndex )) =
-    let
-        (Rows rows) =
-            boardRows
-
-        setRow : Int -> List Row -> Row -> Maybe (List Row)
-        setRow rowIndex rows row =
-            Lextra.setAt rowIndex row rows
-    in
-        rows
-            |> Lextra.getAt rowIndex
-            |> Maybe.map unwrapRow
-            |> Maybe.andThen (Lextra.setAt columnIndex Nothing)
-            |> Maybe.map Row
-            |> Maybe.andThen (setRow rowIndex rows)
-            |> Maybe.map Rows
-            |> Maybe.map Board
-            |> Maybe.withDefault (Board boardRows)
+-- removePiece : Board -> Position -> Board
+-- removePiece board (Position ( RowIndex rowIndex, ColumnIndex columnIndex )) =
+--     let
+--         rawBoard =
+--             to2dList board
+--         setRawRow : Int -> List (List (Maybe Color)) -> (List (Maybe Color)) -> Maybe (List Row)
+--         setRawRow rowIndex rows row =
+--             Lextra.setAt rowIndex row rows
+--     in
+--         rawBoard
+--             |> Lextra.getAt rowIndex
+--             |> Maybe.andThen (Lextra.setAt columnIndex Nothing)
+--             |> Maybe.andThen (setRow rowIndex rawBoard)
+--             |> Maybe.withDefault from2dList
 
 
 unwrapColumnIndex : ColumnIndex -> Int
