@@ -25,26 +25,6 @@ type alias Properties =
     }
 
 
-type RowIndex
-    = RowIndex Int
-
-
-type ColumnIndex
-    = ColumnIndex Int
-
-
-type Position
-    = Position ( RowIndex, ColumnIndex )
-
-
-type XCoord
-    = XCoord Int
-
-
-type YCoord
-    = YCoord Int
-
-
 
 -- INITIALIZING BOARD PROPERTIES
 
@@ -179,13 +159,3 @@ height { numRows, pieceLength } =
             numRows
     in
         (l * r)
-
-
-xCoord : PieceLength -> ColumnIndex -> XCoord
-xCoord (PieceLength pieceLength) (ColumnIndex columnIndex) =
-    XCoord (pieceLength * columnIndex)
-
-
-yCoord : PieceLength -> RowIndex -> YCoord
-yCoord (PieceLength pieceLength) (RowIndex rowIndex) =
-    YCoord (pieceLength * rowIndex)
