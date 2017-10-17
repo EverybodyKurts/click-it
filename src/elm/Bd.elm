@@ -21,6 +21,10 @@ type Board
     = Board Rows
 
 
+type BoardRows
+    = BoardRows List (List (Maybe Color))
+
+
 
 -- BOARD INITIALIZATION
 
@@ -86,22 +90,42 @@ default =
 -- ACCESSING THE BOARD
 
 
+unwrapBoard : Board -> Rows
+unwrapBoard (Board rows) =
+    rows
+
+
+unwrapRows : Rows -> List Row
+unwrapRows (Rows rows) =
+    rows
+
+
 unwrapRow : Row -> List (Maybe Color)
 unwrapRow (Row row) =
     row
 
 
+to2dList : Board -> List (List (Maybe Color))
+to2dList =
+    unwrapBoard
+        >> unwrapRows
+        >> List.map unwrapRow
+
+
+from2dList : List (List (Maybe Color)) -> Board
+from2dList =
+    List.map Row
+        >> Rows
+        >> Board
+
+
 getPiece : Board -> Position -> Maybe Color
-getPiece (Board boardRows) (Position ( RowIndex rowIndex, ColumnIndex columnIndex )) =
-    let
-        (Rows rows) =
-            boardRows
-    in
-        rows
-            |> Lextra.getAt rowIndex
-            |> Maybe.map unwrapRow
-            |> Maybe.andThen (Lextra.getAt columnIndex)
-            |> Maybe.Extra.join
+getPiece board (Position ( RowIndex rowIndex, ColumnIndex columnIndex )) =
+    board
+        |> to2dList
+        |> Lextra.getAt rowIndex
+        |> Maybe.andThen (Lextra.getAt columnIndex)
+        |> Maybe.Extra.join
 
 
 neighborPositions : Position -> List Position
@@ -158,8 +182,13 @@ fcb color board (ColorBlock colorBlock) (Destinations destinations) =
             colorBlock
 
 
-findColorBlock : Board -> Position -> List Position
-findColorBlock board position =
+positionRowIndex : Position -> Int
+positionRowIndex (Position ( RowIndex r, _ )) =
+    r
+
+
+findBlockAt : Board -> Position -> List Position
+findBlockAt board position =
     case getPiece board position of
         Just color ->
             let
@@ -170,6 +199,7 @@ findColorBlock board position =
                     ColorBlock [ position ]
             in
                 fcb color board colorBlock destinations
+                    |> List.sortBy positionRowIndex
 
         Nothing ->
             []
@@ -200,12 +230,82 @@ removePiece (Board boardRows) (Position ( RowIndex rowIndex, ColumnIndex columnI
             |> Maybe.withDefault (Board boardRows)
 
 
+unwrapColumnIndex : ColumnIndex -> Int
+unwrapColumnIndex (ColumnIndex ci) =
+    ci
 
--- removeBlock (Board boardRows) colorBlock =
---     colorBlock
---         |> List.map
---             (\(Position ( RowIndex rowIndex, ColumnIndex columnIndex )) ->
---             )
+
+rpr : List (Maybe a) -> List Int -> List (Maybe a)
+rpr row remainingColumnIndices =
+    case Lextra.uncons remainingColumnIndices of
+        Just ( columnIndex, restColumnIndices ) ->
+            let
+                updatedRow =
+                    Lextra.setAt columnIndex Nothing row
+                        |> Maybe.withDefault row
+            in
+                rpr updatedRow restColumnIndices
+
+        Nothing ->
+            row
+
+
+removePiecesInRow : Row -> List ColumnIndex -> Row
+removePiecesInRow (Row colors) columnIndices =
+    let
+        remainingColumnIndices =
+            columnIndices
+                |> List.map unwrapColumnIndex
+    in
+        rpr colors remainingColumnIndices
+            |> Row
+
+
+positionToColumnIndex : Position -> Int
+positionToColumnIndex (Position ( RowIndex r, ColumnIndex c )) =
+    c
+
+
+positionsHaveSameRow : Position -> Position -> Bool
+positionsHaveSameRow pos1 pos2 =
+    let
+        (Position ( RowIndex a, _ )) =
+            pos1
+
+        (Position ( RowIndex b, _ )) =
+            pos2
+    in
+        a == b
+
+
+rb boardRows indexedColorBlockRows =
+    if List.isEmpty indexedColorBlockRows then
+        boardRows
+    else
+        []
+
+
+removeBlock (Board boardRows) sortedColorBlock =
+    let
+        indexedColorBlockRows =
+            sortedColorBlock
+                |> Lextra.groupWhile positionsHaveSameRow
+                |> List.indexedMap (,)
+    in
+        indexedColorBlockRows
+
+
+
+-- colorBlockRows
+--     |> List.indexedMap (,)
+--     |> List.map
+--         (\( rowIndex, blockRow ) ->
+--             let
+--                 columnIndices =
+--                     List.map positionToColumnIndex blockRow
+--             in
+--                 ( rowIndex, columnIndices )
+--         )
 -- removeBlockAt board position =
 --     let
 --         colorBlock =
