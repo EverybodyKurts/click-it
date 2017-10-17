@@ -11,8 +11,9 @@ import Svg.Events exposing (onClick)
 
 -- import Board exposing (Board, Piece)
 
-import Bd exposing (Board(..), Rows(..), Row(..))
-import Board.Properties exposing (Properties, PieceLength(..), XCoord(..), YCoord(..), RowIndex(..), ColumnIndex(..), Position(..))
+import Bd exposing (Board(..), Rows(..), Row(..), XCoord(..), YCoord(..))
+import Board.Properties exposing (Properties, PieceLength(..))
+import Board.Position exposing (RowIndex(..), ColumnIndex(..), Position(..))
 import Bootstrap exposing (formGroup)
 import Color exposing (Color)
 import Color.Convert exposing (colorToHex)
@@ -131,7 +132,7 @@ update msg ({ properties, board } as model) =
                 _ =
                     case board of
                         Just b ->
-                            Debug.log "colorblock" (Bd.findColorBlock b position)
+                            Debug.log "colorblock" (Bd.findBlockAt b position)
 
                         _ ->
                             []
@@ -150,10 +151,10 @@ drawPiece pieceLength rowIndex ( columnIndex, color ) =
             pieceLength
 
         (XCoord xCoord) =
-            Board.Properties.xCoord pieceLength columnIndex
+            Bd.xCoord pieceLength columnIndex
 
         (YCoord yCoord) =
-            Board.Properties.yCoord pieceLength rowIndex
+            Bd.yCoord pieceLength rowIndex
     in
         rect
             [ x (toString xCoord)
