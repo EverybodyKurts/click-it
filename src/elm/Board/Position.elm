@@ -1,5 +1,9 @@
 module Board.Position exposing (..)
 
+import List.Extra as Lextra
+import Dict exposing (Dict(..))
+import Dict.Extra as Dixtra
+
 
 type RowIndex
     = RowIndex Int
@@ -23,6 +27,11 @@ toTuple (Position ( RowIndex r, ColumnIndex c )) =
     ( r, c )
 
 
+fromTuple : ( Int, Int ) -> Position
+fromTuple ( r, c ) =
+    Position ( RowIndex r, ColumnIndex c )
+
+
 sort : List Position -> List Position
 sort =
     List.sortBy toTuple
@@ -40,11 +49,6 @@ haveSameRow pos1 pos2 =
         a == b
 
 
-fromTuple : ( Int, Int ) -> Position
-fromTuple ( r, c ) =
-    Position ( RowIndex r, ColumnIndex c )
-
-
 neighbors : Position -> List Position
 neighbors position =
     let
@@ -57,3 +61,8 @@ neighbors position =
         , ( r + 1, c ) -- west
         ]
             |> List.map fromTuple
+
+
+toDict : List Position -> Dict Int (List Position)
+toDict positions =
+    Dixtra.groupBy unwrapRow positions
