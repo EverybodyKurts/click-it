@@ -136,15 +136,6 @@ getPiece (Position ( RowIndex rowIndex, ColumnIndex columnIndex )) =
         >> Maybe.Extra.join
 
 
-neighborPositions : Position -> List Position
-neighborPositions (Position ( RowIndex rowIndex, ColumnIndex columnIndex )) =
-    [ Position ( RowIndex rowIndex, ColumnIndex (columnIndex - 1) ) -- north
-    , Position ( RowIndex rowIndex, ColumnIndex (columnIndex + 1) ) -- south
-    , Position ( RowIndex (rowIndex - 1), ColumnIndex columnIndex ) -- east
-    , Position ( RowIndex (rowIndex + 1), ColumnIndex columnIndex ) -- west
-    ]
-
-
 equivNeighborPositions : Board -> Color -> Position -> List Position
 equivNeighborPositions board color position =
     let
@@ -159,7 +150,7 @@ equivNeighborPositions board color position =
                             Nothing
                     )
     in
-        neighborPositions position
+        Position.neighbors position
             |> List.filterMap (keepPositionIfSameColor board color)
 
 
@@ -202,7 +193,7 @@ findBlockAt board position =
                     ColorBlock [ position ]
             in
                 fcb color board colorBlock destinations
-                    |> Position.sortByRow
+                    |> Position.sort
 
         Nothing ->
             []
@@ -268,7 +259,7 @@ removeBlock board sortedColorBlock =
     let
         indexedColorBlockRows =
             sortedColorBlock
-                |> Position.sortByRow
+                |> Position.sort
                 |> Lextra.groupWhile Position.haveSameRow
                 |> List.indexedMap (,)
     in

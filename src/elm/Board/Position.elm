@@ -38,3 +38,22 @@ haveSameRow pos1 pos2 =
             pos2
     in
         a == b
+
+
+fromTuple : ( Int, Int ) -> Position
+fromTuple ( r, c ) =
+    Position ( RowIndex r, ColumnIndex c )
+
+
+neighbors : Position -> List Position
+neighbors position =
+    let
+        ( r, c ) =
+            toTuple position
+    in
+        [ ( r, c - 1 ) -- north
+        , ( r, c + 1 ) -- south
+        , ( r - 1, c ) -- east
+        , ( r + 1, c ) -- west
+        ]
+            |> List.map fromTuple
