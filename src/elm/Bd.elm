@@ -5,7 +5,8 @@ import Random exposing (Generator)
 import Random.Array
 import Color exposing (Color)
 import List.Extra as Lextra
-import Board.Properties exposing (Properties, RowIndex(..), ColumnIndex(..), Position(..))
+import Board.Properties exposing (Properties, PieceLength(..))
+import Board.Position as Position exposing (RowIndex(..), ColumnIndex(..), Position(..))
 import Maybe.Extra
 
 
@@ -23,6 +24,14 @@ type Board
 
 type BoardRows
     = BoardRows List (List (Maybe Color))
+
+
+type XCoord
+    = XCoord Int
+
+
+type YCoord
+    = YCoord Int
 
 
 
@@ -181,11 +190,6 @@ fcb color board (ColorBlock colorBlock) (Destinations destinations) =
             colorBlock
 
 
-positionRowIndex : Position -> Int
-positionRowIndex (Position ( RowIndex r, _ )) =
-    r
-
-
 findBlockAt : Board -> Position -> List Position
 findBlockAt board position =
     case getPiece position board of
@@ -198,7 +202,7 @@ findBlockAt board position =
                     ColorBlock [ position ]
             in
                 fcb color board colorBlock destinations
-                    |> List.sortBy positionRowIndex
+                    |> Position.sortByRow
 
         Nothing ->
             []
@@ -206,20 +210,6 @@ findBlockAt board position =
 
 
 -- UPDATING THE BOARD
--- removePiece : Board -> Position -> Board
--- removePiece board (Position ( RowIndex rowIndex, ColumnIndex columnIndex )) =
---     let
---         rawBoard =
---             to2dList board
---         setRawRow : Int -> List (List (Maybe Color)) -> (List (Maybe Color)) -> Maybe (List Row)
---         setRawRow rowIndex rows row =
---             Lextra.setAt rowIndex row rows
---     in
---         rawBoard
---             |> Lextra.getAt rowIndex
---             |> Maybe.andThen (Lextra.setAt columnIndex Nothing)
---             |> Maybe.andThen (setRow rowIndex rawBoard)
---             |> Maybe.withDefault from2dList
 
 
 unwrapColumnIndex : ColumnIndex -> Int
@@ -253,57 +243,43 @@ removePiecesInRow (Row colors) columnIndices =
             |> Row
 
 
-positionToColumnIndex : Position -> Int
-positionToColumnIndex (Position ( RowIndex r, ColumnIndex c )) =
-    c
+toRowsList : Board -> List Row
+toRowsList =
+    unwrapBoard
+        >> unwrapRows
 
 
-positionsHaveSameRow : Position -> Position -> Bool
-positionsHaveSameRow pos1 pos2 =
-    let
-        (Position ( RowIndex a, _ )) =
-            pos1
+rb rowsList indexedColorBlockRows =
+    case Lextra.uncons indexedColorBlockRows of
+        Just ( ( rowIndex, columnIndices ), restRows ) ->
+            let
+                row =
+                    Lextra.getAt rowIndex rowsList
 
-        (Position ( RowIndex b, _ )) =
-            pos2
-    in
-        a == b
+                -- |> Maybe.map (\colors -> )
+            in
+                rowsList
 
-
-rb boardRows indexedColorBlockRows =
-    if List.isEmpty indexedColorBlockRows then
-        boardRows
-    else
-        []
+        Nothing ->
+            rowsList
 
 
-removeBlock (Board boardRows) sortedColorBlock =
+removeBlock board sortedColorBlock =
     let
         indexedColorBlockRows =
             sortedColorBlock
-                |> Lextra.groupWhile positionsHaveSameRow
+                |> Position.sortByRow
+                |> Lextra.groupWhile Position.haveSameRow
                 |> List.indexedMap (,)
     in
         indexedColorBlockRows
 
 
+xCoord : PieceLength -> ColumnIndex -> XCoord
+xCoord (PieceLength pieceLength) (ColumnIndex columnIndex) =
+    XCoord (pieceLength * columnIndex)
 
--- colorBlockRows
---     |> List.indexedMap (,)
---     |> List.map
---         (\( rowIndex, blockRow ) ->
---             let
---                 columnIndices =
---                     List.map positionToColumnIndex blockRow
---             in
---                 ( rowIndex, columnIndices )
---         )
--- removeBlockAt board position =
---     let
---         colorBlock =
---             findColorBlock board position
---     in
---         if List.length colorBlock >= 3 then
---             colorBlock
---         else
---             []
+
+yCoord : PieceLength -> RowIndex -> YCoord
+yCoord (PieceLength pieceLength) (RowIndex rowIndex) =
+    YCoord (pieceLength * rowIndex)
