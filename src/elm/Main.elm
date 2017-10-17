@@ -7,11 +7,7 @@ import Html.Events exposing (onInput)
 import Svg exposing (Svg, svg, rect)
 import Svg.Attributes exposing (width, height, viewBox, x, y, rx, ry, fill, stroke)
 import Svg.Events exposing (onClick)
-
-
--- import Board exposing (Board, Piece)
-
-import Bd exposing (Board(..), Rows(..), Row(..), XCoord(..), YCoord(..))
+import Board exposing (Board(..), Rows(..), Row(..), XCoord(..), YCoord(..))
 import Board.Properties exposing (Properties, PieceLength(..))
 import Board.Position exposing (RowIndex(..), ColumnIndex(..), Position(..))
 import Bootstrap exposing (formGroup)
@@ -48,7 +44,7 @@ type NumPieces
 
 init : ( Model, Cmd Msg )
 init =
-    initModel ! [ generateBoard Bd.default ]
+    initModel ! [ generateBoard Board.default ]
 
 
 
@@ -103,7 +99,7 @@ update msg ({ properties, board } as model) =
                     Board.Properties.updateNumRowsOrDefault properties numRows
 
                 updatedBoard =
-                    Bd.init updatedProperties
+                    Board.init updatedProperties
             in
                 updatePropertiesAndBoard model updatedProperties updatedBoard
 
@@ -113,7 +109,7 @@ update msg ({ properties, board } as model) =
                     Board.Properties.updateNumColumnsOrDefault properties numCols
 
                 updatedBoard =
-                    Bd.init updatedProperties
+                    Board.init updatedProperties
             in
                 updatePropertiesAndBoard model updatedProperties updatedBoard
 
@@ -123,7 +119,7 @@ update msg ({ properties, board } as model) =
                     Board.Properties.updateNumColorsOrDefault properties rawNumColors
 
                 updatedBoard =
-                    Bd.init updatedProperties
+                    Board.init updatedProperties
             in
                 updatePropertiesAndBoard model updatedProperties updatedBoard
 
@@ -132,7 +128,7 @@ update msg ({ properties, board } as model) =
                 _ =
                     case board of
                         Just b ->
-                            Debug.log "colorblock" (Bd.findBlockAt b position)
+                            Debug.log "colorblock" (Board.findBlockAt b position)
 
                         _ ->
                             []
@@ -151,10 +147,10 @@ drawPiece pieceLength rowIndex ( columnIndex, color ) =
             pieceLength
 
         (XCoord xCoord) =
-            Bd.xCoord pieceLength columnIndex
+            Board.xCoord pieceLength columnIndex
 
         (YCoord yCoord) =
-            Bd.yCoord pieceLength rowIndex
+            Board.yCoord pieceLength rowIndex
     in
         rect
             [ x (toString xCoord)
