@@ -20,3 +20,8 @@ removePieces columnIndices (Row row) =
 
         Nothing ->
             (Row row)
+
+
+unwrap : Row -> List (Maybe Color)
+unwrap (Row row) =
+    row

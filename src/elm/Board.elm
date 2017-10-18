@@ -1,18 +1,14 @@
 module Board exposing (..)
 
 import Array exposing (Array)
+import Color exposing (Color)
 import Random exposing (Generator)
 import Random.Array
-import Color exposing (Color)
 import List.Extra as Lextra
-import Board.Properties exposing (Properties, PieceLength(..))
+import Board.Properties exposing (Properties, PieceLength(..), NumColumns(..))
 import Board.Position as Position exposing (RowIndex(..), ColumnIndex(..), Position(..))
 import Maybe.Extra
-import Dict exposing (Dict)
-
-
-type Row
-    = Row (List (Maybe Color))
+import Board.Row as Row exposing (Row(..))
 
 
 type Rows
@@ -21,10 +17,6 @@ type Rows
 
 type Board
     = Board Rows
-
-
-type BoardRows
-    = BoardRows List (List (Maybe Color))
 
 
 type XCoord
@@ -110,16 +102,11 @@ unwrapRows (Rows rows) =
     rows
 
 
-unwrapRow : Row -> List (Maybe Color)
-unwrapRow (Row row) =
-    row
-
-
 to2dList : Board -> List (List (Maybe Color))
 to2dList =
     unwrapBoard
         >> unwrapRows
-        >> List.map unwrapRow
+        >> List.map Row.unwrap
 
 
 from2dList : List (List (Maybe Color)) -> Board
@@ -204,50 +191,20 @@ findBlockAt board position =
 -- UPDATING THE BOARD
 
 
-unwrapColumnIndex : ColumnIndex -> Int
-unwrapColumnIndex (ColumnIndex ci) =
-    ci
-
-
-rpr : List (Maybe a) -> List Int -> List (Maybe a)
-rpr row remainingColumnIndices =
-    case Lextra.uncons remainingColumnIndices of
-        Just ( columnIndex, restColumnIndices ) ->
-            let
-                updatedRow =
-                    Lextra.setAt columnIndex Nothing row
-                        |> Maybe.withDefault row
-            in
-                rpr updatedRow restColumnIndices
-
-        Nothing ->
-            row
-
-
-removePiecesInRow : List ColumnIndex -> Row -> Row
-removePiecesInRow columnIndices (Row colors) =
-    let
-        remainingColumnIndices =
-            columnIndices
-                |> List.map unwrapColumnIndex
-    in
-        rpr colors remainingColumnIndices
-            |> Row
-
-
 toRowsList : Board -> List Row
 toRowsList =
     unwrapBoard
         >> unwrapRows
 
 
+rb : List Row -> List ( Int, List ColumnIndex ) -> List Row
 rb rowsList rowGroupedColumnIndices =
     case Lextra.uncons rowGroupedColumnIndices of
         Just ( ( rowIndex, columnIndices ), restRowGroups ) ->
             let
                 updatedRowsList =
                     Lextra.getAt rowIndex rowsList
-                        |> Maybe.map (removePiecesInRow columnIndices)
+                        |> Maybe.map (Row.removePieces columnIndices)
                         |> Maybe.andThen (\row -> Lextra.setAt rowIndex row rowsList)
                         |> Maybe.withDefault rowsList
             in
