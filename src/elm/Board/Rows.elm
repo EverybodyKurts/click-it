@@ -40,3 +40,17 @@ removeBlock groupedColumnIndices (Rows rows) =
 
         Nothing ->
             (Rows rows)
+
+
+slideRight : Rows -> Rows
+slideRight (Rows rows) =
+    rows
+        |> List.map Row.slideRight
+        |> Rows
+
+
+slideLeft : Rows -> Rows
+slideLeft (Rows rows) =
+    rows
+        |> List.map Row.slideLeft
+        |> Rows
