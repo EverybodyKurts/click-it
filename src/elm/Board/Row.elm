@@ -63,5 +63,5 @@ slideLeft (Row row) =
             row
                 |> List.filter (not << colorExists)
     in
-        List.append emptySpaces existingPieces
+        List.append existingPieces emptySpaces
             |> Row
