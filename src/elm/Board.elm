@@ -9,10 +9,7 @@ import Board.Properties exposing (Properties, PieceLength(..), NumColumns(..))
 import Board.Position as Position exposing (RowIndex(..), ColumnIndex(..), Position(..))
 import Maybe.Extra
 import Board.Row as Row exposing (Row(..))
-
-
-type Rows
-    = Rows (List Row)
+import Board.Rows as Rows exposing (Rows(..))
 
 
 type Board
@@ -97,15 +94,10 @@ unwrapBoard (Board rows) =
     rows
 
 
-unwrapRows : Rows -> List Row
-unwrapRows (Rows rows) =
-    rows
-
-
 to2dList : Board -> List (List (Maybe Color))
 to2dList =
     unwrapBoard
-        >> unwrapRows
+        >> Rows.unwrap
         >> List.map Row.unwrap
 
 
@@ -194,7 +186,7 @@ findBlockAt board position =
 toRowsList : Board -> List Row
 toRowsList =
     unwrapBoard
-        >> unwrapRows
+        >> Rows.unwrap
 
 
 rb : List Row -> List ( Int, List ColumnIndex ) -> List Row
