@@ -22,6 +22,11 @@ unwrapRow (Position ( RowIndex r, _ )) =
     r
 
 
+unwrapColumnIndex : ColumnIndex -> Int
+unwrapColumnIndex (ColumnIndex c) =
+    c
+
+
 toTuple : Position -> ( Int, Int )
 toTuple (Position ( RowIndex r, ColumnIndex c )) =
     ( r, c )
