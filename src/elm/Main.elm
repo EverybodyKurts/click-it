@@ -15,9 +15,10 @@ import Random exposing (Generator)
 -- User modules
 
 import Bootstrap exposing (formGroup)
-import Board exposing (Board(..), Rows(..), Row(..), XCoord(..), YCoord(..))
+import Board exposing (Board(..), Rows(..), XCoord(..), YCoord(..))
 import Board.Properties exposing (Properties, PieceLength(..), NumRows(..), NumColumns(..), NumColors(..))
 import Board.Position exposing (RowIndex(..), ColumnIndex(..), Position(..))
+import Board.Row as Row exposing (Row(..))
 
 
 -- MODEL
