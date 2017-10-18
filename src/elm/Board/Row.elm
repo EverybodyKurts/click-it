@@ -25,3 +25,43 @@ removePieces columnIndices (Row row) =
 unwrap : Row -> List (Maybe Color)
 unwrap (Row row) =
     row
+
+
+colorExists : Maybe Color -> Bool
+colorExists maybeColor =
+    case maybeColor of
+        Just _ ->
+            True
+
+        _ ->
+            False
+
+
+slideRight : Row -> Row
+slideRight (Row row) =
+    let
+        existingPieces =
+            row
+                |> List.filter colorExists
+
+        emptySpaces =
+            row
+                |> List.filter (not << colorExists)
+    in
+        List.append emptySpaces existingPieces
+            |> Row
+
+
+slideLeft : Row -> Row
+slideLeft (Row row) =
+    let
+        existingPieces =
+            row
+                |> List.filter colorExists
+
+        emptySpaces =
+            row
+                |> List.filter (not << colorExists)
+    in
+        List.append emptySpaces existingPieces
+            |> Row
