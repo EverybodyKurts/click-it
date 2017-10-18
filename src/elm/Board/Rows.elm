@@ -22,6 +22,12 @@ fromList list =
         |> Rows
 
 
+toList : Rows -> List (List (Maybe Color))
+toList (Rows rows) =
+    rows
+        |> List.map Row.unwrap
+
+
 setRow : RowIndex -> List Row -> Row -> Maybe (List Row)
 setRow (RowIndex rowIndex) rows row =
     Lextra.setAt rowIndex row rows
@@ -42,15 +48,11 @@ removeBlock groupedColumnIndices (Rows rows) =
             (Rows rows)
 
 
-slideRight : Rows -> Rows
-slideRight (Rows rows) =
-    rows
-        |> List.map Row.slideRight
-        |> Rows
-
-
-slideLeft : Rows -> Rows
-slideLeft (Rows rows) =
-    rows
-        |> List.map Row.slideLeft
-        |> Rows
+slideDown : Rows -> Rows
+slideDown =
+    toList
+        >> Lextra.transpose
+        >> List.map (Row >> Row.slideRight >> Row.unwrap)
+        >> Lextra.transpose
+        >> List.map Row
+        >> Rows
