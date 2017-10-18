@@ -199,6 +199,10 @@ removeBlockIfMinSize : Int -> Board -> List Position -> Board
 removeBlockIfMinSize minSize board positions =
     if List.length positions >= minSize then
         removeBlock board positions
+            |> unwrap
+            |> Rows.slideDown
+            -- Rows.removeEmptyColumns
+            |> Board
     else
         board
 
