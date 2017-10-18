@@ -85,12 +85,12 @@ columnIndex (Position ( _, columnIndex )) =
     columnIndex
 
 
-groupColumnIndicesByRow : List Position -> List ( Int, List ColumnIndex )
+groupColumnIndicesByRow : List Position -> List ( RowIndex, List ColumnIndex )
 groupColumnIndicesByRow positions =
     let
-        positionsToColumnIndices : ( Int, List Position ) -> ( Int, List ColumnIndex )
+        positionsToColumnIndices : ( Int, List Position ) -> ( RowIndex, List ColumnIndex )
         positionsToColumnIndices ( rowIndex, rowPositions ) =
-            ( rowIndex
+            ( RowIndex rowIndex
             , rowPositions |> List.map columnIndex
             )
     in

@@ -24,6 +24,14 @@ type YCoord
     = YCoord Int
 
 
+type ColorBlock
+    = ColorBlock (List Position)
+
+
+type Destinations
+    = Destinations (List Position)
+
+
 
 -- BOARD INITIALIZATION
 
@@ -87,23 +95,16 @@ default =
 -- ACCESSING THE BOARD
 
 
-unwrapBoard : Board -> Rows
-unwrapBoard (Board rows) =
+unwrap : Board -> Rows
+unwrap (Board rows) =
     rows
 
 
 to2dList : Board -> List (List (Maybe Color))
 to2dList =
-    unwrapBoard
+    unwrap
         >> Rows.unwrap
         >> List.map Row.unwrap
-
-
-from2dList : List (List (Maybe Color)) -> Board
-from2dList =
-    List.map Row
-        >> Rows
-        >> Board
 
 
 getPiece : Position -> Board -> Maybe Color
@@ -130,14 +131,6 @@ equivNeighborPositions board color position =
     in
         Position.neighbors position
             |> List.filterMap (keepPositionIfSameColor board color)
-
-
-type ColorBlock
-    = ColorBlock (List Position)
-
-
-type Destinations
-    = Destinations (List Position)
 
 
 fcb : Color -> Board -> ColorBlock -> Destinations -> List Position
@@ -181,43 +174,31 @@ findBlockAt board position =
 -- UPDATING THE BOARD
 
 
+minimumBlockSize : Int
+minimumBlockSize =
+    3
+
+
 toRowsList : Board -> List Row
 toRowsList =
-    unwrapBoard
+    unwrap
         >> Rows.unwrap
 
 
-rb : List Row -> List ( Int, List ColumnIndex ) -> List Row
-rb rowsList rowGroupedColumnIndices =
-    case Lextra.uncons rowGroupedColumnIndices of
-        Just ( ( rowIndex, columnIndices ), restRowGroups ) ->
-            let
-                updatedRowsList =
-                    Lextra.getAt rowIndex rowsList
-                        |> Maybe.map (Row.removePieces columnIndices)
-                        |> Maybe.andThen (\row -> Lextra.setAt rowIndex row rowsList)
-                        |> Maybe.withDefault rowsList
-            in
-                rb updatedRowsList restRowGroups
-
-        Nothing ->
-            rowsList
-
-
-fromRowsList : List Row -> Board
-fromRowsList =
-    Rows >> Board
-
-
 removeBlock : Board -> List Position -> Board
-removeBlock board colorBlock =
-    if List.length colorBlock >= 3 then
-        let
-            blockGroupedByRow =
-                Position.groupColumnIndicesByRow colorBlock
-        in
-            rb (toRowsList board) blockGroupedByRow
-                |> fromRowsList
+removeBlock (Board rows) colorBlock =
+    let
+        blockGroupedByRow =
+            Position.groupColumnIndicesByRow colorBlock
+    in
+        Rows.removeBlock blockGroupedByRow rows
+            |> Board
+
+
+removeBlockIfMinSize : Int -> Board -> List Position -> Board
+removeBlockIfMinSize minSize board positions =
+    if List.length positions >= minSize then
+        removeBlock board positions
     else
         board
 
@@ -225,7 +206,7 @@ removeBlock board colorBlock =
 removeBlockAt : Board -> Position -> Board
 removeBlockAt board =
     findBlockAt board
-        >> removeBlock board
+        >> removeBlockIfMinSize 3 board
 
 
 xCoord : PieceLength -> ColumnIndex -> XCoord
