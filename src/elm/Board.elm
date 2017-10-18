@@ -43,12 +43,10 @@ genColorPalette numColors =
 
 
 colorsToBoard : Int -> List (Maybe Color) -> Board
-colorsToBoard numColumns boardColors =
-    boardColors
-        |> Lextra.groupsOf numColumns
-        |> List.map Row
-        |> Rows
-        |> Board
+colorsToBoard numColumns =
+    Lextra.groupsOf numColumns
+        >> Rows.fromList
+        >> Board
 
 
 {-| Generate the board & its colors
