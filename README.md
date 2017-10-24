@@ -8,4 +8,16 @@ The following command to boots up the app for dev:
 
 ## Todos
 
-- Calculate piece positions above, below, left, and right of a certain position
+- Add animation
+- Calculate board length/width based on screen dimensions
+- Determine how to score game
+- Save user score to local storage
+- Display a high score board
+
+## Dependencies
+
+Main
+- Board
+  - Position
+  - Properties
+- Bootstrap
