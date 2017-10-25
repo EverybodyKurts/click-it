@@ -65,3 +65,15 @@ slideLeft (Row row) =
     in
         List.append existingPieces emptySpaces
             |> Row
+
+
+isEmpty : Row -> Bool
+isEmpty =
+    unwrap
+        >> List.filter colorExists
+        >> List.isEmpty
+
+
+isNotEmpty : Row -> Bool
+isNotEmpty =
+    isEmpty >> not

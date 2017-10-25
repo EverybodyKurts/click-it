@@ -52,7 +52,9 @@ slideDown : Rows -> Rows
 slideDown =
     toList
         >> Lextra.transpose
-        >> List.map (Row >> Row.slideRight >> Row.unwrap)
+        >> List.map (Row >> Row.slideRight)
+        >> List.filter (Row.isNotEmpty)
+        >> List.map Row.unwrap
         >> Lextra.transpose
         >> List.map Row
         >> Rows
