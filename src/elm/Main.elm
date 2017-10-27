@@ -201,21 +201,22 @@ drawPiece pieceLength rowIndex ( columnIndex, color ) =
             []
 
 
+createTuple : a -> b -> ( a, b )
+createTuple a b =
+    ( a, b )
+
+
 drawRow : PieceLength -> ( RowIndex, Row ) -> List (Svg Msg)
 drawRow pieceLength ( rowIndex, Row row ) =
     let
         keepExistingIndexedColors : ( a, Maybe b ) -> Maybe ( a, b )
         keepExistingIndexedColors ( index, maybeColor ) =
-            case maybeColor of
-                Just color ->
-                    Just ( index, color )
-
-                _ ->
-                    Nothing
+            maybeColor
+                |> Maybe.map (createTuple index)
 
         columnIndexTuple : Int -> a -> ( ColumnIndex, a )
-        columnIndexTuple rawIndex a =
-            ( ColumnIndex rawIndex, a )
+        columnIndexTuple index a =
+            ( ColumnIndex index, a )
 
         indexedPieces =
             row
