@@ -285,7 +285,7 @@ boardColorsFormGroup (NumColors numColors) =
 
 boardPropertiesView : NumRows -> NumColumns -> NumColors -> Html Msg
 boardPropertiesView numRows numColumns numColors =
-    div [ class "d-flex flex-row" ]
+    div [ class "d-flex flex-row justify-content-center" ]
         [ div [ class "p-2" ]
             (boardRowsFormGroup numRows)
         , div [ class "p-2" ]
@@ -295,18 +295,22 @@ boardPropertiesView numRows numColumns numColors =
         ]
 
 
+appView : Properties -> List (Svg Msg) -> Html Msg
+appView ({ numRows, numColumns, numColors } as properties) boardSvg =
+    div []
+        [ (boardPropertiesView numRows numColumns numColors)
+        , div [ class "d-flex flex-row justify-content-center" ]
+            [ div [ class "p-4" ]
+                boardSvg
+            ]
+        ]
+
+
 view : Model -> Html Msg
 view model =
     case model of
-        Prestart ({ numRows, numColumns, numColors } as properties) ->
-            div []
-                [ div [ class "d-flex flex-row" ]
-                    [ (boardPropertiesView numRows numColumns numColors) ]
-                , div [ class "d-flex flex-row" ]
-                    [ div [ class "p-12" ]
-                        []
-                    ]
-                ]
+        Prestart boardProperties ->
+            appView boardProperties []
 
         Started ({ numRows, numColumns, numColors } as properties) board ->
             let
@@ -318,18 +322,14 @@ view model =
 
                 drawnRows =
                     drawRows properties.pieceLength board
-            in
-                div []
-                    [ div [ class "d-flex flex-row" ]
-                        [ (boardPropertiesView numRows numColumns numColors) ]
-                    , div [ class "d-flex flex-row" ]
-                        [ div [ class "p-12" ]
-                            [ svg
-                                [ width (toString boardWidth), height (toString boardHeight) ]
-                                drawnRows
-                            ]
-                        ]
+
+                boardSvg =
+                    [ svg
+                        [ width (toString boardWidth), height (toString boardHeight) ]
+                        drawnRows
                     ]
+            in
+                appView properties boardSvg
 
 
 
