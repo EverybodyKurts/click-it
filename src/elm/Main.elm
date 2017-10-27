@@ -49,8 +49,8 @@ init =
 
 
 generateBoard : Generator Board -> Cmd Msg
-generateBoard board =
-    Random.generate GeneratedBoard board
+generateBoard =
+    Random.generate GeneratedBoard
 
 
 updateBoard : Model -> Board -> Model
