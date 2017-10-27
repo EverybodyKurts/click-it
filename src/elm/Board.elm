@@ -200,8 +200,7 @@ removeBlockIfMinSize minSize board positions =
     if List.length positions >= minSize then
         removeBlock board positions
             |> unwrap
-            |> Rows.slideDown
-            -- Rows.removeEmptyColumns
+            |> Rows.slideDownLeft
             |> Board
     else
         board
