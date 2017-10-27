@@ -48,8 +48,8 @@ removeBlock groupedColumnIndices (Rows rows) =
             (Rows rows)
 
 
-slideDown : Rows -> Rows
-slideDown =
+slideDownLeft : Rows -> Rows
+slideDownLeft =
     toList
         >> Lextra.transpose
         >> List.map (Row >> Row.slideRight)
