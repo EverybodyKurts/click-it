@@ -20,6 +20,7 @@ import Board.Properties exposing (Properties, PieceLength(..), NumRows(..), NumC
 import Board.Position exposing (RowIndex(..), ColumnIndex(..), Position(..))
 import Board.Row as Row exposing (Row(..))
 import Board.Rows as Rows exposing (Rows(..))
+import Util.Tuple as Tuple
 
 
 -- MODEL
@@ -201,18 +202,13 @@ drawPiece pieceLength rowIndex ( columnIndex, color ) =
             []
 
 
-createTuple : a -> b -> ( a, b )
-createTuple a b =
-    ( a, b )
-
-
 drawRow : PieceLength -> ( RowIndex, Row ) -> List (Svg Msg)
 drawRow pieceLength ( rowIndex, Row row ) =
     let
         keepExistingIndexedColors : ( a, Maybe b ) -> Maybe ( a, b )
         keepExistingIndexedColors ( index, maybeColor ) =
             maybeColor
-                |> Maybe.map (createTuple index)
+                |> Maybe.map (Tuple.create index)
 
         columnIndexTuple : Int -> a -> ( ColumnIndex, a )
         columnIndexTuple index a =
