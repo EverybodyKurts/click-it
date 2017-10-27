@@ -217,14 +217,11 @@ drawRow pieceLength ( rowIndex, Row row ) =
         columnIndexTuple : Int -> a -> ( ColumnIndex, a )
         columnIndexTuple index a =
             ( ColumnIndex index, a )
-
-        indexedPieces =
-            row
-                |> List.indexedMap columnIndexTuple
-                |> List.filterMap keepExistingIndexedColors
-                |> List.map (drawPiece pieceLength rowIndex)
     in
-        indexedPieces
+        row
+            |> List.indexedMap columnIndexTuple
+            |> List.filterMap keepExistingIndexedColors
+            |> List.map (drawPiece pieceLength rowIndex)
 
 
 drawRows : PieceLength -> Board -> List (Svg Msg)
