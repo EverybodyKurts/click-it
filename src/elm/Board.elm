@@ -5,9 +5,9 @@ import Color exposing (Color)
 import Random exposing (Generator)
 import Random.Array
 import List.Extra as Lextra
+import Maybe.Extra
 import Board.Properties exposing (Properties, PieceLength(..), NumColumns(..))
 import Board.Position as Position exposing (RowIndex(..), ColumnIndex(..), Position(..))
-import Maybe.Extra
 import Board.Row as Row exposing (Row(..))
 import Board.Rows as Rows exposing (Rows(..))
 
