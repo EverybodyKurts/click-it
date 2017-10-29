@@ -310,8 +310,8 @@ appView ({ numRows, numColumns, numColors } as properties) boardSvg =
 view : Model -> Html Msg
 view model =
     case model of
-        Prestart boardProperties ->
-            appView boardProperties []
+        Prestart properties ->
+            appView properties []
 
         Started ({ numRows, numColumns, numColors } as properties) board ->
             let
