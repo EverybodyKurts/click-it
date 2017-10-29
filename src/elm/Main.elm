@@ -299,9 +299,10 @@ appView : Properties -> List (Svg Msg) -> Html Msg
 appView ({ numRows, numColumns, numColors } as properties) boardSvg =
     div []
         [ (boardPropertiesView numRows numColumns numColors)
-        , div [ class "d-flex flex-row justify-content-center" ]
-            [ div [ class "p-4" ]
-                boardSvg
+        , div [ class "container" ]
+            [ div [ class "row" ]
+                [ div [ class "col-12" ] boardSvg
+                ]
             ]
         ]
 
