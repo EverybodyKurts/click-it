@@ -28,24 +28,24 @@ toList (Rows rows) =
         |> List.map Row.unwrap
 
 
-setRow : RowIndex -> List Row -> Row -> Maybe (List Row)
-setRow (RowIndex rowIndex) rows row =
-    Lextra.setAt rowIndex row rows
-
-
 removeBlock : List ( RowIndex, List ColumnIndex ) -> Rows -> Rows
 removeBlock groupedColumnIndices (Rows rows) =
-    case Lextra.uncons groupedColumnIndices of
-        Just ( ( RowIndex rowIndex, columnIndices ), restRowGroups ) ->
-            Lextra.getAt rowIndex rows
-                |> Maybe.map (Row.removePieces columnIndices)
-                |> Maybe.andThen (setRow (RowIndex rowIndex) rows)
-                |> Maybe.withDefault rows
-                |> Rows
-                |> removeBlock restRowGroups
+    let
+        setRow : RowIndex -> List Row -> Row -> Maybe (List Row)
+        setRow (RowIndex rowIndex) rows row =
+            Lextra.setAt rowIndex row rows
+    in
+        case Lextra.uncons groupedColumnIndices of
+            Just ( ( RowIndex rowIndex, columnIndices ), restRowGroups ) ->
+                Lextra.getAt rowIndex rows
+                    |> Maybe.map (Row.removePieces columnIndices)
+                    |> Maybe.andThen (setRow (RowIndex rowIndex) rows)
+                    |> Maybe.withDefault rows
+                    |> Rows
+                    |> removeBlock restRowGroups
 
-        Nothing ->
-            (Rows rows)
+            Nothing ->
+                (Rows rows)
 
 
 slideDownLeft : Rows -> Rows
