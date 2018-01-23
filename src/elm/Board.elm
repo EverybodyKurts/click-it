@@ -187,6 +187,8 @@ toRowsList =
         >> Rows.unwrap
 
 
+{-| Remove the block of pieces from the board.
+-}
 removeBlock : Board -> List Position -> Board
 removeBlock (Board rows) colorBlock =
     let

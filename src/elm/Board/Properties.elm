@@ -60,8 +60,7 @@ raw { numRows, numColumns, numColors, pieceLength } =
         ( rows, columns, colors, pl )
 
 
-{-| Get the board's total # of pieces,
-based on the # of its rows & columns.
+{-| Get the board's total # of pieces, based on the # of its rows & columns.
 -}
 numPieces : Properties -> Int
 numPieces { numRows, numColumns } =
@@ -79,7 +78,7 @@ numPieces { numRows, numColumns } =
 -- UPDATING PROPERTIES
 
 
-{-| Update the number of rows
+{-| Update the number of rows.
 -}
 updateNumRows : Properties -> NumRows -> Properties
 updateNumRows properties numRows =
@@ -96,6 +95,8 @@ updateNumRowsFromString properties =
         >> Result.map (updateNumRows properties)
 
 
+{-| Update # of rows from user input or provide default # of rows.
+-}
 updateNumRowsOrDefault : Properties -> String -> Properties
 updateNumRowsOrDefault properties =
     (updateNumRowsFromString properties)
@@ -117,8 +118,7 @@ updateNumColumnsFromString properties =
         >> Result.map (updateNumColumns properties)
 
 
-{-| Update the board's # of columns from a string, most likely user input, or
-from the default properties of the board.
+{-| Update the board's # of columns based on user input or provide default # of columns
 -}
 updateNumColumnsOrDefault : Properties -> String -> Properties
 updateNumColumnsOrDefault properties =
@@ -126,6 +126,8 @@ updateNumColumnsOrDefault properties =
         >> Result.withDefault default
 
 
+{-| Update the board's number of colors.
+-}
 updateNumColors : Properties -> NumColors -> Properties
 updateNumColors properties numColors =
     { properties | numColors = numColors }
@@ -141,6 +143,8 @@ updateNumColorsFromString properties =
         >> Result.map (updateNumColors properties)
 
 
+{-| Update the board's # of colors based on user input or provide default # of colors
+-}
 updateNumColorsOrDefault : Properties -> String -> Properties
 updateNumColorsOrDefault properties =
     (updateNumColorsFromString properties)
