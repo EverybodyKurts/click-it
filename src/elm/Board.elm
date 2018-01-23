@@ -100,6 +100,8 @@ unwrap (Board rows) =
     rows
 
 
+{-| Remove the board's types until it is a simple 2d array of colors.
+-}
 to2dList : Board -> List (List (Maybe Color))
 to2dList =
     unwrap
@@ -195,6 +197,8 @@ removeBlock (Board rows) colorBlock =
             |> Board
 
 
+{-| Remove the block from the board if it's at least the minimum specified # of pieces.
+-}
 removeBlockIfMinSize : Int -> Board -> List Position -> Board
 removeBlockIfMinSize minSize board positions =
     if List.length positions >= minSize then

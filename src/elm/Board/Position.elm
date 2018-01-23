@@ -54,6 +54,8 @@ haveSameRow pos1 pos2 =
         a == b
 
 
+{-| Return the position's neighbors: north, south, east, west
+-}
 neighbors : Position -> List Position
 neighbors position =
     let
@@ -73,8 +75,6 @@ toDict =
     Dixtra.groupBy unwrapRow
 
 
-{-| Group positions by row
--}
 groupByRow : List Position -> List ( Int, List Position )
 groupByRow =
     toDict >> Dict.toList

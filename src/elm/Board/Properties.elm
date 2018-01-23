@@ -29,6 +29,8 @@ type alias Properties =
 -- INITIALIZING BOARD PROPERTIES
 
 
+{-| The board's default # of rows, columns, colors, and piece length.
+-}
 default : Properties
 default =
     Properties (NumRows 10) (NumColumns 5) (NumColors 3) (PieceLength 25)
@@ -38,6 +40,8 @@ default =
 -- ACCESSING PROPERTIES
 
 
+{-| Return the board's properties as a tuple of integers.
+-}
 raw : Properties -> ( Int, Int, Int, Int )
 raw { numRows, numColumns, numColors, pieceLength } =
     let
@@ -56,6 +60,9 @@ raw { numRows, numColumns, numColors, pieceLength } =
         ( rows, columns, colors, pl )
 
 
+{-| Get the board's total # of pieces,
+based on the # of its rows & columns.
+-}
 numPieces : Properties -> Int
 numPieces { numRows, numColumns } =
     let
@@ -100,6 +107,8 @@ updateNumColumns properties numColumns =
     { properties | numColumns = numColumns }
 
 
+{-| Update the board's # of columns from a string, most likely user input.
+-}
 updateNumColumnsFromString : Properties -> String -> Result String Properties
 updateNumColumnsFromString properties =
     String.toInt
@@ -108,6 +117,9 @@ updateNumColumnsFromString properties =
         >> Result.map (updateNumColumns properties)
 
 
+{-| Update the board's # of columns from a string, most likely user input, or
+from the default properties of the board.
+-}
 updateNumColumnsOrDefault : Properties -> String -> Properties
 updateNumColumnsOrDefault properties =
     (updateNumColumnsFromString properties)
@@ -119,6 +131,8 @@ updateNumColors properties numColors =
     { properties | numColors = numColors }
 
 
+{-| Update the board's # of colors from a string, most likely user input.
+-}
 updateNumColorsFromString : Properties -> String -> Result String Properties
 updateNumColorsFromString properties =
     String.toInt
@@ -137,6 +151,8 @@ updateNumColorsOrDefault properties =
 -- DRAWING THE BOARD
 
 
+{-| The board's drawn width
+-}
 width : Properties -> Int
 width { numColumns, pieceLength } =
     let
@@ -149,6 +165,8 @@ width { numColumns, pieceLength } =
         (l * c)
 
 
+{-| The board's drawn height
+-}
 height : Properties -> Int
 height { numRows, pieceLength } =
     let
