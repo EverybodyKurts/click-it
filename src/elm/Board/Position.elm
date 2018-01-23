@@ -42,6 +42,8 @@ sort =
     List.sortBy toTuple
 
 
+{-| Return true if the positions are in the same row.
+-}
 haveSameRow : Position -> Position -> Bool
 haveSameRow pos1 pos2 =
     let
@@ -70,16 +72,6 @@ neighbors position =
             |> List.map fromTuple
 
 
-toDict : List Position -> Dict Int (List Position)
-toDict =
-    Dixtra.groupBy unwrapRow
-
-
-groupByRow : List Position -> List ( Int, List Position )
-groupByRow =
-    toDict >> Dict.toList
-
-
 columnIndex : Position -> ColumnIndex
 columnIndex (Position ( _, columnIndex )) =
     columnIndex
@@ -88,6 +80,11 @@ columnIndex (Position ( _, columnIndex )) =
 groupColumnIndicesByRow : List Position -> List ( RowIndex, List ColumnIndex )
 groupColumnIndicesByRow positions =
     let
+        groupByRow : List Position -> List ( Int, List Position )
+        groupByRow =
+            Dixtra.groupBy unwrapRow
+                >> Dict.toList
+
         positionsToColumnIndices : ( Int, List Position ) -> ( RowIndex, List ColumnIndex )
         positionsToColumnIndices ( rowIndex, rowPositions ) =
             ( RowIndex rowIndex
