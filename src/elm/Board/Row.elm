@@ -32,20 +32,21 @@ unwrap (Row row) =
     row
 
 
+colorExists : Maybe Color -> Bool
+colorExists maybeColor =
+    case maybeColor of
+        Just _ ->
+            True
+
+        _ ->
+            False
+
+
 {-| Slide remaining color pieces to the end of the row.
 -}
 slideRight : Row -> Row
 slideRight (Row row) =
     let
-        colorExists : Maybe Color -> Bool
-        colorExists maybeColor =
-            case maybeColor of
-                Just _ ->
-                    True
-
-                _ ->
-                    False
-
         existingPieces =
             row |> List.filter colorExists
 
