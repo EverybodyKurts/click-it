@@ -9,6 +9,11 @@ type Row
     = Row (List (Maybe Color))
 
 
+{-| For a board row, remove pieces that correspond to the given column indices.
+
+This function recursively sets the row's pieces to nothing until it runs out of column indices.
+
+-}
 removePieces : List ColumnIndex -> Row -> Row
 removePieces columnIndices (Row row) =
     case Lextra.uncons columnIndices of
@@ -27,53 +32,37 @@ unwrap (Row row) =
     row
 
 
-colorExists : Maybe Color -> Bool
-colorExists maybeColor =
-    case maybeColor of
-        Just _ ->
-            True
-
-        _ ->
-            False
-
-
+{-| Slide remaining color pieces to the end of the row.
+-}
 slideRight : Row -> Row
 slideRight (Row row) =
     let
+        colorExists : Maybe Color -> Bool
+        colorExists maybeColor =
+            case maybeColor of
+                Just _ ->
+                    True
+
+                _ ->
+                    False
+
         existingPieces =
-            row
-                |> List.filter colorExists
+            row |> List.filter colorExists
 
         emptySpaces =
-            row
-                |> List.filter (not << colorExists)
+            row |> List.filter (not << colorExists)
     in
         List.append emptySpaces existingPieces
             |> Row
 
 
-slideLeft : Row -> Row
-slideLeft (Row row) =
-    let
-        existingPieces =
-            row
-                |> List.filter colorExists
-
-        emptySpaces =
-            row
-                |> List.filter (not << colorExists)
-    in
-        List.append existingPieces emptySpaces
-            |> Row
-
-
-isEmpty : Row -> Bool
-isEmpty =
-    unwrap
-        >> List.filter colorExists
-        >> List.isEmpty
-
-
 isNotEmpty : Row -> Bool
 isNotEmpty =
-    isEmpty >> not
+    let
+        isEmpty : Row -> Bool
+        isEmpty =
+            unwrap
+                >> List.filter colorExists
+                >> List.isEmpty
+    in
+        isEmpty >> not
