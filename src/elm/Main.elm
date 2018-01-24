@@ -49,6 +49,14 @@ init =
 -- UPDATE
 
 
+type Msg
+    = GeneratedBoard Board
+    | UpdateNumRows String
+    | UpdateNumColumns String
+    | UpdateNumColors String
+    | ClickPiece Position
+
+
 generateBoard : Generator Board -> Cmd Msg
 generateBoard =
     Random.generate GeneratedBoard
@@ -64,6 +72,8 @@ updateBoard model board =
             Started properties board
 
 
+{-| Whenever a board's properties are updated, reset the game.
+-}
 updateProperties : Model -> Properties -> Model
 updateProperties model updatedProperties =
     case model of
@@ -74,17 +84,12 @@ updateProperties model updatedProperties =
             Prestart updatedProperties
 
 
+{-| Update the board's properties, generate a new board based on those properties,
+and reset the game.
+-}
 updatePropertiesAndBoard : Model -> Properties -> Generator Board -> ( Model, Cmd Msg )
 updatePropertiesAndBoard model properties board =
     (updateProperties model properties) ! [ generateBoard board ]
-
-
-type Msg
-    = GeneratedBoard Board
-    | UpdateNumRows String
-    | UpdateNumColumns String
-    | UpdateNumColors String
-    | ClickPiece Position
 
 
 updateNumRows : Model -> Properties -> String -> ( Model, Cmd Msg )
@@ -184,11 +189,11 @@ drawPiece pieceLength rowIndex ( columnIndex, color ) =
         (PieceLength length) =
             pieceLength
 
-        (XCoord xCoord) =
-            Board.xCoord pieceLength columnIndex
+        xCoord =
+            Board.rawXCoord pieceLength columnIndex
 
-        (YCoord yCoord) =
-            Board.yCoord pieceLength rowIndex
+        yCoord =
+            Board.rawYCoord pieceLength rowIndex
     in
         rect
             [ x (toString xCoord)
