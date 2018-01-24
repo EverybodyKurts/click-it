@@ -149,15 +149,15 @@ neighborsWithSameColor board position =
 fcb : Board -> ColorBlock -> Destinations -> List Position
 fcb board (ColorBlock colorBlock) (Destinations destinations) =
     case Lextra.uncons destinations of
-        Just ( blockPosition, restDestinations ) ->
+        Just ( nextPosition, restDestinations ) ->
             let
                 updatedColorBlock =
-                    blockPosition :: colorBlock
+                    nextPosition :: colorBlock
 
                 alreadyAdded =
                     flip List.member updatedColorBlock
             in
-                blockPosition
+                nextPosition
                     |> (neighborsWithSameColor board)
                     |> Lextra.filterNot alreadyAdded
                     |> List.append restDestinations
