@@ -1,6 +1,5 @@
 module Board.Position exposing (..)
 
-import List.Extra as Lextra
 import Dict exposing (Dict(..))
 import Dict.Extra as Dixtra
 
@@ -37,11 +36,18 @@ fromTuple ( r, c ) =
     Position ( RowIndex r, ColumnIndex c )
 
 
+fromIndices : RowIndex -> ColumnIndex -> Position
+fromIndices rowIndex columnIndex =
+    Position ( rowIndex, columnIndex )
+
+
 sort : List Position -> List Position
 sort =
     List.sortBy toTuple
 
 
+{-| Return true if the positions are in the same row.
+-}
 haveSameRow : Position -> Position -> Bool
 haveSameRow pos1 pos2 =
     let
@@ -54,6 +60,8 @@ haveSameRow pos1 pos2 =
         a == b
 
 
+{-| Return the position's neighbors: north, south, east, west
+-}
 neighbors : Position -> List Position
 neighbors position =
     let
@@ -68,18 +76,6 @@ neighbors position =
             |> List.map fromTuple
 
 
-toDict : List Position -> Dict Int (List Position)
-toDict =
-    Dixtra.groupBy unwrapRow
-
-
-{-| Group positions by row
--}
-groupByRow : List Position -> List ( Int, List Position )
-groupByRow =
-    toDict >> Dict.toList
-
-
 columnIndex : Position -> ColumnIndex
 columnIndex (Position ( _, columnIndex )) =
     columnIndex
@@ -88,6 +84,11 @@ columnIndex (Position ( _, columnIndex )) =
 groupColumnIndicesByRow : List Position -> List ( RowIndex, List ColumnIndex )
 groupColumnIndicesByRow positions =
     let
+        groupByRow : List Position -> List ( Int, List Position )
+        groupByRow =
+            Dixtra.groupBy unwrapRow
+                >> Dict.toList
+
         positionsToColumnIndices : ( Int, List Position ) -> ( RowIndex, List ColumnIndex )
         positionsToColumnIndices ( rowIndex, rowPositions ) =
             ( RowIndex rowIndex

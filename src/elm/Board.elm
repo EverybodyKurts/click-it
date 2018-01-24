@@ -5,9 +5,9 @@ import Color exposing (Color)
 import Random exposing (Generator)
 import Random.Array
 import List.Extra as Lextra
+import Maybe.Extra
 import Board.Properties exposing (Properties, PieceLength(..), NumColumns(..))
 import Board.Position as Position exposing (RowIndex(..), ColumnIndex(..), Position(..))
-import Maybe.Extra
 import Board.Row as Row exposing (Row(..))
 import Board.Rows as Rows exposing (Rows(..))
 
@@ -100,6 +100,13 @@ unwrap (Board rows) =
     rows
 
 
+unwrapRows : Board -> List Row
+unwrapRows =
+    unwrap >> Rows.unwrap
+
+
+{-| Remove the board's types until it is a simple 2d array of colors.
+-}
 to2dList : Board -> List (List (Maybe Color))
 to2dList =
     unwrap
@@ -185,6 +192,8 @@ toRowsList =
         >> Rows.unwrap
 
 
+{-| Remove the block of pieces from the board.
+-}
 removeBlock : Board -> List Position -> Board
 removeBlock (Board rows) colorBlock =
     let
@@ -195,6 +204,8 @@ removeBlock (Board rows) colorBlock =
             |> Board
 
 
+{-| Remove the block from the board if it's at least the minimum specified # of pieces.
+-}
 removeBlockIfMinSize : Int -> Board -> List Position -> Board
 removeBlockIfMinSize minSize board positions =
     if List.length positions >= minSize then
@@ -212,11 +223,21 @@ removeBlockAt board =
         >> removeBlockIfMinSize 3 board
 
 
+rawXCoord : PieceLength -> ColumnIndex -> Int
+rawXCoord (PieceLength pieceLength) (ColumnIndex columnIndex) =
+    pieceLength * columnIndex
+
+
 xCoord : PieceLength -> ColumnIndex -> XCoord
-xCoord (PieceLength pieceLength) (ColumnIndex columnIndex) =
-    XCoord (pieceLength * columnIndex)
+xCoord pieceLength columnIndex =
+    rawXCoord pieceLength columnIndex |> XCoord
+
+
+rawYCoord : PieceLength -> RowIndex -> Int
+rawYCoord (PieceLength pieceLength) (RowIndex rowIndex) =
+    pieceLength * rowIndex
 
 
 yCoord : PieceLength -> RowIndex -> YCoord
-yCoord (PieceLength pieceLength) (RowIndex rowIndex) =
-    YCoord (pieceLength * rowIndex)
+yCoord pieceLength rowIndex =
+    rawYCoord pieceLength rowIndex |> YCoord

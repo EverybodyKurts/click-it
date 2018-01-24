@@ -29,6 +29,8 @@ type alias Properties =
 -- INITIALIZING BOARD PROPERTIES
 
 
+{-| The board's default # of rows, columns, colors, and piece length.
+-}
 default : Properties
 default =
     Properties (NumRows 10) (NumColumns 5) (NumColors 3) (PieceLength 25)
@@ -38,6 +40,8 @@ default =
 -- ACCESSING PROPERTIES
 
 
+{-| Return the board's properties as a tuple of integers.
+-}
 raw : Properties -> ( Int, Int, Int, Int )
 raw { numRows, numColumns, numColors, pieceLength } =
     let
@@ -56,6 +60,8 @@ raw { numRows, numColumns, numColors, pieceLength } =
         ( rows, columns, colors, pl )
 
 
+{-| Get the board's total # of pieces, based on the # of its rows & columns.
+-}
 numPieces : Properties -> Int
 numPieces { numRows, numColumns } =
     let
@@ -72,7 +78,7 @@ numPieces { numRows, numColumns } =
 -- UPDATING PROPERTIES
 
 
-{-| Update the number of rows
+{-| Update the number of rows.
 -}
 updateNumRows : Properties -> NumRows -> Properties
 updateNumRows properties numRows =
@@ -89,6 +95,8 @@ updateNumRowsFromString properties =
         >> Result.map (updateNumRows properties)
 
 
+{-| Update # of rows from user input or provide default # of rows.
+-}
 updateNumRowsOrDefault : Properties -> String -> Properties
 updateNumRowsOrDefault properties =
     (updateNumRowsFromString properties)
@@ -100,6 +108,8 @@ updateNumColumns properties numColumns =
     { properties | numColumns = numColumns }
 
 
+{-| Update the board's # of columns from a string, most likely user input.
+-}
 updateNumColumnsFromString : Properties -> String -> Result String Properties
 updateNumColumnsFromString properties =
     String.toInt
@@ -108,17 +118,23 @@ updateNumColumnsFromString properties =
         >> Result.map (updateNumColumns properties)
 
 
+{-| Update the board's # of columns based on user input or provide default # of columns
+-}
 updateNumColumnsOrDefault : Properties -> String -> Properties
 updateNumColumnsOrDefault properties =
     (updateNumColumnsFromString properties)
         >> Result.withDefault default
 
 
+{-| Update the board's number of colors.
+-}
 updateNumColors : Properties -> NumColors -> Properties
 updateNumColors properties numColors =
     { properties | numColors = numColors }
 
 
+{-| Update the board's # of colors from a string, most likely user input.
+-}
 updateNumColorsFromString : Properties -> String -> Result String Properties
 updateNumColorsFromString properties =
     String.toInt
@@ -127,6 +143,8 @@ updateNumColorsFromString properties =
         >> Result.map (updateNumColors properties)
 
 
+{-| Update the board's # of colors based on user input or provide default # of colors
+-}
 updateNumColorsOrDefault : Properties -> String -> Properties
 updateNumColorsOrDefault properties =
     (updateNumColorsFromString properties)
@@ -137,6 +155,8 @@ updateNumColorsOrDefault properties =
 -- DRAWING THE BOARD
 
 
+{-| The board's drawn width
+-}
 width : Properties -> Int
 width { numColumns, pieceLength } =
     let
@@ -149,6 +169,8 @@ width { numColumns, pieceLength } =
         (l * c)
 
 
+{-| The board's drawn height
+-}
 height : Properties -> Int
 height { numRows, pieceLength } =
     let

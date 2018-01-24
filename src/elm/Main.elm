@@ -49,6 +49,14 @@ init =
 -- UPDATE
 
 
+type Msg
+    = GeneratedBoard Board
+    | UpdateNumRows String
+    | UpdateNumColumns String
+    | UpdateNumColors String
+    | ClickPiece Position
+
+
 generateBoard : Generator Board -> Cmd Msg
 generateBoard =
     Random.generate GeneratedBoard
@@ -64,6 +72,8 @@ updateBoard model board =
             Started properties board
 
 
+{-| Whenever a board's properties are updated, reset the game.
+-}
 updateProperties : Model -> Properties -> Model
 updateProperties model updatedProperties =
     case model of
@@ -74,17 +84,12 @@ updateProperties model updatedProperties =
             Prestart updatedProperties
 
 
+{-| Update the board's properties, generate a new board based on those properties,
+and reset the game.
+-}
 updatePropertiesAndBoard : Model -> Properties -> Generator Board -> ( Model, Cmd Msg )
 updatePropertiesAndBoard model properties board =
     (updateProperties model properties) ! [ generateBoard board ]
-
-
-type Msg
-    = GeneratedBoard Board
-    | UpdateNumRows String
-    | UpdateNumColumns String
-    | UpdateNumColors String
-    | ClickPiece Position
 
 
 updateNumRows : Model -> Properties -> String -> ( Model, Cmd Msg )
@@ -184,11 +189,14 @@ drawPiece pieceLength rowIndex ( columnIndex, color ) =
         (PieceLength length) =
             pieceLength
 
-        (XCoord xCoord) =
-            Board.xCoord pieceLength columnIndex
+        xCoord =
+            Board.rawXCoord pieceLength columnIndex
 
-        (YCoord yCoord) =
-            Board.yCoord pieceLength rowIndex
+        yCoord =
+            Board.rawYCoord pieceLength rowIndex
+
+        pos =
+            Board.Position.fromIndices rowIndex columnIndex
     in
         rect
             [ x (toString xCoord)
@@ -197,7 +205,7 @@ drawPiece pieceLength rowIndex ( columnIndex, color ) =
             , height (toString length)
             , fill (colorToHex color)
             , stroke "#ddd"
-            , onClick (ClickPiece (Position ( rowIndex, columnIndex )))
+            , onClick (ClickPiece pos)
             ]
             []
 
@@ -227,8 +235,8 @@ drawRows pieceLength board =
         rowIndexTuple rawIndex a =
             ( RowIndex rawIndex, a )
 
-        (Board (Rows rows)) =
-            board
+        rows =
+            Board.unwrapRows board
     in
         rows
             |> List.indexedMap rowIndexTuple
@@ -285,7 +293,7 @@ boardColorsFormGroup (NumColors numColors) =
 
 boardPropertiesView : NumRows -> NumColumns -> NumColors -> Html Msg
 boardPropertiesView numRows numColumns numColors =
-    div [ class "d-flex flex-row" ]
+    div [ class "d-flex flex-row justify-content-center" ]
         [ div [ class "p-2" ]
             (boardRowsFormGroup numRows)
         , div [ class "p-2" ]
@@ -295,18 +303,23 @@ boardPropertiesView numRows numColumns numColors =
         ]
 
 
+appView : Properties -> List (Svg Msg) -> Html Msg
+appView ({ numRows, numColumns, numColors } as properties) boardSvg =
+    div []
+        [ (boardPropertiesView numRows numColumns numColors)
+        , div [ class "container" ]
+            [ div [ class "row" ]
+                [ div [ class "col-12" ] boardSvg
+                ]
+            ]
+        ]
+
+
 view : Model -> Html Msg
 view model =
     case model of
-        Prestart ({ numRows, numColumns, numColors } as properties) ->
-            div []
-                [ div [ class "d-flex flex-row" ]
-                    [ (boardPropertiesView numRows numColumns numColors) ]
-                , div [ class "d-flex flex-row" ]
-                    [ div [ class "p-12" ]
-                        []
-                    ]
-                ]
+        Prestart properties ->
+            appView properties []
 
         Started ({ numRows, numColumns, numColors } as properties) board ->
             let
@@ -318,18 +331,14 @@ view model =
 
                 drawnRows =
                     drawRows properties.pieceLength board
-            in
-                div []
-                    [ div [ class "d-flex flex-row" ]
-                        [ (boardPropertiesView numRows numColumns numColors) ]
-                    , div [ class "d-flex flex-row" ]
-                        [ div [ class "p-12" ]
-                            [ svg
-                                [ width (toString boardWidth), height (toString boardHeight) ]
-                                drawnRows
-                            ]
-                        ]
+
+                boardSvg =
+                    [ svg
+                        [ width (toString boardWidth), height (toString boardHeight) ]
+                        drawnRows
                     ]
+            in
+                appView properties boardSvg
 
 
 
