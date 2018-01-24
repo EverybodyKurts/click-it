@@ -231,15 +231,15 @@ drawRow pieceLength ( rowIndex, Row row ) =
 drawRows : PieceLength -> Board -> List (Svg Msg)
 drawRows pieceLength board =
     let
-        rowIndexTuple : Int -> a -> ( RowIndex, a )
-        rowIndexTuple rawIndex a =
-            ( RowIndex rawIndex, a )
+        indexedRow : Int -> Row -> ( RowIndex, Row )
+        indexedRow index row =
+            ( RowIndex index, row )
 
         rows =
             Board.unwrapRows board
     in
         rows
-            |> List.indexedMap rowIndexTuple
+            |> List.indexedMap indexedRow
             |> List.concatMap (drawRow pieceLength)
 
 
