@@ -112,27 +112,42 @@ pieceAt (Position ( RowIndex rowIndex, ColumnIndex columnIndex )) =
             >> Maybe.Extra.join
 
 
-neighborsWithSameColor : Board -> Color -> Position -> List Position
-neighborsWithSameColor board color position =
-    let
-        keepPositionIfSameColor : Board -> Color -> Position -> Maybe Position
-        keepPositionIfSameColor board color position =
-            board
-                |> pieceAt position
-                |> Maybe.andThen
-                    (\pieceColor ->
-                        if pieceColor == color then
-                            Just position
-                        else
-                            Nothing
-                    )
-    in
-        Position.neighbors position
-            |> List.filterMap (keepPositionIfSameColor board color)
+pieceExistsAt : Position -> Board -> Bool
+pieceExistsAt position board =
+    case pieceAt position board of
+        Just _ ->
+            True
+
+        Nothing ->
+            False
 
 
-fcb : Color -> Board -> ColorBlock -> Destinations -> List Position
-fcb color board (ColorBlock colorBlock) (Destinations destinations) =
+neighborsWithSameColor : Board -> Position -> List Position
+neighborsWithSameColor board position =
+    case pieceAt position board of
+        Just color ->
+            let
+                keepPositionIfSameColor : Board -> Color -> Position -> Maybe Position
+                keepPositionIfSameColor board color position =
+                    board
+                        |> pieceAt position
+                        |> Maybe.andThen
+                            (\pieceColor ->
+                                if pieceColor == color then
+                                    Just position
+                                else
+                                    Nothing
+                            )
+            in
+                Position.neighbors position
+                    |> List.filterMap (keepPositionIfSameColor board color)
+
+        Nothing ->
+            []
+
+
+fcb : Board -> ColorBlock -> Destinations -> List Position
+fcb board (ColorBlock colorBlock) (Destinations destinations) =
     case Lextra.uncons destinations of
         Just ( blockPosition, restDestinations ) ->
             let
@@ -140,11 +155,11 @@ fcb color board (ColorBlock colorBlock) (Destinations destinations) =
                     blockPosition :: colorBlock
             in
                 blockPosition
-                    |> (neighborsWithSameColor board color)
+                    |> (neighborsWithSameColor board)
                     |> Lextra.filterNot (flip List.member updatedColorBlock)
                     |> List.append restDestinations
                     |> Destinations
-                    |> (fcb color board (ColorBlock updatedColorBlock))
+                    |> (fcb board (ColorBlock updatedColorBlock))
 
         Nothing ->
             colorBlock
@@ -152,19 +167,19 @@ fcb color board (ColorBlock colorBlock) (Destinations destinations) =
 
 findBlockAt : Board -> Position -> List Position
 findBlockAt board position =
-    case pieceAt position board of
-        Just color ->
+    case pieceExistsAt position board of
+        True ->
             let
                 destinations =
-                    Destinations (neighborsWithSameColor board color position)
+                    Destinations (neighborsWithSameColor board position)
 
                 colorBlock =
                     ColorBlock [ position ]
             in
-                fcb color board colorBlock destinations
+                fcb board colorBlock destinations
                     |> Position.sort
 
-        Nothing ->
+        False ->
             []
 
 
