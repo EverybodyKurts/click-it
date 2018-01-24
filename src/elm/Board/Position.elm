@@ -1,6 +1,5 @@
 module Board.Position exposing (..)
 
-import List.Extra as Lextra
 import Dict exposing (Dict(..))
 import Dict.Extra as Dixtra
 
@@ -35,6 +34,11 @@ toTuple (Position ( RowIndex r, ColumnIndex c )) =
 fromTuple : ( Int, Int ) -> Position
 fromTuple ( r, c ) =
     Position ( RowIndex r, ColumnIndex c )
+
+
+fromIndices : RowIndex -> ColumnIndex -> Position
+fromIndices rowIndex columnIndex =
+    Position ( rowIndex, columnIndex )
 
 
 sort : List Position -> List Position

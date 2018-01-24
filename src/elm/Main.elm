@@ -194,6 +194,9 @@ drawPiece pieceLength rowIndex ( columnIndex, color ) =
 
         yCoord =
             Board.rawYCoord pieceLength rowIndex
+
+        pos =
+            Board.Position.fromIndices rowIndex columnIndex
     in
         rect
             [ x (toString xCoord)
@@ -202,7 +205,7 @@ drawPiece pieceLength rowIndex ( columnIndex, color ) =
             , height (toString length)
             , fill (colorToHex color)
             , stroke "#ddd"
-            , onClick (ClickPiece (Position ( rowIndex, columnIndex )))
+            , onClick (ClickPiece pos)
             ]
             []
 
