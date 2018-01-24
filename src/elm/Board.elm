@@ -153,10 +153,13 @@ fcb board (ColorBlock colorBlock) (Destinations destinations) =
             let
                 updatedColorBlock =
                     blockPosition :: colorBlock
+
+                alreadyAdded =
+                    flip List.member updatedColorBlock
             in
                 blockPosition
                     |> (neighborsWithSameColor board)
-                    |> Lextra.filterNot (flip List.member updatedColorBlock)
+                    |> Lextra.filterNot alreadyAdded
                     |> List.append restDestinations
                     |> Destinations
                     |> (fcb board (ColorBlock updatedColorBlock))
