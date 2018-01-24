@@ -16,14 +16,6 @@ type Board
     = Board Rows
 
 
-type XCoord
-    = XCoord Int
-
-
-type YCoord
-    = YCoord Int
-
-
 type ColorBlock
     = ColorBlock (List Position)
 
@@ -105,29 +97,28 @@ unwrapRows =
     unwrap >> Rows.unwrap
 
 
-{-| Remove the board's types until it is a simple 2d array of colors.
--}
-to2dList : Board -> List (List (Maybe Color))
-to2dList =
-    unwrap
-        >> Rows.unwrap
-        >> List.map Row.unwrap
+pieceAt : Position -> Board -> Maybe Color
+pieceAt (Position ( RowIndex rowIndex, ColumnIndex columnIndex )) =
+    let
+        boardToList : Board -> List (List (Maybe Color))
+        boardToList =
+            unwrap
+                >> Rows.unwrap
+                >> List.map Row.unwrap
+    in
+        boardToList
+            >> Lextra.getAt rowIndex
+            >> Maybe.andThen (Lextra.getAt columnIndex)
+            >> Maybe.Extra.join
 
 
-getPiece : Position -> Board -> Maybe Color
-getPiece (Position ( RowIndex rowIndex, ColumnIndex columnIndex )) =
-    to2dList
-        >> Lextra.getAt rowIndex
-        >> Maybe.andThen (Lextra.getAt columnIndex)
-        >> Maybe.Extra.join
-
-
-equivNeighborPositions : Board -> Color -> Position -> List Position
-equivNeighborPositions board color position =
+neighborsWithSameColor : Board -> Color -> Position -> List Position
+neighborsWithSameColor board color position =
     let
         keepPositionIfSameColor : Board -> Color -> Position -> Maybe Position
         keepPositionIfSameColor board color position =
-            getPiece position board
+            board
+                |> pieceAt position
                 |> Maybe.andThen
                     (\pieceColor ->
                         if pieceColor == color then
@@ -149,7 +140,7 @@ fcb color board (ColorBlock colorBlock) (Destinations destinations) =
                     blockPosition :: colorBlock
             in
                 blockPosition
-                    |> (equivNeighborPositions board color)
+                    |> (neighborsWithSameColor board color)
                     |> Lextra.filterNot (flip List.member updatedColorBlock)
                     |> List.append restDestinations
                     |> Destinations
@@ -161,11 +152,11 @@ fcb color board (ColorBlock colorBlock) (Destinations destinations) =
 
 findBlockAt : Board -> Position -> List Position
 findBlockAt board position =
-    case getPiece position board of
+    case pieceAt position board of
         Just color ->
             let
                 destinations =
-                    Destinations (equivNeighborPositions board color position)
+                    Destinations (neighborsWithSameColor board color position)
 
                 colorBlock =
                     ColorBlock [ position ]
@@ -228,16 +219,6 @@ rawXCoord (PieceLength pieceLength) (ColumnIndex columnIndex) =
     pieceLength * columnIndex
 
 
-xCoord : PieceLength -> ColumnIndex -> XCoord
-xCoord pieceLength columnIndex =
-    rawXCoord pieceLength columnIndex |> XCoord
-
-
 rawYCoord : PieceLength -> RowIndex -> Int
 rawYCoord (PieceLength pieceLength) (RowIndex rowIndex) =
     pieceLength * rowIndex
-
-
-yCoord : PieceLength -> RowIndex -> YCoord
-yCoord pieceLength rowIndex =
-    rawYCoord pieceLength rowIndex |> YCoord

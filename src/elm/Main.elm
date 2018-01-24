@@ -15,11 +15,10 @@ import Random exposing (Generator)
 -- User modules
 
 import Bootstrap exposing (formGroup)
-import Board exposing (Board(..), XCoord(..), YCoord(..))
+import Board exposing (Board(..))
 import Board.Properties exposing (Properties, PieceLength(..), NumRows(..), NumColumns(..), NumColors(..))
 import Board.Position exposing (RowIndex(..), ColumnIndex(..), Position(..))
 import Board.Row as Row exposing (Row(..))
-import Board.Rows as Rows exposing (Rows(..))
 import Util.Tuple as Tuple
 
 
@@ -218,12 +217,12 @@ drawRow pieceLength ( rowIndex, Row row ) =
             maybeColor
                 |> Maybe.map (Tuple.create index)
 
-        columnIndexTuple : Int -> a -> ( ColumnIndex, a )
-        columnIndexTuple index a =
+        indexedColumn : Int -> a -> ( ColumnIndex, a )
+        indexedColumn index a =
             ( ColumnIndex index, a )
     in
         row
-            |> List.indexedMap columnIndexTuple
+            |> List.indexedMap indexedColumn
             |> List.filterMap keepExistingIndexedColors
             |> List.map (drawPiece pieceLength rowIndex)
 
