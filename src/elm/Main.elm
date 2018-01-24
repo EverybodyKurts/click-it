@@ -235,8 +235,8 @@ drawRows pieceLength board =
         rowIndexTuple rawIndex a =
             ( RowIndex rawIndex, a )
 
-        (Board (Rows rows)) =
-            board
+        rows =
+            Board.unwrapRows board
     in
         rows
             |> List.indexedMap rowIndexTuple

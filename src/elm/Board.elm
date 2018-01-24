@@ -100,6 +100,11 @@ unwrap (Board rows) =
     rows
 
 
+unwrapRows : Board -> List Row
+unwrapRows =
+    unwrap >> Rows.unwrap
+
+
 {-| Remove the board's types until it is a simple 2d array of colors.
 -}
 to2dList : Board -> List (List (Maybe Color))
