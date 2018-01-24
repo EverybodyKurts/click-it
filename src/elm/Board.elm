@@ -218,11 +218,21 @@ removeBlockAt board =
         >> removeBlockIfMinSize 3 board
 
 
+rawXCoord : PieceLength -> ColumnIndex -> Int
+rawXCoord (PieceLength pieceLength) (ColumnIndex columnIndex) =
+    pieceLength * columnIndex
+
+
 xCoord : PieceLength -> ColumnIndex -> XCoord
-xCoord (PieceLength pieceLength) (ColumnIndex columnIndex) =
-    XCoord (pieceLength * columnIndex)
+xCoord pieceLength columnIndex =
+    rawXCoord pieceLength columnIndex |> XCoord
+
+
+rawYCoord : PieceLength -> RowIndex -> Int
+rawYCoord (PieceLength pieceLength) (RowIndex rowIndex) =
+    pieceLength * rowIndex
 
 
 yCoord : PieceLength -> RowIndex -> YCoord
-yCoord (PieceLength pieceLength) (RowIndex rowIndex) =
-    YCoord (pieceLength * rowIndex)
+yCoord pieceLength rowIndex =
+    rawYCoord pieceLength rowIndex |> YCoord
