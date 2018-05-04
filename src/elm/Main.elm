@@ -10,7 +10,7 @@ import Random exposing (Generator)
 -- User modules
 
 import Board exposing (Board(..))
-import Board.Properties as Properties exposing (Properties, PieceLength(..), NumRows(..), NumColumns(..), NumColors(..))
+import Board.Properties as Properties exposing (Properties)
 import Board.Position as Position exposing (Position)
 import Board.Rows as Rows
 
