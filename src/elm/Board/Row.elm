@@ -1,9 +1,15 @@
 module Board.Row exposing (..)
 
 import Color exposing (Color)
+import Board.Properties as Properties exposing (PieceLength)
+import Board.Position as Position exposing (Position)
+import Board.Piece as Piece
 import Board.Position.ColumnIndex as ColumnIndex exposing (ColumnIndex)
+import Board.Position.RowIndex as RowIndex exposing (RowIndex)
+import Util.Tuple as Tuple
 import List.Extra as Lextra
 import Maybe.Extra
+import Svg exposing (Svg)
 
 
 type Row
@@ -96,3 +102,27 @@ isNotEmpty =
                 >> List.isEmpty
     in
         isEmpty >> not
+
+
+draw: PieceLength -> (Position -> msg) -> ( RowIndex, Row ) -> List (Svg msg)
+draw pieceLength clickPieceMsg ( rowIndex, Row row ) =
+    let
+        keepExistingIndexedColors : ( ColumnIndex, Maybe Color ) -> Maybe ( ColumnIndex, Color )
+        keepExistingIndexedColors ( index, maybeColor ) =
+            maybeColor
+                |> Maybe.map (Tuple.create index)
+
+        indexedColumn : Int -> Maybe Color -> ( ColumnIndex, Maybe Color )
+        indexedColumn index maybeColor =
+            ( ColumnIndex.fromInt index, maybeColor )
+    in
+        row
+            |> List.indexedMap indexedColumn
+            |> List.filterMap keepExistingIndexedColors
+            |> List.map
+                (\( columnIndex, color ) ->
+                    Position.create rowIndex columnIndex
+                        |> (Piece.create color pieceLength)
+                        |> Piece.draw clickPieceMsg
+                )
+
