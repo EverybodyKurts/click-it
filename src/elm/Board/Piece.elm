@@ -1,7 +1,8 @@
 module Board.Piece exposing (..)
 
-import Board
 import Board.Position as Position exposing (Position)
+import Board.Position.ColumnIndex as ColumnIndex
+import Board.Position.RowIndex as RowIndex
 import Board.Properties as Properties exposing (PieceLength)
 import Svg exposing (Svg, rect)
 import Svg.Attributes exposing (x, y, width, height, fill, stroke)
@@ -22,7 +23,33 @@ create color length position =
     Piece color length position
 
 
+
 -- VIEW --
+
+
+rawXCoord : Piece -> Int
+rawXCoord { length, position } =
+    let
+        ci =
+            position |> Position.columnIndex |> ColumnIndex.unwrap
+
+        len =
+            Properties.unwrapPieceLength length
+    in
+        ci * len
+
+
+rawYCoord : Piece -> Int
+rawYCoord { length, position } =
+    let
+        ri =
+            position |> Position.rowIndex |> RowIndex.unwrap
+
+        len =
+            Properties.unwrapPieceLength length
+    in
+        ri * len
+
 
 draw : (Position -> a) -> Piece -> Svg a
 draw clickMsg ({ position, color, length } as piece) =
@@ -37,10 +64,10 @@ draw clickMsg ({ position, color, length } as piece) =
             Properties.unwrapPieceLength length
 
         xCoord =
-            Board.rawXCoord length columnIndex
+            rawXCoord piece
 
         yCoord =
-            Board.rawYCoord length rowIndex
+            rawYCoord piece
 
         pos =
             Position.fromIndices rowIndex columnIndex
