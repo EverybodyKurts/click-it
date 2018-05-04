@@ -2,7 +2,6 @@ module Main exposing (..)
 
 import Html exposing (Html, h1, text, div, input, label)
 import Html.Attributes exposing (id, class, for, type_, value)
-import Html.Events exposing (onInput)
 import Svg exposing (Svg, svg, rect)
 import Svg.Attributes exposing (width, height, viewBox, x, y, rx, ry, fill, stroke)
 import Random exposing (Generator)
@@ -10,9 +9,8 @@ import Random exposing (Generator)
 
 -- User modules
 
-import Bootstrap exposing (formGroup)
 import Board exposing (Board(..))
-import Board.Properties exposing (Properties, PieceLength(..), NumRows(..), NumColumns(..), NumColors(..))
+import Board.Properties as Properties exposing (Properties, PieceLength(..), NumRows(..), NumColumns(..), NumColors(..))
 import Board.Position as Position exposing (Position)
 import Board.Rows as Rows
 
@@ -27,7 +25,7 @@ type Model
 
 initModel : Model
 initModel =
-    Prestart Board.Properties.default
+    Prestart Properties.default
 
 
 
@@ -89,7 +87,7 @@ updateNumRows : Model -> Properties -> String -> ( Model, Cmd Msg )
 updateNumRows model properties numRows =
     let
         updatedProperties =
-            Board.Properties.updateNumRowsOrDefault properties numRows
+            Properties.updateNumRowsOrDefault properties numRows
 
         updatedBoard =
             Board.init updatedProperties
@@ -101,7 +99,7 @@ updateNumColumns : Model -> Properties -> String -> ( Model, Cmd Msg )
 updateNumColumns model properties numColumns =
     let
         updatedProperties =
-            Board.Properties.updateNumColumnsOrDefault properties numColumns
+            Properties.updateNumColumnsOrDefault properties numColumns
 
         updatedBoard =
             Board.init updatedProperties
@@ -113,7 +111,7 @@ updateNumColors : Model -> Properties -> String -> ( Model, Cmd Msg )
 updateNumColors model properties numColors =
     let
         updatedProperties =
-            Board.Properties.updateNumColorsOrDefault properties numColors
+            Properties.updateNumColorsOrDefault properties numColors
 
         updatedBoard =
             Board.init updatedProperties
@@ -176,70 +174,10 @@ update msg model =
 -- VIEW
 
 
-boardRowsFormGroup : NumRows -> List (Html Msg)
-boardRowsFormGroup (NumRows numRows) =
-    [ formGroup
-        [ label [ for "boardRows" ] [ (text "Rows") ]
-        , input
-            [ type_ "number"
-            , value (toString numRows)
-            , class "form-control"
-            , id "boardRows"
-            , onInput UpdateNumRows
-            ]
-            []
-        ]
-    ]
-
-
-boardColumnsFormGroup : NumColumns -> List (Html Msg)
-boardColumnsFormGroup (NumColumns numColumns) =
-    [ formGroup
-        [ label [ for "boardColumns" ] [ (text "Columns") ]
-        , input
-            [ type_ "number"
-            , value (toString numColumns)
-            , class "form-control"
-            , id "boardColumns"
-            , onInput UpdateNumColumns
-            ]
-            []
-        ]
-    ]
-
-
-boardColorsFormGroup : NumColors -> List (Html Msg)
-boardColorsFormGroup (NumColors numColors) =
-    [ formGroup
-        [ label [ for "numColors" ] [ (text "# of Colors") ]
-        , input
-            [ type_ "number"
-            , value (toString numColors)
-            , class "form-control"
-            , id "numColors"
-            , onInput UpdateNumColors
-            ]
-            []
-        ]
-    ]
-
-
-boardPropertiesView : NumRows -> NumColumns -> NumColors -> Html Msg
-boardPropertiesView numRows numColumns numColors =
-    div [ class "row justify-content-md-center" ]
-        [ div [ class "col-md-3" ]
-            (boardRowsFormGroup numRows)
-        , div [ class "col-md-3" ]
-            (boardColumnsFormGroup numColumns)
-        , div [ class "col-md-3" ]
-            (boardColorsFormGroup numColors)
-        ]
-
-
 appView : Properties -> List (Svg Msg) -> Html Msg
-appView ({ numRows, numColumns, numColors } as properties) boardSvg =
+appView properties boardSvg =
     div [ class "container" ]
-        [ (boardPropertiesView numRows numColumns numColors)
+        [ (Properties.view UpdateNumRows UpdateNumColumns UpdateNumColors properties)
         , div []
             [ div [ class "row justify-content-md-center" ]
                 [ div [ class "col-md-9" ] boardSvg
@@ -257,15 +195,15 @@ view model =
         Started ({ numRows, numColumns, numColors } as properties) board ->
             let
                 boardWidth =
-                    Board.Properties.width properties
+                    Properties.width properties
 
                 boardHeight =
-                    Board.Properties.height properties
+                    Properties.height properties
 
                 drawnRows =
                     board
-                    |> Board.unwrap
-                    |> Rows.draw properties.pieceLength ClickPiece
+                        |> Board.unwrap
+                        |> Rows.draw properties.pieceLength ClickPiece
 
                 boardSvg =
                     [ svg
