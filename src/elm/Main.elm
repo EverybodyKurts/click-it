@@ -17,9 +17,10 @@ import Random exposing (Generator)
 import Bootstrap exposing (formGroup)
 import Board exposing (Board(..))
 import Board.Properties exposing (Properties, PieceLength(..), NumRows(..), NumColumns(..), NumColors(..))
-import Board.Position exposing (Position)
+import Board.Position as Position exposing (Position)
 import Board.Position.RowIndex as RowIndex exposing (RowIndex)
 import Board.Position.ColumnIndex as ColumnIndex exposing (ColumnIndex)
+import Board.Piece as Piece
 import Board.Row as Row exposing (Row(..))
 import Util.Tuple as Tuple
 
@@ -183,49 +184,27 @@ update msg model =
 -- VIEW
 
 
-drawPiece : PieceLength -> RowIndex -> ( ColumnIndex, Color ) -> Svg Msg
-drawPiece pieceLength rowIndex ( columnIndex, color ) =
-    let
-        (PieceLength length) =
-            pieceLength
-
-        xCoord =
-            Board.rawXCoord pieceLength columnIndex
-
-        yCoord =
-            Board.rawYCoord pieceLength rowIndex
-
-        pos =
-            Board.Position.fromIndices rowIndex columnIndex
-    in
-        rect
-            [ x (toString xCoord)
-            , y (toString yCoord)
-            , width (toString length)
-            , height (toString length)
-            , fill (colorToHex color)
-            , stroke "#ddd"
-            , onClick (ClickPiece pos)
-            ]
-            []
-
-
 drawRow : PieceLength -> ( RowIndex, Row ) -> List (Svg Msg)
 drawRow pieceLength ( rowIndex, Row row ) =
     let
-        keepExistingIndexedColors : ( a, Maybe b ) -> Maybe ( a, b )
+        keepExistingIndexedColors : ( ColumnIndex, Maybe Color ) -> Maybe ( ColumnIndex, Color )
         keepExistingIndexedColors ( index, maybeColor ) =
             maybeColor
                 |> Maybe.map (Tuple.create index)
 
-        indexedColumn : Int -> a -> ( ColumnIndex, a )
-        indexedColumn index a =
-            ( ColumnIndex.fromInt index, a )
+        indexedColumn : Int -> Maybe Color -> ( ColumnIndex, Maybe Color )
+        indexedColumn index maybeColor =
+            ( ColumnIndex.fromInt index, maybeColor )
     in
         row
             |> List.indexedMap indexedColumn
             |> List.filterMap keepExistingIndexedColors
-            |> List.map (drawPiece pieceLength rowIndex)
+            |> List.map
+                (\( columnIndex, color ) ->
+                    Position.create rowIndex columnIndex
+                        |> (Piece.create color pieceLength)
+                        |> Piece.draw ClickPiece
+                )
 
 
 drawRows : PieceLength -> Board -> List (Svg Msg)
