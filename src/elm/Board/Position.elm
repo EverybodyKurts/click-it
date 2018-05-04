@@ -10,11 +10,6 @@ type Position
     = Position ( RowIndex, ColumnIndex )
 
 
-unwrapRow : Position -> Int
-unwrapRow (Position ( ri, _ )) =
-    RowIndex.unwrap ri
-
-
 toTuple : Position -> ( Int, Int )
 toTuple (Position ( rowIndex, columnIndex )) =
     ( RowIndex.unwrap rowIndex, ColumnIndex.unwrap columnIndex )
@@ -70,24 +65,31 @@ columnIndex (Position ( _, columnIndex )) =
     columnIndex
 
 
+columnIndices : List Position -> List ColumnIndex
+columnIndices =
+    List.map columnIndex
+
+
 rowIndex : Position -> RowIndex
 rowIndex (Position ( rowIndex, _ )) =
     rowIndex
 
 
+groupByRow : List Position -> List ( RowIndex, List Position )
+groupByRow =
+    Dixtra.groupBy (rowIndex >> RowIndex.unwrap)
+        >> Dict.toList
+        >> List.map (\( ri, positions ) -> ( RowIndex.fromInt ri, positions ))
+
+
 groupColumnIndicesByRow : List Position -> List ( RowIndex, List ColumnIndex )
 groupColumnIndicesByRow positions =
     let
-        groupByRow : List Position -> List ( Int, List Position )
-        groupByRow =
-            Dixtra.groupBy unwrapRow
-                >> Dict.toList
-
-        positionsToColumnIndices : ( Int, List Position ) -> ( RowIndex, List ColumnIndex )
-        positionsToColumnIndices ( rowIndex, rowPositions ) =
-            ( RowIndex.fromInt rowIndex
-            , rowPositions |> List.map columnIndex
+        toRowGroupedColumnIndices: ( RowIndex, List Position ) -> ( RowIndex, List ColumnIndex )
+        toRowGroupedColumnIndices ( rowIndex, rowPositions ) =
+            ( rowIndex
+            , rowPositions |> columnIndices
             )
     in
         groupByRow positions
-            |> List.map positionsToColumnIndices
+            |> List.map toRowGroupedColumnIndices
