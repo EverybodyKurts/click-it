@@ -21,7 +21,6 @@ import Board.Position exposing (Position)
 import Board.Position.RowIndex as RowIndex exposing (RowIndex)
 import Board.Position.ColumnIndex as ColumnIndex exposing (ColumnIndex)
 import Board.Row as Row exposing (Row(..))
-import Board.Rows as Rows
 import Util.Tuple as Tuple
 
 
