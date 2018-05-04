@@ -1,10 +1,13 @@
 module Board.Rows exposing (..)
 
 import Color exposing (Color)
+import Board.Properties exposing (PieceLength)
+import Board.Position as Position exposing (Position)
 import Board.Position.RowIndex as RowIndex exposing (RowIndex)
 import Board.Position.ColumnIndex as ColumnIndex exposing (ColumnIndex)
 import Board.Row as Row exposing (Row)
 import List.Extra as Lextra
+import Svg exposing (Svg)
 
 
 type Rows
@@ -79,3 +82,10 @@ slideDownLeft =
 indexRow : Int -> Row -> ( RowIndex, Row )
 indexRow ri row =
     ( RowIndex.fromInt ri, row )
+
+
+draw : PieceLength -> (Position -> msg) -> Rows -> List (Svg msg)
+draw pieceLength clickPieceMsg =
+    unwrap
+        >> List.indexedMap indexRow
+        >> List.concatMap (Row.draw pieceLength clickPieceMsg)
