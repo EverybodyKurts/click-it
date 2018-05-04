@@ -104,7 +104,7 @@ isNotEmpty =
         isEmpty >> not
 
 
-draw: PieceLength -> (Position -> msg) -> ( RowIndex, Row ) -> List (Svg msg)
+draw : PieceLength -> (Position -> msg) -> ( RowIndex, Row ) -> List (Svg msg)
 draw pieceLength clickPieceMsg ( rowIndex, Row row ) =
     let
         keepExistingIndexedColors : ( ColumnIndex, Maybe Color ) -> Maybe ( ColumnIndex, Color )
@@ -125,4 +125,3 @@ draw pieceLength clickPieceMsg ( rowIndex, Row row ) =
                         |> (Piece.create color pieceLength)
                         |> Piece.draw clickPieceMsg
                 )
-
