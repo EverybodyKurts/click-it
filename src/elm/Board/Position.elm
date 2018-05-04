@@ -10,6 +10,11 @@ type Position
     = Position ( RowIndex, ColumnIndex )
 
 
+create : RowIndex -> ColumnIndex -> Position
+create rowIndex columnIndex =
+    Position ( rowIndex, columnIndex )
+
+
 toTuple : Position -> ( Int, Int )
 toTuple (Position ( rowIndex, columnIndex )) =
     ( RowIndex.unwrap rowIndex, ColumnIndex.unwrap columnIndex )
@@ -85,7 +90,7 @@ groupByRow =
 groupColumnIndicesByRow : List Position -> List ( RowIndex, List ColumnIndex )
 groupColumnIndicesByRow positions =
     let
-        toRowGroupedColumnIndices: ( RowIndex, List Position ) -> ( RowIndex, List ColumnIndex )
+        toRowGroupedColumnIndices : ( RowIndex, List Position ) -> ( RowIndex, List ColumnIndex )
         toRowGroupedColumnIndices ( rowIndex, rowPositions ) =
             ( rowIndex
             , rowPositions |> columnIndices
