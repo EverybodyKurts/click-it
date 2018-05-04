@@ -1,14 +1,10 @@
 module Main exposing (..)
 
-import Maybe exposing (Maybe)
 import Html exposing (Html, h1, text, div, input, label)
 import Html.Attributes exposing (id, class, for, type_, value)
 import Html.Events exposing (onInput)
 import Svg exposing (Svg, svg, rect)
 import Svg.Attributes exposing (width, height, viewBox, x, y, rx, ry, fill, stroke)
-import Svg.Events exposing (onClick)
-import Color exposing (Color)
-import Color.Convert exposing (colorToHex)
 import Random exposing (Generator)
 
 
@@ -18,11 +14,7 @@ import Bootstrap exposing (formGroup)
 import Board exposing (Board(..))
 import Board.Properties exposing (Properties, PieceLength(..), NumRows(..), NumColumns(..), NumColors(..))
 import Board.Position as Position exposing (Position)
-import Board.Position.RowIndex as RowIndex exposing (RowIndex)
-import Board.Position.ColumnIndex as ColumnIndex exposing (ColumnIndex)
-import Board.Piece as Piece
 import Board.Row as Row exposing (Row(..))
-import Util.Tuple as Tuple
 
 
 -- MODEL
@@ -184,33 +176,10 @@ update msg model =
 -- VIEW
 
 
-drawRow : PieceLength -> ( RowIndex, Row ) -> List (Svg Msg)
-drawRow pieceLength ( rowIndex, Row row ) =
-    let
-        keepExistingIndexedColors : ( ColumnIndex, Maybe Color ) -> Maybe ( ColumnIndex, Color )
-        keepExistingIndexedColors ( index, maybeColor ) =
-            maybeColor
-                |> Maybe.map (Tuple.create index)
-
-        indexedColumn : Int -> Maybe Color -> ( ColumnIndex, Maybe Color )
-        indexedColumn index maybeColor =
-            ( ColumnIndex.fromInt index, maybeColor )
-    in
-        row
-            |> List.indexedMap indexedColumn
-            |> List.filterMap keepExistingIndexedColors
-            |> List.map
-                (\( columnIndex, color ) ->
-                    Position.create rowIndex columnIndex
-                        |> (Piece.create color pieceLength)
-                        |> Piece.draw ClickPiece
-                )
-
-
 drawRows : PieceLength -> Board -> List (Svg Msg)
 drawRows pieceLength =
     Board.indexRows
-        >> List.concatMap (drawRow pieceLength)
+        >> List.concatMap (Row.draw pieceLength ClickPiece)
 
 
 boardRowsFormGroup : NumRows -> List (Html Msg)
