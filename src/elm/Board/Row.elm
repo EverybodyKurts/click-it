@@ -1,12 +1,18 @@
 module Board.Row exposing (..)
 
 import Color exposing (Color)
-import Board.Position exposing (ColumnIndex(..), unwrapColumnIndex)
+import Board.Position.ColumnIndex as ColumnIndex exposing (ColumnIndex)
 import List.Extra as Lextra
+import Maybe.Extra
 
 
 type Row
     = Row (List (Maybe Color))
+
+
+fromMaybeColors : List (Maybe Color) -> Row
+fromMaybeColors colorsList =
+    Row colorsList
 
 
 {-| For a board row, remove pieces that correspond to the given column indices.
@@ -15,16 +21,39 @@ This function recursively sets the row's pieces to nothing until it runs out of 
 
 -}
 removePieces : List ColumnIndex -> Row -> Row
-removePieces columnIndices (Row row) =
+removePieces columnIndices row =
     case Lextra.uncons columnIndices of
-        Just ( ColumnIndex ci, restColumnIndices ) ->
-            Lextra.setAt ci Nothing row
-                |> Maybe.withDefault row
-                |> Row
+        Just ( columnIndex, restColumnIndices ) ->
+            row
+                |> removeColumnPiece columnIndex
                 |> removePieces restColumnIndices
 
         Nothing ->
-            (Row row)
+            row
+
+
+{-| Remove a piece from a specific column in the row. ̰
+-}
+removeColumnPiece : ColumnIndex -> Row -> Row
+removeColumnPiece columnIndex row =
+    let
+        (Row colors) =
+            row
+    in
+        Lextra.setAt (ColumnIndex.unwrap columnIndex) Nothing colors
+            |> Maybe.withDefault colors
+            |> Row
+
+
+getColumnPiece : ColumnIndex -> Row -> Maybe Color
+getColumnPiece columnIndex =
+    let
+        ci =
+            ColumnIndex.unwrap columnIndex
+    in
+        unwrap
+            >> Lextra.getAt ci
+            >> Maybe.Extra.join
 
 
 unwrap : Row -> List (Maybe Color)

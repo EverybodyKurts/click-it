@@ -17,8 +17,11 @@ import Random exposing (Generator)
 import Bootstrap exposing (formGroup)
 import Board exposing (Board(..))
 import Board.Properties exposing (Properties, PieceLength(..), NumRows(..), NumColumns(..), NumColors(..))
-import Board.Position exposing (RowIndex(..), ColumnIndex(..), Position(..))
+import Board.Position exposing (Position)
+import Board.Position.RowIndex as RowIndex exposing (RowIndex)
+import Board.Position.ColumnIndex as ColumnIndex exposing (ColumnIndex)
 import Board.Row as Row exposing (Row(..))
+import Board.Rows as Rows
 import Util.Tuple as Tuple
 
 
@@ -218,7 +221,7 @@ drawRow pieceLength ( rowIndex, Row row ) =
 
         indexedColumn : Int -> a -> ( ColumnIndex, a )
         indexedColumn index a =
-            ( ColumnIndex index, a )
+            ( ColumnIndex.fromInt index, a )
     in
         row
             |> List.indexedMap indexedColumn
@@ -227,18 +230,9 @@ drawRow pieceLength ( rowIndex, Row row ) =
 
 
 drawRows : PieceLength -> Board -> List (Svg Msg)
-drawRows pieceLength board =
-    let
-        indexedRow : Int -> Row -> ( RowIndex, Row )
-        indexedRow index row =
-            ( RowIndex index, row )
-
-        rows =
-            Board.unwrapRows board
-    in
-        rows
-            |> List.indexedMap indexedRow
-            |> List.concatMap (drawRow pieceLength)
+drawRows pieceLength =
+    Board.indexRows
+        >> List.concatMap (drawRow pieceLength)
 
 
 boardRowsFormGroup : NumRows -> List (Html Msg)

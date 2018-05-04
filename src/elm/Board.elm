@@ -5,9 +5,10 @@ import Color exposing (Color)
 import Random exposing (Generator)
 import Random.Array
 import List.Extra as Lextra
-import Maybe.Extra
 import Board.Properties exposing (Properties, PieceLength(..), NumColumns(..))
-import Board.Position as Position exposing (RowIndex(..), ColumnIndex(..), Position(..))
+import Board.Position as Position exposing (Position)
+import Board.Position.RowIndex as RowIndex exposing (RowIndex)
+import Board.Position.ColumnIndex as ColumnIndex exposing (ColumnIndex)
 import Board.Row as Row exposing (Row(..))
 import Board.Rows as Rows exposing (Rows(..))
 
@@ -92,24 +93,18 @@ unwrap (Board rows) =
     rows
 
 
-unwrapRows : Board -> List Row
-unwrapRows =
-    unwrap >> Rows.unwrap
-
-
 pieceAt : Position -> Board -> Maybe Color
-pieceAt (Position ( RowIndex rowIndex, ColumnIndex columnIndex )) =
+pieceAt position =
     let
-        boardToList : Board -> List (List (Maybe Color))
-        boardToList =
-            unwrap
-                >> Rows.unwrap
-                >> List.map Row.unwrap
+        rowIndex =
+            Position.rowIndex position
+
+        columnIndex =
+            Position.columnIndex position
     in
-        boardToList
-            >> Lextra.getAt rowIndex
-            >> Maybe.andThen (Lextra.getAt columnIndex)
-            >> Maybe.Extra.join
+        unwrap
+            >> Rows.getRow rowIndex
+            >> Maybe.andThen (Row.getColumnPiece columnIndex)
 
 
 pieceExistsAt : Position -> Board -> Bool
@@ -233,10 +228,17 @@ removeBlockAt board =
 
 
 rawXCoord : PieceLength -> ColumnIndex -> Int
-rawXCoord (PieceLength pieceLength) (ColumnIndex columnIndex) =
-    pieceLength * columnIndex
+rawXCoord (PieceLength pieceLength) columnIndex =
+    pieceLength * (ColumnIndex.unwrap columnIndex)
 
 
 rawYCoord : PieceLength -> RowIndex -> Int
-rawYCoord (PieceLength pieceLength) (RowIndex rowIndex) =
-    pieceLength * rowIndex
+rawYCoord (PieceLength pieceLength) rowIndex =
+    pieceLength * (RowIndex.unwrap rowIndex)
+
+
+indexRows : Board -> List ( RowIndex, Row )
+indexRows =
+    unwrap
+        >> Rows.unwrap
+        >> List.indexedMap Rows.indexRow

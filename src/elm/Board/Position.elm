@@ -2,14 +2,8 @@ module Board.Position exposing (..)
 
 import Dict exposing (Dict(..))
 import Dict.Extra as Dixtra
-
-
-type RowIndex
-    = RowIndex Int
-
-
-type ColumnIndex
-    = ColumnIndex Int
+import Board.Position.RowIndex as RowIndex exposing (RowIndex)
+import Board.Position.ColumnIndex as ColumnIndex exposing (ColumnIndex)
 
 
 type Position
@@ -17,23 +11,18 @@ type Position
 
 
 unwrapRow : Position -> Int
-unwrapRow (Position ( RowIndex r, _ )) =
-    r
-
-
-unwrapColumnIndex : ColumnIndex -> Int
-unwrapColumnIndex (ColumnIndex c) =
-    c
+unwrapRow (Position ( ri, _ )) =
+    RowIndex.unwrap ri
 
 
 toTuple : Position -> ( Int, Int )
-toTuple (Position ( RowIndex r, ColumnIndex c )) =
-    ( r, c )
+toTuple (Position ( rowIndex, columnIndex )) =
+    ( RowIndex.unwrap rowIndex, ColumnIndex.unwrap columnIndex )
 
 
 fromTuple : ( Int, Int ) -> Position
 fromTuple ( r, c ) =
-    Position ( RowIndex r, ColumnIndex c )
+    Position ( RowIndex.fromInt r, ColumnIndex.fromInt c )
 
 
 fromIndices : RowIndex -> ColumnIndex -> Position
@@ -51,13 +40,13 @@ sort =
 haveSameRow : Position -> Position -> Bool
 haveSameRow pos1 pos2 =
     let
-        (Position ( RowIndex a, _ )) =
+        (Position ( ri1, _ )) =
             pos1
 
-        (Position ( RowIndex b, _ )) =
+        (Position ( ri2, _ )) =
             pos2
     in
-        a == b
+        RowIndex.equals ri1 ri2
 
 
 {-| Return the position's neighbors: north, south, east, west
@@ -81,6 +70,11 @@ columnIndex (Position ( _, columnIndex )) =
     columnIndex
 
 
+rowIndex : Position -> RowIndex
+rowIndex (Position ( rowIndex, _ )) =
+    rowIndex
+
+
 groupColumnIndicesByRow : List Position -> List ( RowIndex, List ColumnIndex )
 groupColumnIndicesByRow positions =
     let
@@ -91,7 +85,7 @@ groupColumnIndicesByRow positions =
 
         positionsToColumnIndices : ( Int, List Position ) -> ( RowIndex, List ColumnIndex )
         positionsToColumnIndices ( rowIndex, rowPositions ) =
-            ( RowIndex rowIndex
+            ( RowIndex.fromInt rowIndex
             , rowPositions |> List.map columnIndex
             )
     in
