@@ -181,3 +181,8 @@ height { numRows, pieceLength } =
             numRows
     in
         (l * r)
+
+
+unwrapPieceLength : PieceLength -> Int
+unwrapPieceLength (PieceLength pl) =
+    pl
