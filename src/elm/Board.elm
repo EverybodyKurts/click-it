@@ -8,7 +8,6 @@ import List.Extra as Lextra
 import Board.Properties exposing (Properties, PieceLength(..), NumColumns(..))
 import Board.Position as Position exposing (Position)
 import Board.Position.RowIndex as RowIndex exposing (RowIndex)
-import Board.Position.ColumnIndex as ColumnIndex exposing (ColumnIndex)
 import Board.Row as Row exposing (Row(..))
 import Board.Rows as Rows exposing (Rows(..))
 
@@ -225,10 +224,3 @@ removeBlockAt : Board -> Position -> Board
 removeBlockAt board =
     findBlockAt board
         >> removeBlockIfMinSize 3 board
-
-
-indexRows : Board -> List ( RowIndex, Row )
-indexRows =
-    unwrap
-        >> Rows.unwrap
-        >> List.indexedMap Rows.indexRow

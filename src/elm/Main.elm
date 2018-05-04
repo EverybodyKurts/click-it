@@ -14,7 +14,7 @@ import Bootstrap exposing (formGroup)
 import Board exposing (Board(..))
 import Board.Properties exposing (Properties, PieceLength(..), NumRows(..), NumColumns(..), NumColors(..))
 import Board.Position as Position exposing (Position)
-import Board.Row as Row exposing (Row(..))
+import Board.Rows as Rows
 
 
 -- MODEL
@@ -176,12 +176,6 @@ update msg model =
 -- VIEW
 
 
-drawRows : PieceLength -> Board -> List (Svg Msg)
-drawRows pieceLength =
-    Board.indexRows
-        >> List.concatMap (Row.draw pieceLength ClickPiece)
-
-
 boardRowsFormGroup : NumRows -> List (Html Msg)
 boardRowsFormGroup (NumRows numRows) =
     [ formGroup
@@ -269,7 +263,9 @@ view model =
                     Board.Properties.height properties
 
                 drawnRows =
-                    drawRows properties.pieceLength board
+                    board
+                    |> Board.unwrap
+                    |> Rows.draw properties.pieceLength ClickPiece
 
                 boardSvg =
                     [ svg
