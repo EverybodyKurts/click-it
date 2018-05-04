@@ -33,7 +33,7 @@ type alias Properties =
 -}
 default : Properties
 default =
-    Properties (NumRows 10) (NumColumns 5) (NumColors 3) (PieceLength 25)
+    Properties (NumRows 15) (NumColumns 10) (NumColors 3) (PieceLength 50)
 
 
 

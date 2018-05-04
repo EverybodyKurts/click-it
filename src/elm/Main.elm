@@ -83,8 +83,7 @@ updateProperties model updatedProperties =
             Prestart updatedProperties
 
 
-{-| Update the board's properties, generate a new board based on those properties,
-and reset the game.
+{-| Update the board's properties, generate a new board based on those properties, and reset the game.
 -}
 updatePropertiesAndBoard : Model -> Properties -> Generator Board -> ( Model, Cmd Msg )
 updatePropertiesAndBoard model properties board =
@@ -292,23 +291,23 @@ boardColorsFormGroup (NumColors numColors) =
 
 boardPropertiesView : NumRows -> NumColumns -> NumColors -> Html Msg
 boardPropertiesView numRows numColumns numColors =
-    div [ class "d-flex flex-row justify-content-center" ]
-        [ div [ class "p-2" ]
+    div [ class "row justify-content-md-center" ]
+        [ div [ class "col-md-3" ]
             (boardRowsFormGroup numRows)
-        , div [ class "p-2" ]
+        , div [ class "col-md-3" ]
             (boardColumnsFormGroup numColumns)
-        , div [ class "p-2" ]
+        , div [ class "col-md-3" ]
             (boardColorsFormGroup numColors)
         ]
 
 
 appView : Properties -> List (Svg Msg) -> Html Msg
 appView ({ numRows, numColumns, numColors } as properties) boardSvg =
-    div []
+    div [ class "container" ]
         [ (boardPropertiesView numRows numColumns numColors)
-        , div [ class "container" ]
-            [ div [ class "row" ]
-                [ div [ class "col-12" ] boardSvg
+        , div []
+            [ div [ class "row justify-content-md-center" ]
+                [ div [ class "col-md-9" ] boardSvg
                 ]
             ]
         ]
