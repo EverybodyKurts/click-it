@@ -5,9 +5,9 @@ import Color exposing (Color)
 import Random exposing (Generator)
 import Random.Array
 import List.Extra as Lextra
+import Svg exposing (Svg)
 import Board.Properties exposing (Properties, PieceLength(..), NumColumns(..))
 import Board.Position as Position exposing (Position)
-import Board.Position.RowIndex as RowIndex exposing (RowIndex)
 import Board.Row as Row exposing (Row(..))
 import Board.Rows as Rows exposing (Rows(..))
 
@@ -224,3 +224,13 @@ removeBlockAt : Board -> Position -> Board
 removeBlockAt board =
     findBlockAt board
         >> removeBlockIfMinSize 3 board
+
+
+
+-- VIEW --
+
+
+draw : PieceLength -> (Position -> msg) -> Board -> List (Svg msg)
+draw pieceLength clickPieceMsg =
+    unwrap
+        >> Rows.draw pieceLength clickPieceMsg

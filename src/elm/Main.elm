@@ -12,7 +12,6 @@ import Random exposing (Generator)
 import Board exposing (Board(..))
 import Board.Properties as Properties exposing (Properties)
 import Board.Position as Position exposing (Position)
-import Board.Rows as Rows
 
 
 -- MODEL
@@ -200,15 +199,14 @@ view model =
                 boardHeight =
                     Properties.height properties
 
-                drawnRows =
+                drawnBoard =
                     board
-                        |> Board.unwrap
-                        |> Rows.draw properties.pieceLength ClickPiece
+                        |> Board.draw properties.pieceLength ClickPiece
 
                 boardSvg =
                     [ svg
                         [ width (toString boardWidth), height (toString boardHeight) ]
-                        drawnRows
+                        drawnBoard
                     ]
             in
                 appView properties boardSvg
