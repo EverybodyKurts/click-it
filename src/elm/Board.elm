@@ -227,7 +227,6 @@ removeBlockAt board =
         >> removeBlockIfMinSize 3 board
 
 
-
 indexRows : Board -> List ( RowIndex, Row )
 indexRows =
     unwrap
