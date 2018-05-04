@@ -227,15 +227,6 @@ removeBlockAt board =
         >> removeBlockIfMinSize 3 board
 
 
-rawXCoord : PieceLength -> ColumnIndex -> Int
-rawXCoord (PieceLength pieceLength) columnIndex =
-    pieceLength * (ColumnIndex.unwrap columnIndex)
-
-
-rawYCoord : PieceLength -> RowIndex -> Int
-rawYCoord (PieceLength pieceLength) rowIndex =
-    pieceLength * (RowIndex.unwrap rowIndex)
-
 
 indexRows : Board -> List ( RowIndex, Row )
 indexRows =
