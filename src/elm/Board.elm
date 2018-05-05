@@ -5,8 +5,10 @@ import Color exposing (Color)
 import Random exposing (Generator)
 import Random.Array
 import List.Extra as Lextra
-import Svg exposing (Svg)
-import Board.Properties exposing (Properties, PieceLength(..), NumColumns(..))
+import Html exposing (Html)
+import Svg exposing (Svg, svg)
+import Svg.Attributes exposing (width, height)
+import Board.Properties as Properties exposing (Properties, PieceLength(..), NumColumns(..))
 import Board.Position as Position exposing (Position)
 import Board.Row as Row exposing (Row(..))
 import Board.Rows as Rows exposing (Rows(..))
@@ -76,7 +78,7 @@ init : Properties -> Generator Board
 init properties =
     let
         ( rows, columns, colors, pieceLength ) =
-            (Board.Properties.raw properties)
+            (Properties.raw properties)
     in
         genPaletteThenBoard rows columns colors
 
@@ -85,7 +87,7 @@ init properties =
 -}
 default : Generator Board
 default =
-    init Board.Properties.default
+    init Properties.default
 
 
 
@@ -239,3 +241,22 @@ draw : PieceLength -> (Position -> msg) -> Board -> List (Svg msg)
 draw pieceLength clickPieceMsg =
     unwrap
         >> Rows.draw pieceLength clickPieceMsg
+
+
+view : (Position -> msg) -> Properties -> Board -> List (Html msg)
+view clickPieceMsg ({ numRows, numColumns, numColors } as properties) board =
+    let
+        boardWidth =
+            Properties.width properties
+
+        boardHeight =
+            Properties.height properties
+
+        drawnBoard =
+            board
+                |> draw properties.pieceLength clickPieceMsg
+    in
+        [ svg
+            [ width (toString boardWidth), height (toString boardHeight) ]
+            drawnBoard
+        ]

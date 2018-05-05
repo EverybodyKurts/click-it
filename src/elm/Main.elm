@@ -3,7 +3,6 @@ module Main exposing (..)
 import Html exposing (Html, h1, text, div, input, label)
 import Html.Attributes exposing (id, class, for, type_, value)
 import Svg exposing (Svg, svg, rect)
-import Svg.Attributes exposing (width, height, viewBox, x, y, rx, ry, fill, stroke)
 import Random exposing (Generator)
 
 
@@ -186,25 +185,10 @@ view model =
         Prestart properties ->
             appView properties []
 
-        Started ({ numRows, numColumns, numColors } as properties) board ->
-            let
-                boardWidth =
-                    Properties.width properties
-
-                boardHeight =
-                    Properties.height properties
-
-                drawnBoard =
-                    board
-                        |> Board.draw properties.pieceLength ClickPiece
-
-                boardSvg =
-                    [ svg
-                        [ width (toString boardWidth), height (toString boardHeight) ]
-                        drawnBoard
-                    ]
-            in
-                appView properties boardSvg
+        Started properties board ->
+            board
+                |> Board.view ClickPiece properties
+                |> appView properties
 
 
 
