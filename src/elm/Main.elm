@@ -1,9 +1,10 @@
 module Main exposing (..)
 
 import Html exposing (Html, h1, text, div, input, label)
-import Html.Attributes exposing (id, class, for, type_, value)
+import Html.Attributes exposing (class, for, type_, value)
 import Svg exposing (Svg, svg, rect)
 import Random exposing (Generator)
+import Bootstrap exposing (container, row)
 
 
 -- User modules
@@ -169,10 +170,10 @@ update msg model =
 
 appView : Properties -> List (Svg Msg) -> Html Msg
 appView properties boardSvg =
-    div [ class "container" ]
+    container
         [ (Properties.view UpdateNumRows UpdateNumColumns UpdateNumColors properties)
         , div []
-            [ div [ class "row justify-content-md-center" ]
+            [ row [ class "justify-content-md-center" ]
                 [ div [ class "col-md-9" ] boardSvg
                 ]
             ]
