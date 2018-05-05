@@ -33,7 +33,7 @@ initModel =
 
 init : ( Model, Cmd Msg )
 init =
-    initModel ! [ generateBoard Board.default ]
+    initModel ! [ Board.generate GeneratedBoard Board.default ]
 
 
 
@@ -46,11 +46,6 @@ type Msg
     | UpdateNumColumns String
     | UpdateNumColors String
     | ClickPiece Position
-
-
-generateBoard : Generator Board -> Cmd Msg
-generateBoard =
-    Random.generate GeneratedBoard
 
 
 updateBoard : Model -> Board -> Model
@@ -79,7 +74,7 @@ updateProperties model updatedProperties =
 -}
 updatePropertiesAndBoard : Model -> Properties -> Generator Board -> ( Model, Cmd Msg )
 updatePropertiesAndBoard model properties board =
-    (updateProperties model properties) ! [ generateBoard board ]
+    (updateProperties model properties) ! [ Board.generate GeneratedBoard board ]
 
 
 updateNumRows : Model -> Properties -> String -> ( Model, Cmd Msg )

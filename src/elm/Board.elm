@@ -28,6 +28,11 @@ type Destinations
 -- BOARD INITIALIZATION
 
 
+generate : (Board -> msg) -> Generator Board -> Cmd msg
+generate =
+    Random.generate
+
+
 {-| Generate a random color
 -}
 genRandomColor : Generator Color
