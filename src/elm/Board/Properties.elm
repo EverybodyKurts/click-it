@@ -1,5 +1,10 @@
 module Board.Properties exposing (..)
 
+import Html exposing (Html, label, text, input, div)
+import Html.Attributes exposing (for, type_, value, class, id)
+import Html.Events exposing (onInput)
+import Bootstrap exposing (formGroup)
+
 
 type NumRows
     = NumRows Int
@@ -181,3 +186,71 @@ height { numRows, pieceLength } =
             numRows
     in
         (l * r)
+
+
+unwrapPieceLength : PieceLength -> Int
+unwrapPieceLength (PieceLength pl) =
+    pl
+
+
+
+-- VIEW --
+
+
+rowsFormGroup : (String -> msg) -> NumRows -> List (Html msg)
+rowsFormGroup updateNumRowsMsg (NumRows numRows) =
+    [ formGroup
+        [ label [ for "boardRows" ] [ (text "Rows") ]
+        , input
+            [ type_ "number"
+            , value (toString numRows)
+            , class "form-control"
+            , id "boardRows"
+            , onInput updateNumRowsMsg
+            ]
+            []
+        ]
+    ]
+
+
+columnsFormGroup : (String -> msg) -> NumColumns -> List (Html msg)
+columnsFormGroup updateNumColumnsMsg (NumColumns numColumns) =
+    [ formGroup
+        [ label [ for "boardColumns" ] [ (text "Columns") ]
+        , input
+            [ type_ "number"
+            , value (toString numColumns)
+            , class "form-control"
+            , id "boardColumns"
+            , onInput updateNumColumnsMsg
+            ]
+            []
+        ]
+    ]
+
+
+colorsFormGroup : (String -> msg) -> NumColors -> List (Html msg)
+colorsFormGroup updateNumColorsMsg (NumColors numColors) =
+    [ formGroup
+        [ label [ for "numColors" ] [ (text "# of Colors") ]
+        , input
+            [ type_ "number"
+            , value (toString numColors)
+            , class "form-control"
+            , id "numColors"
+            , onInput updateNumColorsMsg
+            ]
+            []
+        ]
+    ]
+
+view : (String -> msg) -> (String -> msg) -> (String -> msg) -> Properties -> Html msg
+view updateNumRowsMsg updateNumColumnsMsg updateNumColorsMsg { numRows, numColumns, numColors } =
+    div [ class "row justify-content-md-center" ]
+        [ div [ class "col-md-3" ]
+            (rowsFormGroup updateNumRowsMsg numRows)
+        , div [ class "col-md-3" ]
+            (columnsFormGroup updateNumColumnsMsg numColumns)
+        , div [ class "col-md-3" ]
+            (colorsFormGroup updateNumColorsMsg numColors)
+        ]

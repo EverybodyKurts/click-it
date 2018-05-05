@@ -5,9 +5,11 @@ import Color exposing (Color)
 import Random exposing (Generator)
 import Random.Array
 import List.Extra as Lextra
-import Maybe.Extra
-import Board.Properties exposing (Properties, PieceLength(..), NumColumns(..))
-import Board.Position as Position exposing (RowIndex(..), ColumnIndex(..), Position(..))
+import Html exposing (Html)
+import Svg exposing (Svg, svg)
+import Svg.Attributes exposing (width, height)
+import Board.Properties as Properties exposing (Properties, PieceLength(..), NumColumns(..))
+import Board.Position as Position exposing (Position)
 import Board.Row as Row exposing (Row(..))
 import Board.Rows as Rows exposing (Rows(..))
 
@@ -26,6 +28,11 @@ type Destinations
 
 
 -- BOARD INITIALIZATION
+
+
+generate : (Board -> msg) -> Generator Board -> Cmd msg
+generate =
+    Random.generate
 
 
 {-| Generate a random color
@@ -71,7 +78,7 @@ init : Properties -> Generator Board
 init properties =
     let
         ( rows, columns, colors, pieceLength ) =
-            (Board.Properties.raw properties)
+            (Properties.raw properties)
     in
         genPaletteThenBoard rows columns colors
 
@@ -80,7 +87,7 @@ init properties =
 -}
 default : Generator Board
 default =
-    init Board.Properties.default
+    init Properties.default
 
 
 
@@ -92,24 +99,18 @@ unwrap (Board rows) =
     rows
 
 
-unwrapRows : Board -> List Row
-unwrapRows =
-    unwrap >> Rows.unwrap
-
-
 pieceAt : Position -> Board -> Maybe Color
-pieceAt (Position ( RowIndex rowIndex, ColumnIndex columnIndex )) =
+pieceAt position =
     let
-        boardToList : Board -> List (List (Maybe Color))
-        boardToList =
-            unwrap
-                >> Rows.unwrap
-                >> List.map Row.unwrap
+        rowIndex =
+            Position.rowIndex position
+
+        columnIndex =
+            Position.columnIndex position
     in
-        boardToList
-            >> Lextra.getAt rowIndex
-            >> Maybe.andThen (Lextra.getAt columnIndex)
-            >> Maybe.Extra.join
+        unwrap
+            >> Rows.getRow rowIndex
+            >> Maybe.andThen (Row.getColumnPiece columnIndex)
 
 
 pieceExistsAt : Position -> Board -> Bool
@@ -232,11 +233,30 @@ removeBlockAt board =
         >> removeBlockIfMinSize 3 board
 
 
-rawXCoord : PieceLength -> ColumnIndex -> Int
-rawXCoord (PieceLength pieceLength) (ColumnIndex columnIndex) =
-    pieceLength * columnIndex
+
+-- VIEW --
 
 
-rawYCoord : PieceLength -> RowIndex -> Int
-rawYCoord (PieceLength pieceLength) (RowIndex rowIndex) =
-    pieceLength * rowIndex
+draw : PieceLength -> (Position -> msg) -> Board -> List (Svg msg)
+draw pieceLength clickPieceMsg =
+    unwrap
+        >> Rows.draw pieceLength clickPieceMsg
+
+
+view : (Position -> msg) -> Properties -> Board -> List (Html msg)
+view clickPieceMsg ({ numRows, numColumns, numColors } as properties) board =
+    let
+        boardWidth =
+            Properties.width properties
+
+        boardHeight =
+            Properties.height properties
+
+        drawnBoard =
+            board
+                |> draw properties.pieceLength clickPieceMsg
+    in
+        [ svg
+            [ width (toString boardWidth), height (toString boardHeight) ]
+            drawnBoard
+        ]

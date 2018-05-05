@@ -1,9 +1,13 @@
 module Board.Rows exposing (..)
 
 import Color exposing (Color)
-import Board.Position exposing (ColumnIndex(..), RowIndex(..))
-import Board.Row as Row exposing (Row(..))
+import Board.Properties exposing (PieceLength)
+import Board.Position as Position exposing (Position)
+import Board.Position.RowIndex as RowIndex exposing (RowIndex)
+import Board.Position.ColumnIndex as ColumnIndex exposing (ColumnIndex)
+import Board.Row as Row exposing (Row)
 import List.Extra as Lextra
+import Svg exposing (Svg)
 
 
 type Rows
@@ -18,7 +22,7 @@ unwrap (Rows rows) =
 fromList : List (List (Maybe Color)) -> Rows
 fromList list =
     list
-        |> List.map Row
+        |> List.map Row.fromMaybeColors
         |> Rows
 
 
@@ -28,33 +32,60 @@ toList (Rows rows) =
         |> List.map Row.unwrap
 
 
-removeBlock : List ( RowIndex, List ColumnIndex ) -> Rows -> Rows
-removeBlock groupedColumnIndices (Rows rows) =
+setRow : RowIndex -> Rows -> Row -> Maybe Rows
+setRow rowIndex (Rows rows) row =
     let
-        setRow : RowIndex -> List Row -> Row -> Maybe (List Row)
-        setRow (RowIndex rowIndex) rows row =
-            Lextra.setAt rowIndex row rows
+        ri =
+            RowIndex.unwrap rowIndex
     in
-        case Lextra.uncons groupedColumnIndices of
-            Just ( ( RowIndex rowIndex, columnIndices ), restRowGroups ) ->
-                Lextra.getAt rowIndex rows
-                    |> Maybe.map (Row.removePieces columnIndices)
-                    |> Maybe.andThen (setRow (RowIndex rowIndex) rows)
-                    |> Maybe.withDefault rows
-                    |> Rows
-                    |> removeBlock restRowGroups
+        rows
+            |> Lextra.setAt ri row
+            |> Maybe.map Rows
 
-            Nothing ->
-                (Rows rows)
+
+getRow : RowIndex -> Rows -> Maybe Row
+getRow rowIndex (Rows rows) =
+    let
+        ri =
+            RowIndex.unwrap rowIndex
+    in
+        rows
+            |> Lextra.getAt ri
+
+
+removeBlock : List ( RowIndex, List ColumnIndex ) -> Rows -> Rows
+removeBlock groupedColumnIndices rows =
+    case Lextra.uncons groupedColumnIndices of
+        Just ( ( rowIndex, columnIndices ), restRowGroups ) ->
+            getRow rowIndex rows
+                |> Maybe.map (Row.removePieces columnIndices)
+                |> Maybe.andThen (setRow rowIndex rows)
+                |> Maybe.withDefault rows
+                |> removeBlock restRowGroups
+
+        Nothing ->
+            rows
 
 
 slideDownLeft : Rows -> Rows
 slideDownLeft =
     toList
         >> Lextra.transpose
-        >> List.map (Row >> Row.slideRight)
+        >> List.map (Row.fromMaybeColors >> Row.slideRight)
         >> List.filter (Row.isNotEmpty)
         >> List.map Row.unwrap
         >> Lextra.transpose
-        >> List.map Row
+        >> List.map Row.fromMaybeColors
         >> Rows
+
+
+indexRow : Int -> Row -> ( RowIndex, Row )
+indexRow ri row =
+    ( RowIndex.fromInt ri, row )
+
+
+draw : PieceLength -> (Position -> msg) -> Rows -> List (Svg msg)
+draw pieceLength clickPieceMsg =
+    unwrap
+        >> List.indexedMap indexRow
+        >> List.concatMap (Row.draw pieceLength clickPieceMsg)
