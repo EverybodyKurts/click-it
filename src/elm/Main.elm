@@ -1,25 +1,17 @@
 module Main exposing (..)
 
-import Maybe exposing (Maybe)
 import Html exposing (Html, h1, text, div, input, label)
-import Html.Attributes exposing (id, class, for, type_, value)
-import Html.Events exposing (onInput)
+import Html.Attributes exposing (class, for, type_, value)
 import Svg exposing (Svg, svg, rect)
-import Svg.Attributes exposing (width, height, viewBox, x, y, rx, ry, fill, stroke)
-import Svg.Events exposing (onClick)
-import Color exposing (Color)
-import Color.Convert exposing (colorToHex)
 import Random exposing (Generator)
+import Bootstrap exposing (container, row)
 
 
 -- User modules
 
-import Bootstrap exposing (formGroup)
-import Board exposing (Board(..), XCoord(..), YCoord(..))
-import Board.Properties exposing (Properties, PieceLength(..), NumRows(..), NumColumns(..), NumColors(..))
-import Board.Position exposing (RowIndex(..), ColumnIndex(..), Position(..))
-import Board.Row as Row exposing (Row(..))
-import Board.Rows as Rows exposing (Rows(..))
+import Board exposing (Board)
+import Board.Properties as Properties exposing (Properties)
+import Board.Position as Position exposing (Position)
 
 
 -- MODEL
@@ -32,7 +24,7 @@ type Model
 
 initModel : Model
 initModel =
-    Prestart Board.Properties.default
+    Prestart Properties.default
 
 
 
@@ -41,16 +33,19 @@ initModel =
 
 init : ( Model, Cmd Msg )
 init =
-    initModel ! [ generateBoard Board.default ]
+    initModel ! [ Board.generate GeneratedBoard Board.default ]
 
 
 
 -- UPDATE
 
 
-generateBoard : Generator Board -> Cmd Msg
-generateBoard board =
-    Random.generate GeneratedBoard board
+type Msg
+    = GeneratedBoard Board
+    | UpdateNumRows String
+    | UpdateNumColumns String
+    | UpdateNumColors String
+    | ClickPiece Position
 
 
 updateBoard : Model -> Board -> Model
@@ -63,6 +58,8 @@ updateBoard model board =
             Started properties board
 
 
+{-| Whenever a board's properties are updated, reset the game.
+-}
 updateProperties : Model -> Properties -> Model
 updateProperties model updatedProperties =
     case model of
@@ -73,24 +70,18 @@ updateProperties model updatedProperties =
             Prestart updatedProperties
 
 
+{-| Update the board's properties, generate a new board based on those properties, and reset the game.
+-}
 updatePropertiesAndBoard : Model -> Properties -> Generator Board -> ( Model, Cmd Msg )
 updatePropertiesAndBoard model properties board =
-    (updateProperties model properties) ! [ generateBoard board ]
-
-
-type Msg
-    = GeneratedBoard Board
-    | UpdateNumRows String
-    | UpdateNumColumns String
-    | UpdateNumColors String
-    | ClickPiece Position
+    (updateProperties model properties) ! [ Board.generate GeneratedBoard board ]
 
 
 updateNumRows : Model -> Properties -> String -> ( Model, Cmd Msg )
 updateNumRows model properties numRows =
     let
         updatedProperties =
-            Board.Properties.updateNumRowsOrDefault properties numRows
+            Properties.updateNumRowsOrDefault properties numRows
 
         updatedBoard =
             Board.init updatedProperties
@@ -102,7 +93,7 @@ updateNumColumns : Model -> Properties -> String -> ( Model, Cmd Msg )
 updateNumColumns model properties numColumns =
     let
         updatedProperties =
-            Board.Properties.updateNumColumnsOrDefault properties numColumns
+            Properties.updateNumColumnsOrDefault properties numColumns
 
         updatedBoard =
             Board.init updatedProperties
@@ -114,7 +105,7 @@ updateNumColors : Model -> Properties -> String -> ( Model, Cmd Msg )
 updateNumColors model properties numColors =
     let
         updatedProperties =
-            Board.Properties.updateNumColorsOrDefault properties numColors
+            Properties.updateNumColorsOrDefault properties numColors
 
         updatedBoard =
             Board.init updatedProperties
@@ -177,165 +168,28 @@ update msg model =
 -- VIEW
 
 
-drawPiece : PieceLength -> RowIndex -> ( ColumnIndex, Color ) -> Svg Msg
-drawPiece pieceLength rowIndex ( columnIndex, color ) =
-    let
-        (PieceLength length) =
-            pieceLength
-
-        (XCoord xCoord) =
-            Board.xCoord pieceLength columnIndex
-
-        (YCoord yCoord) =
-            Board.yCoord pieceLength rowIndex
-    in
-        rect
-            [ x (toString xCoord)
-            , y (toString yCoord)
-            , width (toString length)
-            , height (toString length)
-            , fill (colorToHex color)
-            , stroke "#ddd"
-            , onClick (ClickPiece (Position ( rowIndex, columnIndex )))
+appView : Properties -> List (Svg Msg) -> Html Msg
+appView properties boardSvg =
+    container
+        [ (Properties.view UpdateNumRows UpdateNumColumns UpdateNumColors properties)
+        , div []
+            [ row [ class "justify-content-md-center" ]
+                [ div [ class "col-md-9" ] boardSvg
+                ]
             ]
-            []
-
-
-drawRow : PieceLength -> ( RowIndex, Row ) -> List (Svg Msg)
-drawRow pieceLength ( rowIndex, Row row ) =
-    let
-        keepExistingIndexedColors : ( a, Maybe b ) -> Maybe ( a, b )
-        keepExistingIndexedColors ( index, maybeColor ) =
-            case maybeColor of
-                Just color ->
-                    Just ( index, color )
-
-                _ ->
-                    Nothing
-
-        columnIndexTuple : Int -> a -> ( ColumnIndex, a )
-        columnIndexTuple rawIndex a =
-            ( ColumnIndex rawIndex, a )
-
-        indexedPieces =
-            row
-                |> List.indexedMap columnIndexTuple
-                |> List.filterMap keepExistingIndexedColors
-                |> List.map (drawPiece pieceLength rowIndex)
-    in
-        indexedPieces
-
-
-drawRows : PieceLength -> Board -> List (Svg Msg)
-drawRows pieceLength board =
-    let
-        rowIndexTuple : Int -> a -> ( RowIndex, a )
-        rowIndexTuple rawIndex a =
-            ( RowIndex rawIndex, a )
-
-        (Board (Rows rows)) =
-            board
-    in
-        rows
-            |> List.indexedMap rowIndexTuple
-            |> List.concatMap (drawRow pieceLength)
-
-
-boardRowsFormGroup : NumRows -> List (Html Msg)
-boardRowsFormGroup (NumRows numRows) =
-    [ formGroup
-        [ label [ for "boardRows" ] [ (text "Rows") ]
-        , input
-            [ type_ "number"
-            , value (toString numRows)
-            , class "form-control"
-            , id "boardRows"
-            , onInput UpdateNumRows
-            ]
-            []
-        ]
-    ]
-
-
-boardColumnsFormGroup : NumColumns -> List (Html Msg)
-boardColumnsFormGroup (NumColumns numColumns) =
-    [ formGroup
-        [ label [ for "boardColumns" ] [ (text "Columns") ]
-        , input
-            [ type_ "number"
-            , value (toString numColumns)
-            , class "form-control"
-            , id "boardColumns"
-            , onInput UpdateNumColumns
-            ]
-            []
-        ]
-    ]
-
-
-boardColorsFormGroup : NumColors -> List (Html Msg)
-boardColorsFormGroup (NumColors numColors) =
-    [ formGroup
-        [ label [ for "numColors" ] [ (text "# of Colors") ]
-        , input
-            [ type_ "number"
-            , value (toString numColors)
-            , class "form-control"
-            , id "numColors"
-            , onInput UpdateNumColors
-            ]
-            []
-        ]
-    ]
-
-
-boardPropertiesView : NumRows -> NumColumns -> NumColors -> Html Msg
-boardPropertiesView numRows numColumns numColors =
-    div [ class "d-flex flex-row" ]
-        [ div [ class "p-2" ]
-            (boardRowsFormGroup numRows)
-        , div [ class "p-2" ]
-            (boardColumnsFormGroup numColumns)
-        , div [ class "p-2" ]
-            (boardColorsFormGroup numColors)
         ]
 
 
 view : Model -> Html Msg
 view model =
     case model of
-        Prestart ({ numRows, numColumns, numColors } as properties) ->
-            div []
-                [ div [ class "d-flex flex-row" ]
-                    [ (boardPropertiesView numRows numColumns numColors) ]
-                , div [ class "d-flex flex-row" ]
-                    [ div [ class "p-12" ]
-                        []
-                    ]
-                ]
+        Prestart properties ->
+            appView properties []
 
-        Started ({ numRows, numColumns, numColors } as properties) board ->
-            let
-                boardWidth =
-                    Board.Properties.width properties
-
-                boardHeight =
-                    Board.Properties.height properties
-
-                drawnRows =
-                    drawRows properties.pieceLength board
-            in
-                div []
-                    [ div [ class "d-flex flex-row" ]
-                        [ (boardPropertiesView numRows numColumns numColors) ]
-                    , div [ class "d-flex flex-row" ]
-                        [ div [ class "p-12" ]
-                            [ svg
-                                [ width (toString boardWidth), height (toString boardHeight) ]
-                                drawnRows
-                            ]
-                        ]
-                    ]
+        Started properties board ->
+            board
+                |> Board.view ClickPiece properties
+                |> appView properties
 
 
 
