@@ -198,7 +198,7 @@ view model =
 
 
 subscriptions : Model -> Sub Msg
-subscriptions model =
+subscriptions _ =
     Sub.none
 
 
@@ -206,11 +206,10 @@ subscriptions model =
 -- MAIN
 
 
-main : Program Never Model Msg
 main =
-    Html.program
-        { init = init
-        , view = view
+    Browser.element
+        { view = view
+        , init = init
         , update = update
-        , subscriptions = subscriptions
+        , subscriptions = always Sub.none
         }
