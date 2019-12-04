@@ -6,3 +6,4 @@ yarn.lock
 
 
 .DS_Store
+elm-upgrade*.log
