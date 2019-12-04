@@ -18,7 +18,7 @@ console.log('\x1b[36m%s\x1b[0m', `** elm-webpack-starter: mode "${MODE}", withDe
 
 var common = {
     mode: MODE,
-    entry: "./src/index.js",
+    entry: "./src/static/index.js",
     output: {
         path: path.join(__dirname, "dist"),
         publicPath: "/",
@@ -28,7 +28,7 @@ var common = {
     plugins: [
         new HTMLWebpackPlugin({
             // Use this template to get basic responsive meta tags
-            template: "src/index.html",
+            template: "src/static/index.html",
             // inject details of output file at end of body
             inject: "body"
         })
