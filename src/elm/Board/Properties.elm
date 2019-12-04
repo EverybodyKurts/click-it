@@ -41,28 +41,33 @@ default =
     Properties (NumRows 15) (NumColumns 10) (NumColors 3) (PieceLength 50)
 
 
+rowInt : Properties -> Int
+rowInt { numRows } =
+    let
+        (NumRows nr) =
+            numRows
+    in
+    nr
+
+
+columnInt : Properties -> Int
+columnInt { numColumns } =
+    let
+        (NumColumns nc) =
+            numColumns
+    in
+    nc
+colorInt : Properties -> Int
+colorInt { numColors } =
+    let
+        (NumColors nc) =
+            numColors
+    in
+    nc
+
+
 
 -- ACCESSING PROPERTIES
-
-
-{-| Return the board's properties as a tuple of integers.
--}
-raw : Properties -> ( Int, Int, Int, Int )
-raw { numRows, numColumns, numColors, pieceLength } =
-    let
-        (NumRows rows) =
-            numRows
-
-        (NumColumns columns) =
-            numColumns
-
-        (NumColors colors) =
-            numColors
-
-        (PieceLength pl) =
-            pieceLength
-    in
-    ( rows, columns, colors, pl )
 
 
 {-| Get the board's total # of pieces, based on the # of its rows & columns.
@@ -92,12 +97,12 @@ updateNumRows properties numRows =
 
 {-| Update the number of rows from a string, most likely user input.
 -}
-updateNumRowsFromString : Properties -> String -> Result String Properties
+updateNumRowsFromString : Properties -> String -> Maybe Properties
 updateNumRowsFromString properties =
     String.toInt
-        >> Result.map (clamp 1 100)
-        >> Result.map NumRows
-        >> Result.map (updateNumRows properties)
+        >> Maybe.map (clamp 1 100)
+        >> Maybe.map NumRows
+        >> Maybe.map (updateNumRows properties)
 
 
 {-| Update # of rows from user input or provide default # of rows.
@@ -105,7 +110,7 @@ updateNumRowsFromString properties =
 updateNumRowsOrDefault : Properties -> String -> Properties
 updateNumRowsOrDefault properties =
     updateNumRowsFromString properties
-        >> Result.withDefault default
+        >> Maybe.withDefault default
 
 
 updateNumColumns : Properties -> NumColumns -> Properties
@@ -115,12 +120,12 @@ updateNumColumns properties numColumns =
 
 {-| Update the board's # of columns from a string, most likely user input.
 -}
-updateNumColumnsFromString : Properties -> String -> Result String Properties
+updateNumColumnsFromString : Properties -> String -> Maybe Properties
 updateNumColumnsFromString properties =
     String.toInt
-        >> Result.map (clamp 1 100)
-        >> Result.map NumColumns
-        >> Result.map (updateNumColumns properties)
+        >> Maybe.map (clamp 1 100)
+        >> Maybe.map NumColumns
+        >> Maybe.map (updateNumColumns properties)
 
 
 {-| Update the board's # of columns based on user input or provide default # of columns
@@ -128,7 +133,7 @@ updateNumColumnsFromString properties =
 updateNumColumnsOrDefault : Properties -> String -> Properties
 updateNumColumnsOrDefault properties =
     updateNumColumnsFromString properties
-        >> Result.withDefault default
+        >> Maybe.withDefault default
 
 
 {-| Update the board's number of colors.
@@ -140,12 +145,12 @@ updateNumColors properties numColors =
 
 {-| Update the board's # of colors from a string, most likely user input.
 -}
-updateNumColorsFromString : Properties -> String -> Result String Properties
+updateNumColorsFromString : Properties -> String -> Maybe Properties
 updateNumColorsFromString properties =
     String.toInt
-        >> Result.map (clamp 1 100)
-        >> Result.map NumColors
-        >> Result.map (updateNumColors properties)
+        >> Maybe.map (clamp 1 100)
+        >> Maybe.map NumColors
+        >> Maybe.map (updateNumColors properties)
 
 
 {-| Update the board's # of colors based on user input or provide default # of colors
@@ -153,7 +158,7 @@ updateNumColorsFromString properties =
 updateNumColorsOrDefault : Properties -> String -> Properties
 updateNumColorsOrDefault properties =
     updateNumColorsFromString properties
-        >> Result.withDefault default
+        >> Maybe.withDefault default
 
 
 

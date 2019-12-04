@@ -5,7 +5,6 @@ import Board.Position.ColumnIndex as ColumnIndex
 import Board.Position.RowIndex as RowIndex
 import Board.Properties as Properties exposing (PieceLength)
 import Color exposing (Color)
-import Color.Convert exposing (colorToHex)
 import Svg exposing (Svg, rect)
 import Svg.Attributes exposing (fill, height, stroke, width, x, y)
 import Svg.Events exposing (onClick)
@@ -73,11 +72,11 @@ draw clickMsg ({ position, color, length } as piece) =
             Position.fromIndices rowIndex columnIndex
     in
     rect
-        [ x (toString xCoord)
-        , y (toString yCoord)
-        , width (toString rawPieceLength)
-        , height (toString rawPieceLength)
-        , fill (colorToHex color)
+        [ x (String.fromInt xCoord)
+        , y (String.fromInt yCoord)
+        , width (String.fromInt rawPieceLength)
+        , height (String.fromInt rawPieceLength)
+        , fill (Color.toCssString color)
         , stroke "#ddd"
         , onClick (clickMsg pos)
         ]

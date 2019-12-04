@@ -46,8 +46,8 @@ removeColumnPiece columnIndex row =
         (Row colors) =
             row
     in
-    List.setAt (ColumnIndex.unwrap columnIndex) Nothing colors
-        |> Maybe.withDefault colors
+    colors
+        |> List.setAt (ColumnIndex.unwrap columnIndex) Nothing
         |> Row
 
 

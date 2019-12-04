@@ -3,6 +3,7 @@ module Main exposing (..)
 import Board exposing (Board)
 import Board.Position as Position exposing (Position)
 import Board.Properties as Properties exposing (Properties)
+import Browser
 import Bootstrap exposing (container, row)
 import Html exposing (Html, div, h1, input, label, text)
 import Html.Attributes exposing (class, for, type_, value)
@@ -28,8 +29,8 @@ initModel =
 -- INIT
 
 
-init : ( Model, Cmd Msg )
-init =
+init : Flags -> ( Model, Cmd Msg )
+init _ =
     ( initModel
     , Board.generate GeneratedBoard Board.default
     )
@@ -140,10 +141,10 @@ update msg model =
 
         Started properties board ->
             case msg of
-                GeneratedBoard board ->
+                GeneratedBoard bd ->
                     let
                         updatedModel =
-                            updateBoard model board
+                            updateBoard model bd
                     in
                     ( updatedModel, Cmd.none )
 
@@ -204,6 +205,9 @@ subscriptions _ =
 
 
 -- MAIN
+
+type alias Flags =
+    {  }
 
 
 main =

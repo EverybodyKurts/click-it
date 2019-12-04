@@ -39,7 +39,7 @@ generate =
 -}
 genRandomColor : Generator Color
 genRandomColor =
-    Random.map3 Color.rgb (Random.int 0 255) (Random.int 0 255) (Random.int 0 255)
+    Random.map3 Color.rgb255 (Random.int 0 255) (Random.int 0 255) (Random.int 0 255)
 
 
 {-| Generate a color palette to use in the board
@@ -76,11 +76,10 @@ genPaletteThenBoard numRows numColumns numColors =
 -}
 init : Properties -> Generator Board
 init properties =
-    let
-        ( rows, columns, colors, pieceLength ) =
-            Properties.raw properties
-    in
-    genPaletteThenBoard rows columns colors
+    genPaletteThenBoard
+        (Properties.rowInt properties)
+        (Properties.columnInt properties)
+        (Properties.colorInt properties)
 
 
 {-| Generate the default board
@@ -129,12 +128,12 @@ neighborsWithSameColor board position =
         Just color ->
             let
                 keepPositionIfSameColor : Board -> Color -> Position -> Maybe Position
-                keepPositionIfSameColor board color position =
-                    board
-                        |> pieceAt position
+                keepPositionIfSameColor bd col pos =
+                    bd
+                        |> pieceAt pos
                         |> Maybe.andThen
                             (\pieceColor ->
-                                if pieceColor == color then
+                                if pieceColor == col then
                                     Just position
 
                                 else
@@ -259,6 +258,6 @@ view clickPieceMsg ({ numRows, numColumns, numColors } as properties) board =
                 |> draw properties.pieceLength clickPieceMsg
     in
     [ svg
-        [ width (toString boardWidth), height (toString boardHeight) ]
+        [ width (String.fromInt boardWidth), height (String.fromInt boardHeight) ]
         drawnBoard
     ]

@@ -32,7 +32,7 @@ toList (Rows rows) =
         |> List.map Row.unwrap
 
 
-setRow : RowIndex -> Rows -> Row -> Maybe Rows
+setRow : RowIndex -> Rows -> Row -> Rows
 setRow rowIndex (Rows rows) row =
     let
         ri =
@@ -40,7 +40,7 @@ setRow rowIndex (Rows rows) row =
     in
     rows
         |> List.setAt ri row
-        |> Maybe.map Rows
+        |> Rows
 
 
 getRow : RowIndex -> Rows -> Maybe Row
@@ -59,9 +59,9 @@ removeBlock groupedColumnIndices rows =
         Just ( ( rowIndex, columnIndices ), restRowGroups ) ->
             getRow rowIndex rows
                 |> Maybe.map (Row.removePieces columnIndices)
-                |> Maybe.andThen (setRow rowIndex rows)
+                |> Maybe.map (setRow rowIndex rows)
+                |> Maybe.map (removeBlock restRowGroups)
                 |> Maybe.withDefault rows
-                |> removeBlock restRowGroups
 
         Nothing ->
             rows
