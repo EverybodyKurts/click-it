@@ -1,17 +1,17 @@
 module Board exposing (..)
 
 import Array exposing (Array)
-import Color exposing (Color)
-import Random exposing (Generator)
-import Random.Array
-import List.Extra as Lextra
-import Html exposing (Html)
-import Svg exposing (Svg, svg)
-import Svg.Attributes exposing (width, height)
-import Board.Properties as Properties exposing (Properties, PieceLength(..), NumColumns(..))
 import Board.Position as Position exposing (Position)
+import Board.Properties as Properties exposing (NumColumns(..), PieceLength(..), Properties)
 import Board.Row as Row exposing (Row(..))
 import Board.Rows as Rows exposing (Rows(..))
+import Color exposing (Color)
+import Html exposing (Html)
+import List.Extra as List
+import Random exposing (Generator)
+import Random.Array
+import Svg exposing (Svg, svg)
+import Svg.Attributes exposing (height, width)
 
 
 type Board
@@ -51,7 +51,7 @@ genColorPalette numColors =
 
 colorsToBoard : Int -> List (Maybe Color) -> Board
 colorsToBoard numColumns =
-    Lextra.groupsOf numColumns
+    List.groupsOf numColumns
         >> Rows.fromList
         >> Board
 
@@ -78,9 +78,9 @@ init : Properties -> Generator Board
 init properties =
     let
         ( rows, columns, colors, pieceLength ) =
-            (Properties.raw properties)
+            Properties.raw properties
     in
-        genPaletteThenBoard rows columns colors
+    genPaletteThenBoard rows columns colors
 
 
 {-| Generate the default board
@@ -108,9 +108,9 @@ pieceAt position =
         columnIndex =
             Position.columnIndex position
     in
-        unwrap
-            >> Rows.getRow rowIndex
-            >> Maybe.andThen (Row.getColumnPiece columnIndex)
+    unwrap
+        >> Rows.getRow rowIndex
+        >> Maybe.andThen (Row.getColumnPiece columnIndex)
 
 
 pieceExistsAt : Position -> Board -> Bool
@@ -136,12 +136,13 @@ neighborsWithSameColor board position =
                             (\pieceColor ->
                                 if pieceColor == color then
                                     Just position
+
                                 else
                                     Nothing
                             )
             in
-                Position.neighbors position
-                    |> List.filterMap (keepPositionIfSameColor board color)
+            Position.neighbors position
+                |> List.filterMap (keepPositionIfSameColor board color)
 
         Nothing ->
             []
@@ -149,21 +150,21 @@ neighborsWithSameColor board position =
 
 fcb : Board -> ColorBlock -> Destinations -> List Position
 fcb board (ColorBlock colorBlock) (Destinations destinations) =
-    case Lextra.uncons destinations of
+    case List.uncons destinations of
         Just ( nextPosition, restDestinations ) ->
             let
                 updatedColorBlock =
                     nextPosition :: colorBlock
 
                 alreadyAdded =
-                    flip List.member updatedColorBlock
+                    \a -> List.member a updatedColorBlock
             in
-                nextPosition
-                    |> (neighborsWithSameColor board)
-                    |> Lextra.filterNot alreadyAdded
-                    |> List.append restDestinations
-                    |> Destinations
-                    |> (fcb board (ColorBlock updatedColorBlock))
+            nextPosition
+                |> neighborsWithSameColor board
+                |> List.filterNot alreadyAdded
+                |> List.append restDestinations
+                |> Destinations
+                |> fcb board (ColorBlock updatedColorBlock)
 
         Nothing ->
             colorBlock
@@ -180,8 +181,8 @@ findBlockAt board position =
                 colorBlock =
                     ColorBlock [ position ]
             in
-                fcb board colorBlock destinations
-                    |> Position.sort
+            fcb board colorBlock destinations
+                |> Position.sort
 
         False ->
             []
@@ -210,8 +211,8 @@ removeBlock (Board rows) colorBlock =
         blockGroupedByRow =
             Position.groupColumnIndicesByRow colorBlock
     in
-        Rows.removeBlock blockGroupedByRow rows
-            |> Board
+    Rows.removeBlock blockGroupedByRow rows
+        |> Board
 
 
 {-| Remove the block from the board if it's at least the minimum specified # of pieces.
@@ -223,6 +224,7 @@ removeBlockIfMinSize minSize board positions =
             |> unwrap
             |> Rows.slideDownLeft
             |> Board
+
     else
         board
 
@@ -256,7 +258,7 @@ view clickPieceMsg ({ numRows, numColumns, numColors } as properties) board =
             board
                 |> draw properties.pieceLength clickPieceMsg
     in
-        [ svg
-            [ width (toString boardWidth), height (toString boardHeight) ]
-            drawnBoard
-        ]
+    [ svg
+        [ width (toString boardWidth), height (toString boardHeight) ]
+        drawnBoard
+    ]

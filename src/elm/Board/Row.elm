@@ -1,15 +1,15 @@
 module Board.Row exposing (..)
 
-import Color exposing (Color)
-import Board.Properties as Properties exposing (PieceLength)
-import Board.Position as Position exposing (Position)
 import Board.Piece as Piece
+import Board.Position as Position exposing (Position)
 import Board.Position.ColumnIndex as ColumnIndex exposing (ColumnIndex)
 import Board.Position.RowIndex as RowIndex exposing (RowIndex)
-import Util.Tuple as Tuple
-import List.Extra as Lextra
+import Board.Properties as Properties exposing (PieceLength)
+import Color exposing (Color)
+import List.Extra as List
 import Maybe.Extra
 import Svg exposing (Svg)
+import Util.Tuple as Tuple
 
 
 type Row
@@ -28,7 +28,7 @@ This function recursively sets the row's pieces to nothing until it runs out of 
 -}
 removePieces : List ColumnIndex -> Row -> Row
 removePieces columnIndices row =
-    case Lextra.uncons columnIndices of
+    case List.uncons columnIndices of
         Just ( columnIndex, restColumnIndices ) ->
             row
                 |> removeColumnPiece columnIndex
@@ -46,9 +46,9 @@ removeColumnPiece columnIndex row =
         (Row colors) =
             row
     in
-        Lextra.setAt (ColumnIndex.unwrap columnIndex) Nothing colors
-            |> Maybe.withDefault colors
-            |> Row
+    List.setAt (ColumnIndex.unwrap columnIndex) Nothing colors
+        |> Maybe.withDefault colors
+        |> Row
 
 
 getColumnPiece : ColumnIndex -> Row -> Maybe Color
@@ -57,9 +57,9 @@ getColumnPiece columnIndex =
         ci =
             ColumnIndex.unwrap columnIndex
     in
-        unwrap
-            >> Lextra.getAt ci
-            >> Maybe.Extra.join
+    unwrap
+        >> List.getAt ci
+        >> Maybe.Extra.join
 
 
 unwrap : Row -> List (Maybe Color)
@@ -88,8 +88,8 @@ slideRight (Row row) =
         emptySpaces =
             row |> List.filter (not << colorExists)
     in
-        List.append emptySpaces existingPieces
-            |> Row
+    List.append emptySpaces existingPieces
+        |> Row
 
 
 isNotEmpty : Row -> Bool
@@ -101,7 +101,7 @@ isNotEmpty =
                 >> List.filter colorExists
                 >> List.isEmpty
     in
-        isEmpty >> not
+    isEmpty >> not
 
 
 draw : PieceLength -> (Position -> msg) -> ( RowIndex, Row ) -> List (Svg msg)
@@ -116,12 +116,12 @@ draw pieceLength clickPieceMsg ( rowIndex, Row row ) =
         indexedColumn index maybeColor =
             ( ColumnIndex.fromInt index, maybeColor )
     in
-        row
-            |> List.indexedMap indexedColumn
-            |> List.filterMap keepExistingIndexedColors
-            |> List.map
-                (\( columnIndex, color ) ->
-                    Position.create rowIndex columnIndex
-                        |> (Piece.create color pieceLength)
-                        |> Piece.draw clickPieceMsg
-                )
+    row
+        |> List.indexedMap indexedColumn
+        |> List.filterMap keepExistingIndexedColors
+        |> List.map
+            (\( columnIndex, color ) ->
+                Position.create rowIndex columnIndex
+                    |> Piece.create color pieceLength
+                    |> Piece.draw clickPieceMsg
+            )

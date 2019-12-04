@@ -1,9 +1,9 @@
 module Board.Position exposing (..)
 
+import Board.Position.ColumnIndex as ColumnIndex exposing (ColumnIndex)
+import Board.Position.RowIndex as RowIndex exposing (RowIndex)
 import Dict exposing (Dict(..))
 import Dict.Extra as Dixtra
-import Board.Position.RowIndex as RowIndex exposing (RowIndex)
-import Board.Position.ColumnIndex as ColumnIndex exposing (ColumnIndex)
 
 
 type Position
@@ -11,13 +11,13 @@ type Position
 
 
 create : RowIndex -> ColumnIndex -> Position
-create rowIndex columnIndex =
-    Position ( rowIndex, columnIndex )
+create row column =
+    Position ( row, column )
 
 
 toTuple : Position -> ( Int, Int )
-toTuple (Position ( rowIndex, columnIndex )) =
-    ( RowIndex.unwrap rowIndex, ColumnIndex.unwrap columnIndex )
+toTuple (Position ( row, column )) =
+    ( RowIndex.unwrap row, ColumnIndex.unwrap column )
 
 
 fromTuple : ( Int, Int ) -> Position
@@ -26,8 +26,8 @@ fromTuple ( r, c ) =
 
 
 fromIndices : RowIndex -> ColumnIndex -> Position
-fromIndices rowIndex columnIndex =
-    Position ( rowIndex, columnIndex )
+fromIndices row column =
+    Position ( row, column )
 
 
 sort : List Position -> List Position
@@ -46,7 +46,7 @@ haveSameRow pos1 pos2 =
         (Position ( ri2, _ )) =
             pos2
     in
-        RowIndex.equals ri1 ri2
+    RowIndex.equals ri1 ri2
 
 
 {-| Return the position's neighbors: north, south, east, west
@@ -57,17 +57,17 @@ neighbors position =
         ( r, c ) =
             toTuple position
     in
-        [ ( r, c - 1 ) -- north
-        , ( r, c + 1 ) -- south
-        , ( r - 1, c ) -- east
-        , ( r + 1, c ) -- west
-        ]
-            |> List.map fromTuple
+    [ ( r, c - 1 ) -- north
+    , ( r, c + 1 ) -- south
+    , ( r - 1, c ) -- east
+    , ( r + 1, c ) -- west
+    ]
+        |> List.map fromTuple
 
 
 columnIndex : Position -> ColumnIndex
-columnIndex (Position ( _, columnIndex )) =
-    columnIndex
+columnIndex (Position ( _, column )) =
+    column
 
 
 columnIndices : List Position -> List ColumnIndex
@@ -76,8 +76,8 @@ columnIndices =
 
 
 rowIndex : Position -> RowIndex
-rowIndex (Position ( rowIndex, _ )) =
-    rowIndex
+rowIndex (Position ( row, _ )) =
+    row
 
 
 groupByRow : List Position -> List ( RowIndex, List Position )
@@ -91,10 +91,10 @@ groupColumnIndicesByRow : List Position -> List ( RowIndex, List ColumnIndex )
 groupColumnIndicesByRow positions =
     let
         toRowGroupedColumnIndices : ( RowIndex, List Position ) -> ( RowIndex, List ColumnIndex )
-        toRowGroupedColumnIndices ( rowIndex, rowPositions ) =
-            ( rowIndex
+        toRowGroupedColumnIndices ( row, rowPositions ) =
+            ( row
             , rowPositions |> columnIndices
             )
     in
-        groupByRow positions
-            |> List.map toRowGroupedColumnIndices
+    groupByRow positions
+        |> List.map toRowGroupedColumnIndices

@@ -1,12 +1,12 @@
 module Board.Rows exposing (..)
 
-import Color exposing (Color)
-import Board.Properties exposing (PieceLength)
 import Board.Position as Position exposing (Position)
-import Board.Position.RowIndex as RowIndex exposing (RowIndex)
 import Board.Position.ColumnIndex as ColumnIndex exposing (ColumnIndex)
+import Board.Position.RowIndex as RowIndex exposing (RowIndex)
+import Board.Properties exposing (PieceLength)
 import Board.Row as Row exposing (Row)
-import List.Extra as Lextra
+import Color exposing (Color)
+import List.Extra as List
 import Svg exposing (Svg)
 
 
@@ -38,9 +38,9 @@ setRow rowIndex (Rows rows) row =
         ri =
             RowIndex.unwrap rowIndex
     in
-        rows
-            |> Lextra.setAt ri row
-            |> Maybe.map Rows
+    rows
+        |> List.setAt ri row
+        |> Maybe.map Rows
 
 
 getRow : RowIndex -> Rows -> Maybe Row
@@ -49,13 +49,13 @@ getRow rowIndex (Rows rows) =
         ri =
             RowIndex.unwrap rowIndex
     in
-        rows
-            |> Lextra.getAt ri
+    rows
+        |> List.getAt ri
 
 
 removeBlock : List ( RowIndex, List ColumnIndex ) -> Rows -> Rows
 removeBlock groupedColumnIndices rows =
-    case Lextra.uncons groupedColumnIndices of
+    case List.uncons groupedColumnIndices of
         Just ( ( rowIndex, columnIndices ), restRowGroups ) ->
             getRow rowIndex rows
                 |> Maybe.map (Row.removePieces columnIndices)
@@ -70,11 +70,11 @@ removeBlock groupedColumnIndices rows =
 slideDownLeft : Rows -> Rows
 slideDownLeft =
     toList
-        >> Lextra.transpose
+        >> List.transpose
         >> List.map (Row.fromMaybeColors >> Row.slideRight)
-        >> List.filter (Row.isNotEmpty)
+        >> List.filter Row.isNotEmpty
         >> List.map Row.unwrap
-        >> Lextra.transpose
+        >> List.transpose
         >> List.map Row.fromMaybeColors
         >> Rows
 

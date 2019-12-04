@@ -20,4 +20,4 @@ row attrs =
         rowAttrs =
             [ class "row" ] ++ attrs
     in
-        div rowAttrs
+    div rowAttrs

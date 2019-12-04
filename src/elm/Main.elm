@@ -1,17 +1,14 @@
 module Main exposing (..)
 
-import Html exposing (Html, h1, text, div, input, label)
-import Html.Attributes exposing (class, for, type_, value)
-import Svg exposing (Svg, svg, rect)
-import Random exposing (Generator)
-import Bootstrap exposing (container, row)
-
-
--- User modules
-
 import Board exposing (Board)
-import Board.Properties as Properties exposing (Properties)
 import Board.Position as Position exposing (Position)
+import Board.Properties as Properties exposing (Properties)
+import Bootstrap exposing (container, row)
+import Html exposing (Html, div, h1, input, label, text)
+import Html.Attributes exposing (class, for, type_, value)
+import Random exposing (Generator)
+import Svg exposing (Svg, rect, svg)
+
 
 
 -- MODEL
@@ -33,7 +30,9 @@ initModel =
 
 init : ( Model, Cmd Msg )
 init =
-    initModel ! [ Board.generate GeneratedBoard Board.default ]
+    ( initModel
+    , Board.generate GeneratedBoard Board.default
+    )
 
 
 
@@ -74,7 +73,9 @@ updateProperties model updatedProperties =
 -}
 updatePropertiesAndBoard : Model -> Properties -> Generator Board -> ( Model, Cmd Msg )
 updatePropertiesAndBoard model properties board =
-    (updateProperties model properties) ! [ Board.generate GeneratedBoard board ]
+    ( updateProperties model properties
+    , Board.generate GeneratedBoard board
+    )
 
 
 updateNumRows : Model -> Properties -> String -> ( Model, Cmd Msg )
@@ -86,7 +87,7 @@ updateNumRows model properties numRows =
         updatedBoard =
             Board.init updatedProperties
     in
-        updatePropertiesAndBoard model updatedProperties updatedBoard
+    updatePropertiesAndBoard model updatedProperties updatedBoard
 
 
 updateNumColumns : Model -> Properties -> String -> ( Model, Cmd Msg )
@@ -98,7 +99,7 @@ updateNumColumns model properties numColumns =
         updatedBoard =
             Board.init updatedProperties
     in
-        updatePropertiesAndBoard model updatedProperties updatedBoard
+    updatePropertiesAndBoard model updatedProperties updatedBoard
 
 
 updateNumColors : Model -> Properties -> String -> ( Model, Cmd Msg )
@@ -110,7 +111,7 @@ updateNumColors model properties numColors =
         updatedBoard =
             Board.init updatedProperties
     in
-        updatePropertiesAndBoard model updatedProperties updatedBoard
+    updatePropertiesAndBoard model updatedProperties updatedBoard
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -123,7 +124,7 @@ update msg model =
                         updatedModel =
                             updateBoard model board
                     in
-                        ( updatedModel, Cmd.none )
+                    ( updatedModel, Cmd.none )
 
                 UpdateNumRows numRows ->
                     updateNumRows model properties numRows
@@ -144,7 +145,7 @@ update msg model =
                         updatedModel =
                             updateBoard model board
                     in
-                        ( updatedModel, Cmd.none )
+                    ( updatedModel, Cmd.none )
 
                 UpdateNumRows numRows ->
                     updateNumRows model properties numRows
@@ -161,7 +162,7 @@ update msg model =
                             Board.removeBlockAt board position
                                 |> updateBoard model
                     in
-                        ( updatedModel, Cmd.none )
+                    ( updatedModel, Cmd.none )
 
 
 
@@ -171,7 +172,7 @@ update msg model =
 appView : Properties -> List (Svg Msg) -> Html Msg
 appView properties boardSvg =
     container
-        [ (Properties.view UpdateNumRows UpdateNumColumns UpdateNumColors properties)
+        [ Properties.view UpdateNumRows UpdateNumColumns UpdateNumColors properties
         , div []
             [ row [ class "justify-content-md-center" ]
                 [ div [ class "col-md-9" ] boardSvg

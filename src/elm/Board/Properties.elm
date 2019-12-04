@@ -1,9 +1,9 @@
 module Board.Properties exposing (..)
 
-import Html exposing (Html, label, text, input, div)
-import Html.Attributes exposing (for, type_, value, class, id)
-import Html.Events exposing (onInput)
 import Bootstrap exposing (formGroup)
+import Html exposing (Html, div, input, label, text)
+import Html.Attributes exposing (class, for, id, type_, value)
+import Html.Events exposing (onInput)
 
 
 type NumRows
@@ -62,7 +62,7 @@ raw { numRows, numColumns, numColors, pieceLength } =
         (PieceLength pl) =
             pieceLength
     in
-        ( rows, columns, colors, pl )
+    ( rows, columns, colors, pl )
 
 
 {-| Get the board's total # of pieces, based on the # of its rows & columns.
@@ -76,7 +76,7 @@ numPieces { numRows, numColumns } =
         (NumColumns c) =
             numColumns
     in
-        r * c
+    r * c
 
 
 
@@ -104,7 +104,7 @@ updateNumRowsFromString properties =
 -}
 updateNumRowsOrDefault : Properties -> String -> Properties
 updateNumRowsOrDefault properties =
-    (updateNumRowsFromString properties)
+    updateNumRowsFromString properties
         >> Result.withDefault default
 
 
@@ -127,7 +127,7 @@ updateNumColumnsFromString properties =
 -}
 updateNumColumnsOrDefault : Properties -> String -> Properties
 updateNumColumnsOrDefault properties =
-    (updateNumColumnsFromString properties)
+    updateNumColumnsFromString properties
         >> Result.withDefault default
 
 
@@ -152,7 +152,7 @@ updateNumColorsFromString properties =
 -}
 updateNumColorsOrDefault : Properties -> String -> Properties
 updateNumColorsOrDefault properties =
-    (updateNumColorsFromString properties)
+    updateNumColorsFromString properties
         >> Result.withDefault default
 
 
@@ -171,7 +171,7 @@ width { numColumns, pieceLength } =
         (NumColumns c) =
             numColumns
     in
-        (l * c)
+    l * c
 
 
 {-| The board's drawn height
@@ -185,7 +185,7 @@ height { numRows, pieceLength } =
         (NumRows r) =
             numRows
     in
-        (l * r)
+    l * r
 
 
 unwrapPieceLength : PieceLength -> Int
@@ -200,10 +200,10 @@ unwrapPieceLength (PieceLength pl) =
 rowsFormGroup : (String -> msg) -> NumRows -> List (Html msg)
 rowsFormGroup updateNumRowsMsg (NumRows numRows) =
     [ formGroup
-        [ label [ for "boardRows" ] [ (text "Rows") ]
+        [ label [ for "boardRows" ] [ text "Rows" ]
         , input
             [ type_ "number"
-            , value (toString numRows)
+            , value (String.fromInt numRows)
             , class "form-control"
             , id "boardRows"
             , onInput updateNumRowsMsg
@@ -216,10 +216,10 @@ rowsFormGroup updateNumRowsMsg (NumRows numRows) =
 columnsFormGroup : (String -> msg) -> NumColumns -> List (Html msg)
 columnsFormGroup updateNumColumnsMsg (NumColumns numColumns) =
     [ formGroup
-        [ label [ for "boardColumns" ] [ (text "Columns") ]
+        [ label [ for "boardColumns" ] [ text "Columns" ]
         , input
             [ type_ "number"
-            , value (toString numColumns)
+            , value (String.fromInt numColumns)
             , class "form-control"
             , id "boardColumns"
             , onInput updateNumColumnsMsg
@@ -232,10 +232,10 @@ columnsFormGroup updateNumColumnsMsg (NumColumns numColumns) =
 colorsFormGroup : (String -> msg) -> NumColors -> List (Html msg)
 colorsFormGroup updateNumColorsMsg (NumColors numColors) =
     [ formGroup
-        [ label [ for "numColors" ] [ (text "# of Colors") ]
+        [ label [ for "numColors" ] [ text "# of Colors" ]
         , input
             [ type_ "number"
-            , value (toString numColors)
+            , value (String.fromInt numColors)
             , class "form-control"
             , id "numColors"
             , onInput updateNumColorsMsg
@@ -243,6 +243,7 @@ colorsFormGroup updateNumColorsMsg (NumColors numColors) =
             []
         ]
     ]
+
 
 view : (String -> msg) -> (String -> msg) -> (String -> msg) -> Properties -> Html msg
 view updateNumRowsMsg updateNumColumnsMsg updateNumColorsMsg { numRows, numColumns, numColors } =

@@ -4,11 +4,11 @@ import Board.Position as Position exposing (Position)
 import Board.Position.ColumnIndex as ColumnIndex
 import Board.Position.RowIndex as RowIndex
 import Board.Properties as Properties exposing (PieceLength)
-import Svg exposing (Svg, rect)
-import Svg.Attributes exposing (x, y, width, height, fill, stroke)
-import Svg.Events exposing (onClick)
 import Color exposing (Color)
 import Color.Convert exposing (colorToHex)
+import Svg exposing (Svg, rect)
+import Svg.Attributes exposing (fill, height, stroke, width, x, y)
+import Svg.Events exposing (onClick)
 
 
 type alias Piece =
@@ -36,7 +36,7 @@ rawXCoord { length, position } =
         len =
             Properties.unwrapPieceLength length
     in
-        ci * len
+    ci * len
 
 
 rawYCoord : Piece -> Int
@@ -48,7 +48,7 @@ rawYCoord { length, position } =
         len =
             Properties.unwrapPieceLength length
     in
-        ri * len
+    ri * len
 
 
 draw : (Position -> a) -> Piece -> Svg a
@@ -72,13 +72,13 @@ draw clickMsg ({ position, color, length } as piece) =
         pos =
             Position.fromIndices rowIndex columnIndex
     in
-        rect
-            [ x (toString xCoord)
-            , y (toString yCoord)
-            , width (toString rawPieceLength)
-            , height (toString rawPieceLength)
-            , fill (colorToHex color)
-            , stroke "#ddd"
-            , onClick (clickMsg pos)
-            ]
-            []
+    rect
+        [ x (toString xCoord)
+        , y (toString yCoord)
+        , width (toString rawPieceLength)
+        , height (toString rawPieceLength)
+        , fill (colorToHex color)
+        , stroke "#ddd"
+        , onClick (clickMsg pos)
+        ]
+        []
