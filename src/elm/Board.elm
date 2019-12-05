@@ -12,6 +12,7 @@ import Random exposing (Generator)
 import Random.Array
 import Svg exposing (Svg, svg)
 import Svg.Attributes exposing (height, width)
+import Util.Color
 
 
 type Board
@@ -35,20 +36,6 @@ generate =
     Random.generate
 
 
-{-| Generate a random color
--}
-genRandomColor : Generator Color
-genRandomColor =
-    Random.map3 Color.rgb255 (Random.int 0 255) (Random.int 0 255) (Random.int 0 255)
-
-
-{-| Generate a color palette to use in the board
--}
-genColorPalette : Int -> Generator (Array Color)
-genColorPalette numColors =
-    Random.Array.array numColors genRandomColor
-
-
 colorsToBoard : Int -> List (Maybe Color) -> Board
 colorsToBoard numColumns =
     List.groupsOf numColumns
@@ -67,9 +54,9 @@ genBoard numRows numColumns colorPalette =
 {-| Generate color palette & then the board and its colors
 -}
 genPaletteThenBoard : Int -> Int -> Int -> Generator Board
-genPaletteThenBoard numRows numColumns numColors =
-    genColorPalette numColors
-        |> Random.andThen (genBoard numRows numColumns)
+genPaletteThenBoard numRows numColumns =
+    Util.Color.randomArray
+        >> Random.andThen (genBoard numRows numColumns)
 
 
 {-| Initialize a board based on specified properties
@@ -171,20 +158,19 @@ fcb board (ColorBlock colorBlock) (Destinations destinations) =
 
 findBlockAt : Board -> Position -> List Position
 findBlockAt board position =
-    case pieceExistsAt position board of
-        True ->
-            let
-                destinations =
-                    Destinations (neighborsWithSameColor board position)
+    if pieceExistsAt position board == True then
+        let
+            destinations =
+                Destinations (neighborsWithSameColor board position)
 
-                colorBlock =
-                    ColorBlock [ position ]
-            in
-            fcb board colorBlock destinations
-                |> Position.sort
+            colorBlock =
+                ColorBlock [ position ]
+        in
+        fcb board colorBlock destinations
+            |> Position.sort
 
-        False ->
-            []
+    else
+        []
 
 
 
@@ -245,7 +231,7 @@ draw pieceLength clickPieceMsg =
 
 
 view : (Position -> msg) -> Properties -> Board -> List (Html msg)
-view clickPieceMsg ({ numRows, numColumns, numColors } as properties) board =
+view clickPieceMsg properties board =
     let
         boardWidth =
             Properties.width properties
