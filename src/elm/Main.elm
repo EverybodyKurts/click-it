@@ -1,14 +1,14 @@
 module Main exposing (..)
 
 import Board exposing (Board)
-import Board.Position as Position exposing (Position)
+import Board.Position exposing (Position)
 import Board.Properties as Properties exposing (Properties)
-import Browser
 import Bootstrap exposing (container, row)
-import Html exposing (Html, div, h1, input, label, text)
-import Html.Attributes exposing (class, for, type_, value)
+import Browser
+import Html exposing (Html, div)
+import Html.Attributes exposing (class)
 import Random exposing (Generator)
-import Svg exposing (Svg, rect, svg)
+import Svg exposing (Svg)
 
 
 
@@ -206,8 +206,9 @@ subscriptions _ =
 
 -- MAIN
 
+
 type alias Flags =
-    {  }
+    {}
 
 
 main =

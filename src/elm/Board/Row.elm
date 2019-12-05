@@ -3,8 +3,8 @@ module Board.Row exposing (..)
 import Board.Piece as Piece
 import Board.Position as Position exposing (Position)
 import Board.Position.ColumnIndex as ColumnIndex exposing (ColumnIndex)
-import Board.Position.RowIndex as RowIndex exposing (RowIndex)
-import Board.Properties as Properties exposing (PieceLength)
+import Board.Position.RowIndex exposing (RowIndex)
+import Board.Properties exposing (PieceLength)
 import Color exposing (Color)
 import List.Extra as List
 import Maybe.Extra

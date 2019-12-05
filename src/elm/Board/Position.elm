@@ -3,7 +3,7 @@ module Board.Position exposing (..)
 import Board.Position.ColumnIndex as ColumnIndex exposing (ColumnIndex)
 import Board.Position.RowIndex as RowIndex exposing (RowIndex)
 import Dict exposing (Dict(..))
-import Dict.Extra as Dixtra
+import Dict.Extra as Dict
 
 
 type Position
@@ -82,7 +82,7 @@ rowIndex (Position ( row, _ )) =
 
 groupByRow : List Position -> List ( RowIndex, List Position )
 groupByRow =
-    Dixtra.groupBy (rowIndex >> RowIndex.unwrap)
+    Dict.groupBy (rowIndex >> RowIndex.unwrap)
         >> Dict.toList
         >> List.map (\( ri, positions ) -> ( RowIndex.fromInt ri, positions ))
 

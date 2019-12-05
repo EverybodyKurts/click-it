@@ -1,7 +1,7 @@
 module Board.Rows exposing (..)
 
-import Board.Position as Position exposing (Position)
-import Board.Position.ColumnIndex as ColumnIndex exposing (ColumnIndex)
+import Board.Position exposing (Position)
+import Board.Position.ColumnIndex exposing (ColumnIndex)
 import Board.Position.RowIndex as RowIndex exposing (RowIndex)
 import Board.Properties exposing (PieceLength)
 import Board.Row as Row exposing (Row)
