@@ -32,7 +32,7 @@ initModel =
 init : Flags -> ( Model, Cmd Msg )
 init _ =
     ( initModel
-    , Board.generate GeneratedBoard Board.default
+    , Random.generate GeneratedBoard Board.default
     )
 
 
@@ -75,7 +75,7 @@ updateProperties model updatedProperties =
 updatePropertiesAndBoard : Model -> Properties -> Generator Board -> ( Model, Cmd Msg )
 updatePropertiesAndBoard model properties board =
     ( updateProperties model properties
-    , Board.generate GeneratedBoard board
+    , Random.generate GeneratedBoard board
     )
 
 
@@ -86,7 +86,7 @@ updateNumRows model properties numRows =
             properties |> Properties.updateRows numRows
 
         updatedBoard =
-            Board.init updatedProperties
+            Board.generate updatedProperties
     in
     updatePropertiesAndBoard model updatedProperties updatedBoard
 
@@ -98,7 +98,7 @@ updateNumColumns model properties numColumns =
             properties |> Properties.updateColumns numColumns
 
         updatedBoard =
-            Board.init updatedProperties
+            Board.generate updatedProperties
     in
     updatePropertiesAndBoard model updatedProperties updatedBoard
 
@@ -110,7 +110,7 @@ updateNumColors model properties numColors =
             properties |> Properties.updateColors numColors
 
         updatedBoard =
-            Board.init updatedProperties
+            Board.generate updatedProperties
     in
     updatePropertiesAndBoard model updatedProperties updatedBoard
 

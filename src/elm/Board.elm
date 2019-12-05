@@ -2,7 +2,7 @@ module Board exposing (..)
 
 import Array exposing (Array)
 import Board.Position as Position exposing (Position)
-import Board.Properties as Properties exposing (NumColumns(..), PieceLength(..), Properties)
+import Board.Properties as Properties exposing (PieceLength(..), Properties)
 import Board.Row as Row exposing (Row(..))
 import Board.Rows as Rows exposing (Rows(..))
 import Color exposing (Color)
@@ -31,11 +31,6 @@ type Destinations
 -- BOARD INITIALIZATION
 
 
-generate : (Board -> msg) -> Generator Board -> Cmd msg
-generate =
-    Random.generate
-
-
 colorsToBoard : Int -> List (Maybe Color) -> Board
 colorsToBoard numColumns =
     List.groupsOf numColumns
@@ -43,38 +38,33 @@ colorsToBoard numColumns =
         >> Board
 
 
-{-| Generate the board & its colors
--}
-genBoard : Int -> Int -> Array Color -> Generator Board
-genBoard numRows numColumns =
-    Random.Array.sample
-        >> Random.list (numRows * numColumns)
-        >> Random.map (colorsToBoard numColumns)
+generate : Properties -> Generator Board
+generate properties =
+    let
+        genBoard : Int -> Int -> Array Color -> Generator Board
+        genBoard numRows numColumns =
+            Random.Array.sample
+                >> Random.list (numRows * numColumns)
+                >> Random.map (colorsToBoard numColumns)
 
+        rows =
+            Properties.rowInt properties
 
-{-| Generate color palette & then the board and its colors
--}
-genPaletteThenBoard : Int -> Int -> Int -> Generator Board
-genPaletteThenBoard numRows numColumns =
-    Util.Color.randomArray
-        >> Random.andThen (genBoard numRows numColumns)
+        columns =
+            Properties.columnInt properties
 
-
-{-| Initialize a board based on specified properties
--}
-init : Properties -> Generator Board
-init properties =
-    genPaletteThenBoard
-        (Properties.rowInt properties)
-        (Properties.columnInt properties)
-        (Properties.colorInt properties)
+        colors =
+            Properties.colorInt properties
+    in
+    Util.Color.randomArray colors
+        |> Random.andThen (genBoard rows columns)
 
 
 {-| Generate the default board
 -}
 default : Generator Board
 default =
-    init Properties.default
+    generate Properties.default
 
 
 
