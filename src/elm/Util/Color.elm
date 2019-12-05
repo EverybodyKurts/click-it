@@ -1,4 +1,4 @@
-module Util.Color exposing (random, randomArray)
+module Util.Color exposing (exists, random, randomArray)
 
 import Array exposing (Array)
 import Color exposing (Color)
@@ -12,8 +12,19 @@ random : Generator Color
 random =
     Random.map3 Color.rgb255 (Random.int 0 255) (Random.int 0 255) (Random.int 0 255)
 
+
 {-| Generate a color palette to use in the board
 -}
 randomArray : Int -> Generator (Array Color)
 randomArray numColors =
     Random.Array.array numColors random
+
+
+exists : Maybe Color -> Bool
+exists maybeColor =
+    case maybeColor of
+        Just _ ->
+            True
+
+        _ ->
+            False

@@ -10,6 +10,7 @@ import List.Extra as List
 import Maybe.Extra
 import Svg exposing (Svg)
 import Util.Tuple as Tuple
+import Util.Color
 
 
 type Row
@@ -17,8 +18,8 @@ type Row
 
 
 fromMaybeColors : List (Maybe Color) -> Row
-fromMaybeColors colorsList =
-    Row colorsList
+fromMaybeColors =
+    Row 
 
 
 {-| For a board row, remove pieces that correspond to the given column indices.
@@ -67,26 +68,16 @@ unwrap (Row row) =
     row
 
 
-colorExists : Maybe Color -> Bool
-colorExists maybeColor =
-    case maybeColor of
-        Just _ ->
-            True
-
-        _ ->
-            False
-
-
 {-| Slide remaining color pieces to the end of the row.
 -}
 slideRight : Row -> Row
 slideRight (Row row) =
     let
         existingPieces =
-            row |> List.filter colorExists
+            row |> List.filter Util.Color.exists
 
         emptySpaces =
-            row |> List.filter (not << colorExists)
+            row |> List.filter (not << Util.Color.exists)
     in
     List.append emptySpaces existingPieces
         |> Row
@@ -98,7 +89,7 @@ isNotEmpty =
         isEmpty : Row -> Bool
         isEmpty =
             unwrap
-                >> List.filter colorExists
+                >> List.filter Util.Color.exists
                 >> List.isEmpty
     in
     isEmpty >> not
