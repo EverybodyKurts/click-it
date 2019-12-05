@@ -83,7 +83,7 @@ updateNumRows : Model -> Properties -> String -> ( Model, Cmd Msg )
 updateNumRows model properties numRows =
     let
         updatedProperties =
-            Properties.updateNumRowsOrDefault properties numRows
+            properties |> Properties.updateRows numRows
 
         updatedBoard =
             Board.init updatedProperties
@@ -95,7 +95,7 @@ updateNumColumns : Model -> Properties -> String -> ( Model, Cmd Msg )
 updateNumColumns model properties numColumns =
     let
         updatedProperties =
-            Properties.updateNumColumnsOrDefault properties numColumns
+            properties |> Properties.updateColumns numColumns
 
         updatedBoard =
             Board.init updatedProperties
@@ -107,7 +107,7 @@ updateNumColors : Model -> Properties -> String -> ( Model, Cmd Msg )
 updateNumColors model properties numColors =
     let
         updatedProperties =
-            Properties.updateNumColorsOrDefault properties numColors
+            properties |> Properties.updateColors numColors
 
         updatedBoard =
             Board.init updatedProperties

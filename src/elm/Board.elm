@@ -46,9 +46,10 @@ colorsToBoard numColumns =
 {-| Generate the board & its colors
 -}
 genBoard : Int -> Int -> Array Color -> Generator Board
-genBoard numRows numColumns colorPalette =
-    Random.list (numRows * numColumns) (Random.Array.sample colorPalette)
-        |> Random.map (colorsToBoard numColumns)
+genBoard numRows numColumns =
+    Random.Array.sample
+        >> Random.list (numRows * numColumns)
+        >> Random.map (colorsToBoard numColumns)
 
 
 {-| Generate color palette & then the board and its colors

@@ -4,6 +4,7 @@ import Bootstrap exposing (formGroup)
 import Html exposing (Html, div, input, label, text)
 import Html.Attributes exposing (class, for, id, type_, value)
 import Html.Events exposing (onInput)
+import Util exposing (flip)
 
 
 type NumRows
@@ -57,6 +58,8 @@ columnInt { numColumns } =
             numColumns
     in
     nc
+
+
 colorInt : Properties -> Int
 colorInt { numColors } =
     let
@@ -88,77 +91,59 @@ numPieces { numRows, numColumns } =
 -- UPDATING PROPERTIES
 
 
-{-| Update the number of rows.
+{-| Set the number of rows.
 -}
-updateNumRows : Properties -> NumRows -> Properties
-updateNumRows properties numRows =
+setRows : NumRows -> Properties -> Properties
+setRows numRows properties =
     { properties | numRows = numRows }
-
-
-{-| Update the number of rows from a string, most likely user input.
--}
-updateNumRowsFromString : Properties -> String -> Maybe Properties
-updateNumRowsFromString properties =
-    String.toInt
-        >> Maybe.map (clamp 1 100)
-        >> Maybe.map NumRows
-        >> Maybe.map (updateNumRows properties)
 
 
 {-| Update # of rows from user input or provide default # of rows.
 -}
-updateNumRowsOrDefault : Properties -> String -> Properties
-updateNumRowsOrDefault properties =
-    updateNumRowsFromString properties
-        >> Maybe.withDefault default
+updateRows : String -> Properties -> Properties
+updateRows rowInput properties =
+    rowInput
+        |> String.toInt
+        |> Maybe.map (clamp 1 100)
+        |> Maybe.map NumRows
+        |> Maybe.map (flip setRows properties)
+        |> Maybe.withDefault default
 
 
-updateNumColumns : Properties -> NumColumns -> Properties
-updateNumColumns properties numColumns =
+setColumns : NumColumns -> Properties -> Properties
+setColumns numColumns properties =
     { properties | numColumns = numColumns }
-
-
-{-| Update the board's # of columns from a string, most likely user input.
--}
-updateNumColumnsFromString : Properties -> String -> Maybe Properties
-updateNumColumnsFromString properties =
-    String.toInt
-        >> Maybe.map (clamp 1 100)
-        >> Maybe.map NumColumns
-        >> Maybe.map (updateNumColumns properties)
 
 
 {-| Update the board's # of columns based on user input or provide default # of columns
 -}
-updateNumColumnsOrDefault : Properties -> String -> Properties
-updateNumColumnsOrDefault properties =
-    updateNumColumnsFromString properties
-        >> Maybe.withDefault default
+updateColumns : String -> Properties -> Properties
+updateColumns columnInput properties =
+    columnInput
+        |> String.toInt
+        |> Maybe.map (clamp 1 100)
+        |> Maybe.map NumColumns
+        |> Maybe.map (flip setColumns properties)
+        |> Maybe.withDefault default
 
 
 {-| Update the board's number of colors.
 -}
-updateNumColors : Properties -> NumColors -> Properties
-updateNumColors properties numColors =
+setColors : NumColors -> Properties -> Properties
+setColors numColors properties =
     { properties | numColors = numColors }
-
-
-{-| Update the board's # of colors from a string, most likely user input.
--}
-updateNumColorsFromString : Properties -> String -> Maybe Properties
-updateNumColorsFromString properties =
-    String.toInt
-        >> Maybe.map (clamp 1 100)
-        >> Maybe.map NumColors
-        >> Maybe.map (updateNumColors properties)
 
 
 {-| Update the board's # of colors based on user input or provide default # of colors
 -}
-updateNumColorsOrDefault : Properties -> String -> Properties
-updateNumColorsOrDefault properties =
-    updateNumColorsFromString properties
-        >> Maybe.withDefault default
+updateColors : String -> Properties -> Properties
+updateColors colorInput properties =
+    colorInput
+        |> String.toInt
+        |> Maybe.map (clamp 1 100)
+        |> Maybe.map NumColors
+        |> Maybe.map (flip setColors properties)
+        |> Maybe.withDefault default
 
 
 
