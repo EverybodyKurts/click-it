@@ -27,9 +27,8 @@ fromList list =
 
 
 toList : Rows -> List (List (Maybe Color))
-toList (Rows rows) =
-    rows
-        |> List.map Row.unwrap
+toList =
+    unwrap >> List.map Row.unwrap
 
 
 setRow : RowIndex -> Rows -> Row -> Rows
