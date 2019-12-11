@@ -7,7 +7,7 @@ import Board.Position.RowIndex exposing (RowIndex)
 import Board.Properties exposing (PieceLength)
 import Color exposing (Color)
 import List.Extra as List
-import Maybe.Extra
+import Maybe.Extra as Maybe
 import Svg exposing (Svg)
 import Util.Tuple as Tuple
 import Util.Color
@@ -52,15 +52,15 @@ removeColumnPiece columnIndex row =
         |> Row
 
 
-getColumnPiece : ColumnIndex -> Row -> Maybe Color
-getColumnPiece columnIndex =
+getAt : ColumnIndex -> Row -> Maybe Color
+getAt columnIndex =
     let
         ci =
             ColumnIndex.unwrap columnIndex
     in
     toList
         >> List.getAt ci
-        >> Maybe.Extra.join
+        >> Maybe.join
 
 
 toList : Row -> List (Maybe Color)

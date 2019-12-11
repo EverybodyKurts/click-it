@@ -88,16 +88,6 @@ to2dList =
         >> List.map Row.toList
 
 
-getRow : RowIndex -> Board -> Maybe Row
-getRow rowIndex =
-    let
-        ri =
-            RowIndex.unwrap rowIndex
-    in
-    toList
-        >> List.getAt ri
-
-
 pieceAt : Position -> Board -> Maybe Color
 pieceAt position =
     let
@@ -108,7 +98,7 @@ pieceAt position =
             Position.columnIndex position
     in
     getRow rowIndex
-        >> Maybe.andThen (Row.getColumnPiece columnIndex)
+        >> Maybe.andThen (Row.getAt columnIndex)
 
 
 pieceExistsAt : Position -> Board -> Bool
@@ -194,16 +184,25 @@ minimumBlockSize =
     3
 
 
-setRow : RowIndex -> Board -> Row -> Board
-setRow rowIndex board row =
+setRow : RowIndex -> Row -> Board -> Board
+setRow rowIndex row =
     let
         ri =
             RowIndex.unwrap rowIndex
     in
-    board
-        |> toList
-        |> List.setAt ri row
-        |> Board
+    toList
+        >> List.setAt ri row
+        >> Board
+
+
+getRow : RowIndex -> Board -> Maybe Row
+getRow rowIndex =
+    let
+        ri =
+            RowIndex.unwrap rowIndex
+    in
+    toList
+        >> List.getAt ri
 
 
 {-| Remove the block of pieces from the board.
@@ -220,7 +219,7 @@ removeBlock colorBlock =
                 Just ( ( rowIndex, columnIndices ), restRowGroups ) ->
                     getRow rowIndex bd
                         |> Maybe.map (Row.removePieces columnIndices)
-                        |> Maybe.map (setRow rowIndex bd)
+                        |> Maybe.map (\row -> setRow rowIndex row bd)
                         |> Maybe.map (removePiecesByRow restRowGroups)
                         |> Maybe.withDefault bd
 
