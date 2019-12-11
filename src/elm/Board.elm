@@ -2,9 +2,10 @@ module Board exposing (..)
 
 import Array exposing (Array)
 import Board.Position as Position exposing (Position)
+import Board.Position.ColumnIndex exposing (ColumnIndex)
+import Board.Position.RowIndex as RowIndex exposing (RowIndex)
 import Board.Properties as Properties exposing (PieceLength(..), Properties)
-import Board.Row as Row exposing (Row(..))
-import Board.Rows as Rows exposing (Rows(..))
+import Board.Row as Row exposing (Row)
 import Color exposing (Color)
 import Html exposing (Html)
 import List.Extra as List
@@ -16,7 +17,7 @@ import Util.Color
 
 
 type Board
-    = Board Rows
+    = Board (List Row)
 
 
 type ColorBlock
@@ -31,11 +32,16 @@ type Destinations
 -- BOARD INITIALIZATION
 
 
+fromList : List (List (Maybe Color)) -> Board
+fromList =
+    List.map Row.fromMaybeColors
+        >> Board
+
+
 colorsToBoard : Int -> List (Maybe Color) -> Board
 colorsToBoard numColumns =
     List.groupsOf numColumns
-        >> Rows.fromList
-        >> Board
+        >> fromList
 
 
 generate : Properties -> Generator Board
@@ -71,9 +77,25 @@ default =
 -- ACCESSING THE BOARD
 
 
-unwrap : Board -> Rows
-unwrap (Board rows) =
+toList : Board -> List Row
+toList (Board rows) =
     rows
+
+
+to2dList : Board -> List (List (Maybe Color))
+to2dList =
+    toList
+        >> List.map Row.toList
+
+
+getRow : RowIndex -> Board -> Maybe Row
+getRow rowIndex =
+    let
+        ri =
+            RowIndex.unwrap rowIndex
+    in
+    toList
+        >> List.getAt ri
 
 
 pieceAt : Position -> Board -> Maybe Color
@@ -85,8 +107,7 @@ pieceAt position =
         columnIndex =
             Position.columnIndex position
     in
-    unwrap
-        >> Rows.getRow rowIndex
+    getRow rowIndex
         >> Maybe.andThen (Row.getColumnPiece columnIndex)
 
 
@@ -147,8 +168,8 @@ fcb board (ColorBlock colorBlock) (Destinations destinations) =
             colorBlock
 
 
-findBlockAt : Board -> Position -> List Position
-findBlockAt board position =
+findBlockAt : Position -> Board -> List Position
+findBlockAt position board =
     if pieceExistsAt position board == True then
         let
             destinations =
@@ -173,52 +194,91 @@ minimumBlockSize =
     3
 
 
-toRowsList : Board -> List Row
-toRowsList =
-    unwrap
-        >> Rows.unwrap
+setRow : RowIndex -> Board -> Row -> Board
+setRow rowIndex board row =
+    let
+        ri =
+            RowIndex.unwrap rowIndex
+    in
+    board
+        |> toList
+        |> List.setAt ri row
+        |> Board
 
 
 {-| Remove the block of pieces from the board.
 -}
-removeBlock : Board -> List Position -> Board
-removeBlock (Board rows) colorBlock =
+removeBlock : List Position -> Board -> Board
+removeBlock colorBlock =
     let
         blockGroupedByRow =
             Position.groupColumnIndicesByRow colorBlock
+
+        removePiecesByRow : List ( RowIndex, List ColumnIndex ) -> Board -> Board
+        removePiecesByRow groupedColumnIndices bd =
+            case List.uncons groupedColumnIndices of
+                Just ( ( rowIndex, columnIndices ), restRowGroups ) ->
+                    getRow rowIndex bd
+                        |> Maybe.map (Row.removePieces columnIndices)
+                        |> Maybe.map (setRow rowIndex bd)
+                        |> Maybe.map (removePiecesByRow restRowGroups)
+                        |> Maybe.withDefault bd
+
+                Nothing ->
+                    bd
     in
-    Rows.removeBlock blockGroupedByRow rows
-        |> Board
+    removePiecesByRow blockGroupedByRow
+
+
+slideDownLeft : Board -> Board
+slideDownLeft =
+    to2dList
+        >> List.transpose
+        >> List.map (Row.fromMaybeColors >> Row.slideRight)
+        >> List.filter Row.isNotEmpty
+        >> List.map Row.toList
+        >> List.transpose
+        >> List.map Row.fromMaybeColors
+        >> Board
 
 
 {-| Remove the block from the board if it's at least the minimum specified # of pieces.
 -}
-removeBlockIfMinSize : Int -> Board -> List Position -> Board
-removeBlockIfMinSize minSize board positions =
+removeBlockIfMinSize : Int -> List Position -> Board -> Board
+removeBlockIfMinSize minSize positions board =
     if List.length positions >= minSize then
-        removeBlock board positions
-            |> unwrap
-            |> Rows.slideDownLeft
-            |> Board
+        board
+            |> removeBlock positions
+            |> slideDownLeft
 
     else
         board
 
 
-removeBlockAt : Board -> Position -> Board
-removeBlockAt board =
-    findBlockAt board
-        >> removeBlockIfMinSize 3 board
+removeBlockAt : Position -> Board -> Board
+removeBlockAt position board =
+    let
+        block =
+            board |> findBlockAt position
+    in
+    board
+        |> removeBlockIfMinSize 3 block
 
 
 
 -- VIEW --
 
 
+indexRow : Int -> Row -> ( RowIndex, Row )
+indexRow ri row =
+    ( RowIndex.fromInt ri, row )
+
+
 draw : PieceLength -> (Position -> msg) -> Board -> List (Svg msg)
 draw pieceLength clickPieceMsg =
-    unwrap
-        >> Rows.draw pieceLength clickPieceMsg
+    toList
+        >> List.indexedMap indexRow
+        >> List.concatMap (Row.draw pieceLength clickPieceMsg)
 
 
 view : (Position -> msg) -> Properties -> Board -> List (Html msg)

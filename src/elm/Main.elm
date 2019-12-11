@@ -160,7 +160,8 @@ update msg model =
                 ClickPiece position ->
                     let
                         updatedModel =
-                            Board.removeBlockAt board position
+                            board 
+                                |> Board.removeBlockAt position
                                 |> updateBoard model
                     in
                     ( updatedModel, Cmd.none )

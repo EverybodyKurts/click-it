@@ -58,13 +58,13 @@ getColumnPiece columnIndex =
         ci =
             ColumnIndex.unwrap columnIndex
     in
-    unwrap
+    toList
         >> List.getAt ci
         >> Maybe.Extra.join
 
 
-unwrap : Row -> List (Maybe Color)
-unwrap (Row row) =
+toList : Row -> List (Maybe Color)
+toList (Row row) =
     row
 
 
@@ -88,7 +88,7 @@ isNotEmpty =
     let
         isEmpty : Row -> Bool
         isEmpty =
-            unwrap
+            toList
                 >> List.filter Util.Color.exists
                 >> List.isEmpty
     in
