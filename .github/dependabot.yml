@@ -1,0 +1,11 @@
+version: 2
+updates:
+- package-ecosystem: elm
+  directory: "/"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: elm-community/list-extra
+    versions:
+    - 8.2.4
